@@ -21,6 +21,8 @@ const app = createGatewayApp({
     identity: env.IDENTITY_URL,
     catalog: env.CATALOG_URL,
     media: env.MEDIA_URL,
+    order: env.ORDER_URL,
+    payment: env.PAYMENT_URL,
   }),
   mediaStaticTarget: env.MEDIA_STATIC_URL,
   shops: new ShopResolver(tenantShopLookup(tenant), env.SHOP_CACHE_TTL_SECONDS * 1000),

@@ -90,11 +90,31 @@ model Variant {
   updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(3)
 
-  product Product @relation(fields: [shopId, productId], references: [shopId, id], onDelete: Restrict, onUpdate: Restrict)
+  product      Product            @relation(fields: [shopId, productId], references: [shopId, id], onDelete: Restrict, onUpdate: Restrict)
+  reservations StockReservation[]
 
   @@unique([shopId, id])
   @@index([shopId, productId, sortOrder])
   @@map("variants")
+}
+
+/// Stock held for an order (written by the order saga). Released on cancel/reject.
+/// One row per (order, variant) makes reserve and release idempotent.
+model StockReservation {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  shopId     String    @map("shop_id") @db.Uuid
+  orderId    String    @map("order_id") @db.Uuid
+  variantId  String    @map("variant_id") @db.Uuid
+  qty        Int
+  /// Whether stock was actually decremented (false for untracked variants).
+  tracked    Boolean
+  releasedAt DateTime? @map("released_at") @db.Timestamptz(3)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  variant Variant @relation(fields: [shopId, variantId], references: [shopId, id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([shopId, orderId, variantId])
+  @@map("stock_reservations")
 }
 
 /// Ordered images of a product. URLs are copied from the media service when saved.

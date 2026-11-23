@@ -54,9 +54,15 @@ export function createInternalClient({ baseUrl, secret, caller, timeoutMs = 3000
     }
 
     if (!response.ok) {
-      const error = (json as { error?: { code?: string; message?: string } } | undefined)?.error;
+      const error = (json as { error?: { code?: string; message?: string; details?: unknown } } | undefined)?.error;
       const status = response.status >= 500 ? 502 : response.status;
-      throw new AppError(error?.code ?? 'UPSTREAM_ERROR', status, error?.message ?? `Upstream error ${response.status}`);
+      // 4xx keep their code and details (e.g. OUT_OF_STOCK items) so callers can pass them on.
+      throw new AppError(
+        error?.code ?? 'UPSTREAM_ERROR',
+        status,
+        error?.message ?? `Upstream error ${response.status}`,
+        status < 500 ? error?.details : undefined,
+      );
     }
     return (json as { data: T }).data;
   }

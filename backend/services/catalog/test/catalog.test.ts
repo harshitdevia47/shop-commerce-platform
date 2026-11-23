@@ -79,6 +79,7 @@ beforeAll(() => {
 
 async function clean() {
   const where = { shopId: { in: SHOPS } };
+  await rawPrisma.stockReservation.deleteMany({ where });
   await rawPrisma.productImage.deleteMany({ where });
   await rawPrisma.variant.deleteMany({ where });
   await rawPrisma.product.deleteMany({ where });

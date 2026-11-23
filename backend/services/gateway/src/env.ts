@@ -10,6 +10,8 @@ const envSchema = z.object({
   IDENTITY_URL: z.string().url(),
   CATALOG_URL: z.string().url(),
   MEDIA_URL: z.string().url(),
+  ORDER_URL: z.string().url(),
+  PAYMENT_URL: z.string().url(),
   /** Dev only: proxy GET /media/* to the media service (nginx serves /media in production). */
   MEDIA_STATIC_URL: z.string().url().optional(),
   RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(120),

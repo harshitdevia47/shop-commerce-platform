@@ -7,6 +7,7 @@ export const TENANT_MODELS = [
   Prisma.ModelName.User,
   Prisma.ModelName.OtpChallenge,
   Prisma.ModelName.RefreshToken,
+  Prisma.ModelName.Address,
 ] as const;
 
 /**

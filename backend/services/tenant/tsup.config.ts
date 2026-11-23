@@ -1,7 +1,8 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ['src/main.ts'],
+  // Operator CLIs ship in the image: docker compose exec tenant node dist/client.js ...
+  entry: { main: 'src/main.ts', client: 'scripts/client.ts' },
   format: ['esm'],
   platform: 'node',
   target: 'node22',

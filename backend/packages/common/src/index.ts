@@ -11,3 +11,4 @@ export * from './roles.js';
 export * from './tenant-prisma.js';
 export * from './uuid.js';
 export * from './prisma-guard.js';
+export * from './shop-config.js';

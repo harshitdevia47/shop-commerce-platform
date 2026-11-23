@@ -45,6 +45,10 @@ services:
     environment:
       PORT: 3000
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/qc_tenant
+      # For `docker compose exec tenant node dist/client.js sync <slug>`
+      CLIENTS_DIR: /clients
+    volumes:
+      - ../clients:/clients:ro
     depends_on:
       postgres: { condition: service_healthy }
     deploy:
@@ -97,6 +101,33 @@ services:
       # sharp needs headroom to decode phone photos
       resources: { limits: { memory: 384m } }
 
+  payment:
+    <<: *service
+    build: { context: ../backend, dockerfile: Dockerfile, args: { SERVICE: payment } }
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/qc_payment
+      TENANT_URL: http://tenant:3000
+    depends_on:
+      postgres: { condition: service_healthy }
+    deploy:
+      resources: { limits: { memory: 256m } }
+
+  order:
+    <<: *service
+    build: { context: ../backend, dockerfile: Dockerfile, args: { SERVICE: order } }
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/qc_order
+      TENANT_URL: http://tenant:3000
+      IDENTITY_URL: http://identity:3000
+      CATALOG_URL: http://catalog:3000
+      PAYMENT_URL: http://payment:3000
+    depends_on:
+      postgres: { condition: service_healthy }
+    deploy:
+      resources: { limits: { memory: 256m } }
+
   gateway:
     <<: *service
     build: { context: ../backend, dockerfile: Dockerfile, args: { SERVICE: gateway } }
@@ -107,6 +138,8 @@ services:
       IDENTITY_URL: http://identity:3000
       CATALOG_URL: http://catalog:3000
       MEDIA_URL: http://media:3000
+      ORDER_URL: http://order:3000
+      PAYMENT_URL: http://payment:3000
       JWT_PUBLIC_KEY_FILE: /run/secrets/jwt_public_key
       TRUST_PROXY_HOPS: 1
     secrets: [jwt_public_key]
@@ -116,6 +149,8 @@ services:
       identity: { condition: service_started }
       catalog: { condition: service_started }
       media: { condition: service_started }
+      order: { condition: service_started }
+      payment: { condition: service_started }
     deploy:
       resources: { limits: { memory: 256m } }
 

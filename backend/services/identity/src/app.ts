@@ -1,6 +1,8 @@
 import { createServiceApp, finalizeApp, internalAuth, type Logger, type RateLimitStore } from '@qc/common';
 import type { Express } from 'express';
 import type { Db } from './db.js';
+import { addressesRouter } from './modules/addresses/addresses.routes.js';
+import { createAddressesService } from './modules/addresses/addresses.service.js';
 import { authRouter } from './modules/auth/auth.routes.js';
 import { createOtpService } from './modules/auth/otp.service.js';
 import { createTokenService } from './modules/auth/token.service.js';
@@ -38,6 +40,7 @@ export async function createIdentityApp(deps: IdentityAppDeps): Promise<Express>
 
   app.use(internalAuth(deps.internalSecret));
   app.use(authRouter(otp, tokens, users));
+  app.use(addressesRouter(createAddressesService(db, now), users));
   app.use(usersRouter(users));
 
   finalizeApp(app, logger);

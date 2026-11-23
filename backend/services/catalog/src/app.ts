@@ -5,6 +5,8 @@ import { categoriesRouter } from './modules/categories/categories.routes.js';
 import { createCategoriesService } from './modules/categories/categories.service.js';
 import { productsRouter } from './modules/products/products.routes.js';
 import { createProductsService } from './modules/products/products.service.js';
+import { stockRouter } from './modules/stock/stock.routes.js';
+import { createStockService } from './modules/stock/stock.service.js';
 import type { MediaResolver, ShopCatalogSettings } from './upstreams.js';
 
 export interface CatalogAppDeps {
@@ -26,6 +28,7 @@ export function createCatalogApp(deps: CatalogAppDeps): Express {
   app.use(internalAuth(deps.internalSecret));
   app.use(categoriesRouter(categories));
   app.use(productsRouter(products));
+  app.use(stockRouter(createStockService(db, now)));
 
   finalizeApp(app, logger);
   return app;

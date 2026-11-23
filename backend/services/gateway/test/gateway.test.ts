@@ -37,7 +37,7 @@ async function token(claims: Record<string, unknown>, expiresIn = '15m'): Promis
 function buildApp(perMinute = 1000, target = upstreamUrl) {
   return createGatewayApp({
     logger: createLogger('gateway-test', 'silent'),
-    routes: buildRoutes({ tenant: target, identity: target, catalog: target, media: target }),
+    routes: buildRoutes({ tenant: target, identity: target, catalog: target, media: target, order: target, payment: target }),
     mediaStaticTarget: target,
     shops: new ShopResolver(async (slug) => {
       lookups++;
@@ -159,6 +159,18 @@ describe('gateway', () => {
       const staff = await token({ sub: 'u2', shopId: 'id-a', role: 'STAFF' });
       expect((await request(app).post(path).set('x-shop-key', 'shop_a').set('authorization', `Bearer ${staff}`)).status).toBe(200);
     }
+  });
+
+  it('order quote is public; placing orders and payments need login; shop order admin needs a shop role', async () => {
+    const shop = { 'x-shop-key': 'shop_a' };
+    expect((await request(app).post('/api/v1/orders/quote').set(shop)).status).toBe(200);
+    expect((await request(app).post('/api/v1/orders').set(shop)).status).toBe(401);
+    expect((await request(app).get('/api/v1/payments/orders/x').set(shop)).status).toBe(401);
+    const customer = await token({ sub: 'u1', shopId: 'id-a', role: 'CUSTOMER' });
+    const auth = { ...shop, authorization: `Bearer ${customer}` };
+    expect((await request(app).post('/api/v1/orders').set(auth)).status).toBe(200);
+    expect((await request(app).get('/api/v1/admin/orders').set(auth)).status).toBe(403);
+    expect((await request(app).post('/api/v1/admin/payments/orders/x/mark-paid').set(auth)).status).toBe(403);
   });
 
   it('never routes /internal paths', async () => {

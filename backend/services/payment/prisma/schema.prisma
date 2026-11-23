@@ -1,0 +1,53 @@
+// Payment service: one payment record per order.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  runtime             = "nodejs"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum PaymentMethod {
+  COD
+  UPI
+}
+
+enum PaymentStatus {
+  /// Waiting for money (cash on delivery, or UPI not yet paid)
+  PENDING
+  /// Customer says they paid by UPI and gave a UTR; the owner checks the bank app
+  SUBMITTED
+  /// Owner confirmed the money arrived
+  PAID
+  /// Order cancelled/rejected before payment
+  VOID
+}
+
+model Payment {
+  id           String        @id @default(uuid(7)) @db.Uuid
+  shopId       String        @map("shop_id") @db.Uuid
+  orderId      String        @map("order_id") @db.Uuid
+  /// Human order number, used in the UPI note so the owner can match payments.
+  orderNumber  Int           @map("order_number")
+  customerId   String        @map("customer_id") @db.Uuid
+  method       PaymentMethod
+  status       PaymentStatus @default(PENDING)
+  amountPaise  Int           @map("amount_paise")
+  /// UPI transaction reference the customer typed (12 digits)
+  utr          String?
+  utrAt        DateTime?     @map("utr_at") @db.Timestamptz(3)
+  paidAt       DateTime?     @map("paid_at") @db.Timestamptz(3)
+  /// Staff user who marked it paid
+  paidBy       String?       @map("paid_by") @db.Uuid
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@unique([shopId, orderId])
+  @@index([shopId, status, createdAt])
+  @@map("payments")
+}

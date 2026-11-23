@@ -19,7 +19,8 @@ export function readSecret(source: Record<string, string | undefined>, name: str
 }
 
 export const commonEnv = {
-  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+  /** `staging`: a real server for pilots; dev conveniences (console SMS, OTP echo) still allowed. */
+  NODE_ENV: z.enum(['development', 'test', 'staging', 'production']).default('development'),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
   PORT: z.coerce.number().int().positive().default(3000),
   INTERNAL_HMAC_SECRET: z.string().min(32, 'INTERNAL_HMAC_SECRET must be at least 32 characters'),

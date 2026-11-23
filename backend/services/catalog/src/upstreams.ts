@@ -1,4 +1,4 @@
-import { requireShopId, type InternalClient } from '@qc/common';
+import { cachedShopConfig, type InternalClient } from '@qc/common';
 import type { CatalogConfig } from '@qc/config-schema';
 
 /** The current shop's catalog settings (variant style, axes, custom fields) from the tenant service. */
@@ -18,19 +18,10 @@ export interface MediaResolver {
   resolve(ids: string[]): Promise<MediaRef[]>;
 }
 
-/** Tenant-backed settings with a short per-shop cache (settings change rarely; saves a call per write). */
-export function tenantCatalogSettings(tenant: InternalClient, ttlMs: number, now: () => number = Date.now): ShopCatalogSettings {
-  const cache = new Map<string, { value: CatalogConfig; expiresAt: number }>();
-  return {
-    async get() {
-      const shopId = requireShopId();
-      const hit = cache.get(shopId);
-      if (hit && hit.expiresAt > now()) return hit.value;
-      const config = await tenant.get<{ catalog: CatalogConfig }>('/internal/shop/config');
-      cache.set(shopId, { value: config.catalog, expiresAt: now() + ttlMs });
-      return config.catalog;
-    },
-  };
+/** Tenant-backed catalog settings (cached per shop). */
+export function tenantCatalogSettings(tenant: InternalClient, ttlMs: number): ShopCatalogSettings {
+  const config = cachedShopConfig<{ catalog: CatalogConfig }>(tenant, ttlMs);
+  return { get: async () => (await config.get()).catalog };
 }
 
 export function mediaServiceResolver(media: InternalClient): MediaResolver {

@@ -89,6 +89,7 @@ beforeEach(async () => {
   app = await build();
   await rawPrisma.refreshToken.deleteMany();
   await rawPrisma.otpChallenge.deleteMany();
+  await rawPrisma.address.deleteMany();
   await rawPrisma.user.deleteMany();
 });
 
@@ -353,6 +354,82 @@ describe('tenant isolation', () => {
     const session = await login(SHOP_A);
     const res = await request(app).get('/api/v1/me').set(as(SHOP_B, { userId: session.user.id, role: 'CUSTOMER' }));
     expect(res.status).toBe(404);
+  });
+});
+
+describe('/api/v1/me/addresses', () => {
+  const home = { line1: '12 Station Road', city: 'Bhavnagar', pincode: '364001', landmark: 'Near temple' };
+
+  let userId: string | undefined;
+  /** Logs in once per test (OTP cooldown), then signs fresh headers for that user. */
+  async function customer(shopId = SHOP_A) {
+    userId ??= (await login(shopId)).user.id;
+    return as(shopId, { userId, role: 'CUSTOMER' });
+  }
+  beforeEach(() => {
+    userId = undefined;
+  });
+
+  it('first address becomes the default; a new default replaces it', async () => {
+    const headers = await customer();
+    const first = await request(app).post('/api/v1/me/addresses').set(headers).send(home);
+    expect(first.status).toBe(201);
+    expect(first.body.data).toMatchObject({ ...home, label: 'home', isDefault: true });
+    expect(first.body.data).not.toHaveProperty('shopId');
+
+    const work = await request(app)
+      .post('/api/v1/me/addresses')
+      .set(await customer())
+      .send({ ...home, label: 'work', line1: 'GIDC', isDefault: true });
+    const list = await request(app).get('/api/v1/me/addresses').set(await customer());
+    expect(list.body.data.map((a: { id: string; isDefault: boolean }) => [a.id, a.isDefault])).toEqual([
+      [work.body.data.id, true],
+      [first.body.data.id, false],
+    ]);
+  });
+
+  it('deleting the default promotes another', async () => {
+    const a = (await request(app).post('/api/v1/me/addresses').set(await customer()).send(home)).body.data;
+    const b = (await request(app).post('/api/v1/me/addresses').set(await customer()).send({ ...home, line1: 'B' })).body.data;
+    await request(app).delete(`/api/v1/me/addresses/${a.id}`).set(await customer()).expect(204);
+    const list = await request(app).get('/api/v1/me/addresses').set(await customer());
+    expect(list.body.data).toEqual([expect.objectContaining({ id: b.id, isDefault: true })]);
+  });
+
+  it('validates pincode and phone', async () => {
+    const res = await request(app)
+      .post('/api/v1/me/addresses')
+      .set(await customer())
+      .send({ ...home, pincode: '3640', phone: '12345' });
+    expect(res.status).toBe(400);
+    expect(res.body.error.details.map((d: { path: string }) => d.path).sort()).toEqual(['phone', 'pincode']);
+  });
+
+  it("users never see or change each other's addresses, even in the same shop", async () => {
+    const mine = (await request(app).post('/api/v1/me/addresses').set(await customer()).send(home)).body.data;
+    const other = await login(SHOP_A, '+919811111111');
+    const otherHeaders = as(SHOP_A, { userId: other.user.id, role: 'CUSTOMER' });
+    expect((await request(app).get('/api/v1/me/addresses').set(otherHeaders)).body.data).toEqual([]);
+    expect((await request(app).patch(`/api/v1/me/addresses/${mine.id}`).set(otherHeaders).send({ city: 'X' })).status).toBe(404);
+    expect((await request(app).delete(`/api/v1/me/addresses/${mine.id}`).set(otherHeaders)).status).toBe(404);
+  });
+
+  it('internal checkout profile returns the user and their address for the order snapshot', async () => {
+    const session = await login();
+    const headers = as(SHOP_A, { userId: session.user.id, role: 'CUSTOMER' });
+    const address = (await request(app).post('/api/v1/me/addresses').set(headers).send(home)).body.data;
+
+    const res = await request(app)
+      .get(`/internal/users/${session.user.id}/checkout?addressId=${address.id}`)
+      .set(as(SHOP_A));
+    expect(res.body.data).toMatchObject({
+      user: { id: session.user.id, phone: PHONE, isBlocked: false },
+      address: { id: address.id, pincode: '364001' },
+    });
+
+    // Not across shops.
+    const foreign = await request(app).get(`/internal/users/${session.user.id}/checkout`).set(as(SHOP_B));
+    expect(foreign.status).toBe(404);
   });
 });
 

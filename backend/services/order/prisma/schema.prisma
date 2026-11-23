@@ -1,0 +1,119 @@
+// Order service: orders, their items (snapshots) and status history.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  runtime             = "nodejs"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Transitions live in src/modules/orders/status.ts.
+enum OrderStatus {
+  PLACED
+  CONFIRMED
+  PACKED
+  OUT_FOR_DELIVERY
+  READY_FOR_PICKUP
+  DELIVERED
+  PICKED_UP
+  CANCELLED
+  REJECTED
+}
+
+enum Fulfillment {
+  DELIVERY
+  PICKUP
+}
+
+enum PaymentMethod {
+  COD
+  UPI
+}
+
+model Order {
+  id               String        @id @default(uuid(7)) @db.Uuid
+  shopId           String        @map("shop_id") @db.Uuid
+  /// Human order number, per shop: #1, #2, ...
+  number           Int
+  customerId       String        @map("customer_id") @db.Uuid
+  customerPhone    String        @map("customer_phone")
+  customerName     String?       @map("customer_name")
+  status           OrderStatus   @default(PLACED)
+  fulfillment      Fulfillment
+  /// Snapshot of the delivery address (null for pickup)
+  address          Json?
+  note             String?
+  paymentMethod    PaymentMethod @map("payment_method")
+  subtotalPaise    Int           @map("subtotal_paise")
+  deliveryFeePaise Int           @map("delivery_fee_paise")
+  totalPaise       Int           @map("total_paise")
+  itemCount        Int           @map("item_count")
+  /// Client-generated key: retrying a timed-out "place order" never creates a second order.
+  idempotencyKey   String        @map("idempotency_key") @db.Uuid
+  cancelReason     String?       @map("cancel_reason")
+  placedAt         DateTime      @default(now()) @map("placed_at") @db.Timestamptz(3)
+  updatedAt        DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  items   OrderItem[]
+  history OrderStatusChange[]
+
+  @@unique([shopId, id])
+  @@unique([shopId, number])
+  @@unique([shopId, customerId, idempotencyKey])
+  @@index([shopId, status, id])
+  @@index([shopId, customerId, id])
+  @@map("orders")
+}
+
+/// Line snapshot: names and prices as they were when the order was placed.
+model OrderItem {
+  id               String  @id @default(uuid(7)) @db.Uuid
+  shopId           String  @map("shop_id") @db.Uuid
+  orderId          String  @map("order_id") @db.Uuid
+  productId        String  @map("product_id") @db.Uuid
+  variantId        String  @map("variant_id") @db.Uuid
+  productName      String  @map("product_name")
+  productNameI18n  Json?   @map("product_name_i18n")
+  variantLabel     String  @map("variant_label")
+  variantLabelI18n Json?   @map("variant_label_i18n")
+  thumbUrl         String? @map("thumb_url")
+  pricePaise       Int     @map("price_paise")
+  mrpPaise         Int?    @map("mrp_paise")
+  qty              Int
+  lineTotalPaise   Int     @map("line_total_paise")
+
+  order Order @relation(fields: [shopId, orderId], references: [shopId, id], onDelete: Cascade, onUpdate: Restrict)
+
+  @@index([shopId, orderId])
+  @@map("order_items")
+}
+
+model OrderStatusChange {
+  id        String       @id @default(uuid(7)) @db.Uuid
+  shopId    String       @map("shop_id") @db.Uuid
+  orderId   String       @map("order_id") @db.Uuid
+  from      OrderStatus?
+  to        OrderStatus
+  byUserId  String?      @map("by_user_id") @db.Uuid
+  byRole    String?      @map("by_role")
+  reason    String?
+  createdAt DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  order Order @relation(fields: [shopId, orderId], references: [shopId, id], onDelete: Cascade, onUpdate: Restrict)
+
+  @@index([shopId, orderId, createdAt])
+  @@map("order_status_changes")
+}
+
+/// Last order number per shop. Incremented with a row lock inside a transaction.
+model OrderCounter {
+  shopId     String @id @map("shop_id") @db.Uuid
+  lastNumber Int    @map("last_number")
+
+  @@map("order_counters")
+}

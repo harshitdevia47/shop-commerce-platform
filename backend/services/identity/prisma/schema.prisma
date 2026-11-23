@@ -35,8 +35,10 @@ model User {
   updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   refreshTokens RefreshToken[]
+  addresses     Address[]
 
   @@unique([shopId, phone])
+  @@unique([shopId, id])
   @@index([shopId, role])
   @@map("users")
 }
@@ -79,4 +81,32 @@ model RefreshToken {
   @@index([familyId])
   @@index([expiresAt])
   @@map("refresh_tokens")
+}
+
+/// Customer delivery address. Orders copy it (snapshot), so edits never change past orders.
+model Address {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  shopId    String    @map("shop_id") @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  /// home | work | other
+  label     String    @default("home")
+  /// Receiver, if not the account holder
+  name      String?
+  phone     String?
+  line1     String
+  line2     String?
+  landmark  String?
+  city      String
+  pincode   String    @db.Char(6)
+  lat       Float?
+  lng       Float?
+  isDefault Boolean   @default(false) @map("is_default")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [shopId, userId], references: [shopId, id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([shopId, userId])
+  @@map("addresses")
 }
