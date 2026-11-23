@@ -17,7 +17,8 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "build": "npm run build --workspaces --if-present",
-    "client": "npm run client -w @qc/tenant --"
+    "client": "npm run client -w @qc/tenant --",
+    "users": "npm run users -w @qc/identity --"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

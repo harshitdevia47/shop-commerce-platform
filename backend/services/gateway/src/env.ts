@@ -7,6 +7,7 @@ const envSchema = z.object({
   JWT_PUBLIC_KEY: z.string().includes('BEGIN PUBLIC KEY', { message: 'JWT_PUBLIC_KEY(_FILE) must be a PEM public key' }),
   JWT_ISSUER: z.string().min(1).default('qc-identity'),
   TENANT_URL: z.string().url(),
+  IDENTITY_URL: z.string().url(),
   RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(120),
   SHOP_CACHE_TTL_SECONDS: z.coerce.number().int().positive().default(60),
   TRUST_PROXY_HOPS: z.coerce.number().int().nonnegative().default(1),

@@ -10,12 +10,12 @@ import {
   signInternalHeaders,
   type InternalIdentity,
   type Logger,
+  type RateLimitStore,
 } from '@qc/common';
 import { SLUG_PATTERN } from '@qc/config-schema';
 import express, { type Express, type Request, type RequestHandler } from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import { bearerToken, type AccessTokenVerifier } from './auth.js';
-import type { RateLimitStore } from './rate-limit.js';
 import { matchRoute, type RouteRule } from './routes.js';
 import type { ShopResolver } from './shop-resolver.js';
 
@@ -67,7 +67,7 @@ export function createGatewayApp(deps: GatewayDeps): Express {
     const route = matchRoute(deps.routes, req.path);
     if (!route) throw Errors.notFound('ROUTE_NOT_FOUND', 'Route not found');
     locals(res).route = route;
-    locals(res).identity = { requestId: randomUUID() };
+    locals(res).identity = { requestId: randomUUID(), clientIp: req.ip };
     res.setHeader(INTERNAL_HEADERS.requestId, locals(res).identity.requestId);
     next();
   });

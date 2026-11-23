@@ -13,6 +13,7 @@ export const INTERNAL_HEADERS = {
   shopId: 'x-internal-shop-id',
   userId: 'x-internal-user-id',
   role: 'x-internal-role',
+  clientIp: 'x-internal-client-ip',
   timestamp: 'x-internal-ts',
   signature: 'x-internal-signature',
   requestId: 'x-request-id',
@@ -25,7 +26,14 @@ export type InternalIdentity = RequestContext;
 const MAX_CLOCK_SKEW_SECONDS = 60;
 
 function canonical(identity: InternalIdentity, timestamp: string): string {
-  return [identity.requestId, identity.shopId ?? '', identity.userId ?? '', identity.role ?? '', timestamp].join('|');
+  return [
+    identity.requestId,
+    identity.shopId ?? '',
+    identity.userId ?? '',
+    identity.role ?? '',
+    identity.clientIp ?? '',
+    timestamp,
+  ].join('|');
 }
 
 function hmac(secret: string, data: string): Buffer {
@@ -46,6 +54,7 @@ export function signInternalHeaders(
   if (identity.shopId) headers[INTERNAL_HEADERS.shopId] = identity.shopId;
   if (identity.userId) headers[INTERNAL_HEADERS.userId] = identity.userId;
   if (identity.role) headers[INTERNAL_HEADERS.role] = identity.role;
+  if (identity.clientIp) headers[INTERNAL_HEADERS.clientIp] = identity.clientIp;
   return headers;
 }
 
@@ -82,6 +91,7 @@ export function verifyInternalHeaders(
     shopId: single(headers, INTERNAL_HEADERS.shopId),
     userId: single(headers, INTERNAL_HEADERS.userId),
     role,
+    clientIp: single(headers, INTERNAL_HEADERS.clientIp),
   };
 
   const expected = hmac(secret, canonical(identity, timestamp));
@@ -102,6 +112,12 @@ export function internalAuth(secret: string): RequestHandler {
 
 export const requireShop: RequestHandler = (_req, _res, next) => {
   if (!getContext()?.shopId) throw Errors.badRequest('SHOP_REQUIRED', 'Shop context is required');
+  next();
+};
+
+/** Any logged-in user (gateway verified the access token). */
+export const requireUser: RequestHandler = (_req, _res, next) => {
+  if (!getContext()?.userId) throw Errors.unauthorized('AUTH_REQUIRED', 'Login required');
   next();
 };
 

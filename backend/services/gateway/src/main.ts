@@ -1,9 +1,8 @@
-import { createInternalClient, createLogger } from '@qc/common';
+import { RedisRateLimitStore, createInternalClient, createLogger } from '@qc/common';
 import { Redis } from 'ioredis';
 import { createGatewayApp } from './app.js';
 import { createAccessTokenVerifier } from './auth.js';
 import { loadGatewayEnv } from './env.js';
-import { RedisRateLimitStore } from './rate-limit.js';
 import { buildRoutes } from './routes.js';
 import { ShopResolver, tenantShopLookup } from './shop-resolver.js';
 
@@ -17,7 +16,7 @@ const tenant = createInternalClient({ baseUrl: env.TENANT_URL, secret: env.INTER
 
 const app = createGatewayApp({
   logger,
-  routes: buildRoutes({ tenant: env.TENANT_URL }),
+  routes: buildRoutes({ tenant: env.TENANT_URL, identity: env.IDENTITY_URL }),
   shops: new ShopResolver(tenantShopLookup(tenant), env.SHOP_CACHE_TTL_SECONDS * 1000),
   verifyAccessToken: await createAccessTokenVerifier(env.JWT_PUBLIC_KEY, env.JWT_ISSUER),
   rateLimit: { store: new RedisRateLimitStore(redis), perMinute: env.RATE_LIMIT_PER_MINUTE },

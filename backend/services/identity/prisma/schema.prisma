@@ -1,0 +1,82 @@
+// Identity service: users (per shop), OTP challenges, refresh tokens.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  runtime             = "nodejs"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  CUSTOMER
+  OWNER
+  STAFF
+  RIDER
+}
+
+/// A person's account at ONE shop. The same phone at two shops = two users.
+model User {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  shopId      String    @map("shop_id") @db.Uuid
+  /// E.164, e.g. +919876543210
+  phone       String
+  name        String?
+  role        Role      @default(CUSTOMER)
+  /// Preferred app language (en | gu | hi)
+  locale      String?
+  isBlocked   Boolean   @default(false) @map("is_blocked")
+  lastLoginAt DateTime? @map("last_login_at") @db.Timestamptz(3)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  refreshTokens RefreshToken[]
+
+  @@unique([shopId, phone])
+  @@index([shopId, role])
+  @@map("users")
+}
+
+/// One OTP sent to a phone. Code is stored as an HMAC, never in plain text.
+model OtpChallenge {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  shopId     String    @map("shop_id") @db.Uuid
+  phone      String
+  codeHash   String    @map("code_hash")
+  attempts   Int       @default(0)
+  expiresAt  DateTime  @map("expires_at") @db.Timestamptz(3)
+  consumedAt DateTime? @map("consumed_at") @db.Timestamptz(3)
+  requestIp  String?   @map("request_ip")
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([shopId, phone, createdAt])
+  @@index([expiresAt])
+  @@map("otp_challenges")
+}
+
+/// Opaque refresh token (stored hashed). Rotated on every use; all tokens from one
+/// login share a familyId so reuse of a rotated token can revoke the whole session.
+model RefreshToken {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  shopId        String    @map("shop_id") @db.Uuid
+  userId        String    @map("user_id") @db.Uuid
+  familyId      String    @map("family_id") @db.Uuid
+  tokenHash     String    @unique @map("token_hash")
+  expiresAt     DateTime  @map("expires_at") @db.Timestamptz(3)
+  revokedAt     DateTime? @map("revoked_at") @db.Timestamptz(3)
+  /// rotated | reuse_detected | logout | blocked
+  revokedReason String?   @map("revoked_reason")
+  userAgent     String?   @map("user_agent")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([shopId, userId])
+  @@index([familyId])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}

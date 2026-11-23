@@ -50,6 +50,22 @@ services:
     deploy:
       resources: { limits: { memory: 256m } }
 
+  identity:
+    <<: *service
+    build: { context: ../backend, dockerfile: Dockerfile, args: { SERVICE: identity } }
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/qc_identity
+      REDIS_URL: redis://redis:6379
+      JWT_PRIVATE_KEY_FILE: /run/secrets/jwt_private_key
+      TENANT_URL: http://tenant:3000
+    secrets: [jwt_private_key]
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    deploy:
+      resources: { limits: { memory: 256m } }
+
   gateway:
     <<: *service
     build: { context: ../backend, dockerfile: Dockerfile, args: { SERVICE: gateway } }
@@ -57,12 +73,14 @@ services:
       PORT: 3000
       REDIS_URL: redis://redis:6379
       TENANT_URL: http://tenant:3000
+      IDENTITY_URL: http://identity:3000
       JWT_PUBLIC_KEY_FILE: /run/secrets/jwt_public_key
       TRUST_PROXY_HOPS: 1
     secrets: [jwt_public_key]
     depends_on:
       redis: { condition: service_healthy }
       tenant: { condition: service_started }
+      identity: { condition: service_started }
     deploy:
       resources: { limits: { memory: 256m } }
 
@@ -91,3 +109,5 @@ volumes:
 secrets:
   jwt_public_key:
     file: ./secrets/jwt-public.pem
+  jwt_private_key:
+    file: ./secrets/jwt-private.pem

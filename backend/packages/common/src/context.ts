@@ -10,6 +10,8 @@ export interface RequestContext {
   shopId?: string;
   userId?: string;
   role?: Role;
+  /** End-user IP as seen by the gateway (for rate limiting / audit). */
+  clientIp?: string;
 }
 
 const storage = new AsyncLocalStorage<RequestContext>();

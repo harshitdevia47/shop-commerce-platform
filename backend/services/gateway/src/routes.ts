@@ -18,6 +18,7 @@ export interface RouteRule {
 
 export interface UpstreamUrls {
   tenant: string;
+  identity: string;
 }
 
 /**
@@ -27,6 +28,9 @@ export interface UpstreamUrls {
 export function buildRoutes(upstreams: UpstreamUrls): RouteRule[] {
   const rules: RouteRule[] = [
     { prefix: '/api/v1/shop', target: upstreams.tenant, auth: 'public' },
+    // Clients must NOT send an access token to /auth (it may be expired while refreshing).
+    { prefix: '/api/v1/auth', target: upstreams.identity, auth: 'public' },
+    { prefix: '/api/v1/me', target: upstreams.identity, auth: 'required' },
     { prefix: '/api/v1/admin/settings', target: upstreams.tenant, auth: 'required', roles: ADMIN_ROLES },
   ];
   // Longest prefix first so specific rules win.

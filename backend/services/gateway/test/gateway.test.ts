@@ -7,7 +7,7 @@ import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createGatewayApp } from '../src/app.js';
 import { createAccessTokenVerifier } from '../src/auth.js';
-import { MemoryRateLimitStore } from '../src/rate-limit.js';
+import { MemoryRateLimitStore } from '@qc/common';
 import { buildRoutes } from '../src/routes.js';
 import { ShopResolver, type ShopRef } from '../src/shop-resolver.js';
 
@@ -37,7 +37,7 @@ async function token(claims: Record<string, unknown>, expiresIn = '15m'): Promis
 function buildApp(perMinute = 1000, target = upstreamUrl) {
   return createGatewayApp({
     logger: createLogger('gateway-test', 'silent'),
-    routes: buildRoutes({ tenant: target }),
+    routes: buildRoutes({ tenant: target, identity: target }),
     shops: new ShopResolver(async (slug) => {
       lookups++;
       return SHOPS[slug] ?? null;
@@ -110,6 +110,16 @@ describe('gateway', () => {
     expect(res.body.identity.userId).toBeUndefined();
     expect(res.body.path).toBe('/api/v1/shop/config?x=1');
     expect(res.headers['x-request-id']).toBe(res.body.identity.requestId);
+  });
+
+  it('forwards the client IP inside the signed identity', async () => {
+    const res = await request(app).get('/api/v1/shop/config').set('x-shop-key', 'shop_a').set('x-internal-client-ip', '6.6.6.6');
+    expect(res.body.identity.clientIp).toBeDefined();
+    expect(res.body.identity.clientIp).not.toBe('6.6.6.6');
+  });
+
+  it('requires login for /api/v1/me', async () => {
+    expect((await request(app).get('/api/v1/me').set('x-shop-key', 'shop_a')).status).toBe(401);
   });
 
   it('streams request bodies through', async () => {

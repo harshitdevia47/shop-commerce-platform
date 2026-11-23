@@ -32,3 +32,27 @@ export class MemoryRateLimitStore implements RateLimitStore {
     return 1;
   }
 }
+
+export interface LimitResult {
+  allowed: boolean;
+  count: number;
+  /** Seconds until the current window resets (upper bound). */
+  retryAfterSeconds: number;
+}
+
+/**
+ * Fixed-window limit: at most `limit` hits per `windowSeconds` for `key`.
+ * The window index is part of the key, so counters roll over automatically.
+ */
+export async function hitLimit(
+  store: RateLimitStore,
+  key: string,
+  limit: number,
+  windowSeconds: number,
+  nowMs: number = Date.now(),
+): Promise<LimitResult> {
+  const windowIndex = Math.floor(nowMs / 1000 / windowSeconds);
+  const count = await store.hit(`${key}:${windowIndex}`, windowSeconds);
+  const retryAfterSeconds = (windowIndex + 1) * windowSeconds - Math.floor(nowMs / 1000);
+  return { allowed: count <= limit, count, retryAfterSeconds };
+}

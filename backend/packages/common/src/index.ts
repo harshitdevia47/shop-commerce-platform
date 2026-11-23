@@ -6,5 +6,6 @@ export * from './http.js';
 export * from './internal-auth.js';
 export * from './internal-client.js';
 export * from './logger.js';
+export * from './rate-limit.js';
 export * from './roles.js';
 export * from './tenant-prisma.js';

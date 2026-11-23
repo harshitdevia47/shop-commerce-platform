@@ -13,7 +13,7 @@ import {
 } from '../src/index.js';
 
 const SECRET = 'test-secret-test-secret-test-secret-123';
-const identity = { requestId: 'req-1', shopId: 'shop-a', userId: 'user-1', role: 'OWNER' as const };
+const identity = { requestId: 'req-1', shopId: 'shop-a', userId: 'user-1', role: 'OWNER' as const, clientIp: '1.2.3.4' };
 
 describe('internal header signing', () => {
   it('round-trips a signed identity', () => {
@@ -31,6 +31,11 @@ describe('internal header signing', () => {
       ...signInternalHeaders({ requestId: 'r' }, SECRET),
       [INTERNAL_HEADERS.shopId]: 'shop-b',
     };
+    expect(() => verifyInternalHeaders(headers, SECRET)).toThrow(/signature/);
+  });
+
+  it('rejects a tampered client IP', () => {
+    const headers = { ...signInternalHeaders(identity, SECRET), [INTERNAL_HEADERS.clientIp]: '9.9.9.9' };
     expect(() => verifyInternalHeaders(headers, SECRET)).toThrow(/signature/);
   });
 
