@@ -68,6 +68,8 @@ class Address {
     this.line2,
     this.landmark,
     this.isDefault = false,
+    this.lat,
+    this.lng,
   });
 
   factory Address.fromJson(Map<String, dynamic> json) => Address(
@@ -81,7 +83,13 @@ class Address {
     city: json['city'] as String,
     pincode: json['pincode'] as String,
     isDefault: json['isDefault'] as bool? ?? false,
+    lat: (json['lat'] as num?)?.toDouble(),
+    lng: (json['lng'] as num?)?.toDouble(),
   );
+
+  /// Map pin, when the customer set one (distance and rider ETA use it).
+  final double? lat;
+  final double? lng;
 
   final String id;
   final String label;

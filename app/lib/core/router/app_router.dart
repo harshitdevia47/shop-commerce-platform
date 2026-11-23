@@ -23,6 +23,8 @@ import '../../features/home/presentation/home_screen.dart';
 import '../../features/orders/presentation/checkout_screen.dart';
 import '../../features/orders/presentation/my_orders_screen.dart';
 import '../../features/orders/presentation/order_detail_screen.dart';
+import '../../features/admin_team/presentation/admin_team_screen.dart';
+import '../../features/rider_deliveries/presentation/rider_delivery_screen.dart';
 import '../../features/rider_deliveries/presentation/rider_home_screen.dart';
 import '../providers.dart';
 import 'routes.dart';
@@ -135,6 +137,12 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(path: 'categories', builder: (context, state) => const AdminCategoriesScreen()),
           GoRoute(
+            path: 'team',
+            // Owner only (staff cannot hire); the server enforces it too.
+            redirect: (context, state) => ref.read(authControllerProvider).value?.role == UserRole.owner ? null : Routes.admin,
+            builder: (context, state) => const AdminTeamScreen(),
+          ),
+          GoRoute(
             path: 'orders',
             builder: (context, state) => const AdminOrdersScreen(),
             routes: [
@@ -146,7 +154,16 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
-      GoRoute(path: Routes.rider, builder: (context, state) => const RiderHomeScreen()),
+      GoRoute(
+        path: Routes.rider,
+        builder: (context, state) => const RiderHomeScreen(),
+        routes: [
+          GoRoute(
+            path: 'deliveries/:id',
+            builder: (context, state) => RiderDeliveryScreen(deliveryId: state.pathParameters['id']!),
+          ),
+        ],
+      ),
     ],
   );
   // Redirects alone do not unwind imperatively pushed pages (e.g. /account on top of /),

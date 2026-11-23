@@ -11,6 +11,8 @@ import '../../../core/utils/launcher.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/splash_view.dart';
+import '../../delivery/presentation/delivery_providers.dart';
+import '../../delivery/presentation/delivery_widgets.dart';
 import '../domain/order_models.dart';
 import 'orders_providers.dart';
 import 'widgets/bill_summary.dart';
@@ -51,7 +53,8 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
   void _refresh() {
     ref
       ..invalidate(orderProvider(widget.orderId))
-      ..invalidate(paymentProvider(widget.orderId));
+      ..invalidate(paymentProvider(widget.orderId))
+      ..invalidate(customerDeliveryProvider(widget.orderId));
   }
 
   Future<void> _cancel() async {
@@ -113,6 +116,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                     subtitle: Text(l10n.orderNumber(value.number)),
                   ),
                 ),
+              CustomerDeliveryCard(order: value),
               Card(child: OrderTimeline(order: value)),
               const SizedBox(height: 8),
               _PaymentCard(order: value),

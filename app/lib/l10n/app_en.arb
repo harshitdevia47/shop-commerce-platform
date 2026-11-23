@@ -101,7 +101,7 @@
   "saved": "Saved",
   "roleOwner": "Owner",
   "roleStaff": "Staff",
-  "roleRider": "Delivery partner",
+  "roleRider": "Rider",
   "roleCustomer": "Customer",
   "adminTitle": "Shop dashboard",
   "adminWelcome": "Hello, {name}",
@@ -114,7 +114,6 @@
   },
   "adminComingSoon": "Orders and sales will appear here.",
   "riderTitle": "Deliveries",
-  "riderComingSoon": "Deliveries assigned to you will appear here.",
   "errorPhoneInvalid": "Enter a valid 10-digit mobile number.",
   "errorOtpInvalid": "Incorrect code. {attempts} attempts left.",
   "@errorOtpInvalid": {
@@ -402,5 +401,108 @@
   "notificationChannelOrders": "Order updates",
   "@notificationChannelOrders": {
     "description": "Android notification channel name (Settings > Apps > Notifications)"
-  }
+  },
+  "deliveryPartner": "Your delivery partner",
+  "deliveryOtpLabel": "Delivery code",
+  "deliveryOtpHint": "Tell this code to the rider when your order arrives.",
+  "deliveryRiderDistance": "{km} km away · about {minutes} min",
+  "@deliveryRiderDistance": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "deliveryRiderOnTheWay": "On the way to you",
+  "deliveryTrackOnMap": "Track on map",
+  "callRider": "Call rider",
+  "deliverySection": "Delivery",
+  "assignRider": "Assign rider",
+  "changeRider": "Change rider",
+  "chooseRider": "Choose a rider",
+  "noRiders": "No riders yet. Add them in Team.",
+  "riderActiveCount": "{count} active",
+  "@riderActiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noRiderYet": "No rider assigned yet",
+  "deliveryAssigned": "Rider assigned",
+  "deliveryPickedUp": "On the way",
+  "deliveryDelivered": "Delivered",
+  "deliveryCancelled": "Cancelled",
+  "adminTeam": "Team",
+  "adminTeamSubtitle": "Riders and staff",
+  "teamAdd": "Add person",
+  "teamEmpty": "No riders or staff yet.",
+  "teamAdded": "Added. They log in with this number.",
+  "teamRemove": "Remove",
+  "teamRemoveConfirm": "Remove {name} from the team? They become a normal customer.",
+  "@teamRemoveConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "nameOptional": "Name (optional)",
+  "riderActive": "Active",
+  "riderDone": "Done",
+  "riderNoActive": "No deliveries right now.",
+  "riderNoDone": "Nothing delivered yet.",
+  "riderCollectCash": "Collect {amount} in cash",
+  "@riderCollectCash": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "riderPrepaid": "Paid online · nothing to collect",
+  "riderItems": "{count} items",
+  "@riderItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "riderPickUp": "Picked up from shop",
+  "riderDeliver": "Delivered · enter code",
+  "riderEnterOtp": "Ask the customer for the 4-digit code",
+  "riderConfirm": "Confirm",
+  "riderNavigate": "Navigate",
+  "riderNote": "Note: {note}",
+  "@riderNote": {
+    "placeholders": {
+      "note": {
+        "type": "String"
+      }
+    }
+  },
+  "riderSharingTitle": "Sharing your location",
+  "riderSharingText": "The customer can see you are on the way.",
+  "riderNeedsPermission": "Allow location so the customer can track you",
+  "riderGpsOff": "Turn on GPS so the customer can track you",
+  "riderCancelledReturn": "Cancelled · return it to the shop",
+  "errorOrderNotPacked": "The shop has not packed this order yet.",
+  "errorDeliveryOtp": "Wrong code. {attempts} attempts left.",
+  "@errorDeliveryOtp": {
+    "placeholders": {
+      "attempts": {
+        "type": "int"
+      }
+    }
+  },
+  "errorDeliveryOtpLocked": "Too many wrong codes. Ask the shop to mark it delivered.",
+  "errorDeliveryNotAssignable": "Assign a rider after accepting the order and before it leaves the shop.",
+  "errorDeliveryStarted": "The rider has already picked this order up.",
+  "errorDeliveryClosed": "This delivery is no longer active.",
+  "errorOwnerLocked": "The owner's role can't be changed."
 }

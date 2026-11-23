@@ -6,18 +6,26 @@ import 'package:socket_io_client/socket_io_client.dart' as io;
 /// Something changed on the server; the app re-fetches the affected data over REST.
 @immutable
 class RealtimeEvent {
-  const RealtimeEvent({required this.type, required this.orderId, this.status});
+  const RealtimeEvent({required this.type, required this.orderId, this.status, this.data = const {}});
 
-  /// `order.updated` | `payment.updated`
+  /// `order.updated` | `payment.updated` | `delivery.updated` | `rider.location`
   final String type;
   final String orderId;
   final String? status;
+
+  /// The whole payload (e.g. lat/lng/at for `rider.location`).
+  final Map<String, Object?> data;
 
   static RealtimeEvent? fromSocket(String type, Object? data) {
     if (data is! Map) return null;
     final orderId = data['orderId'];
     if (orderId is! String) return null;
-    return RealtimeEvent(type: type, orderId: orderId, status: data['status'] as String?);
+    return RealtimeEvent(
+      type: type,
+      orderId: orderId,
+      status: data['status'] as String?,
+      data: Map<String, Object?>.from(data.map((key, value) => MapEntry(key.toString(), value))),
+    );
   }
 
   @override
@@ -30,6 +38,10 @@ abstract interface class RealtimeChannel {
 
   /// true while connected. Screens poll only while this is false.
   Stream<bool> get connection;
+
+  /// Rider phones: sends a location ping. Returns how many orders it is shown on (0 = not on the way,
+  /// or not connected / refused).
+  Future<int> sendLocation({required double lat, required double lng, double? accuracy});
 
   void close();
 }
@@ -77,6 +89,8 @@ class SocketRealtimeChannel implements RealtimeChannel {
       })
       ..on('order.updated', (data) => _emit('order.updated', data))
       ..on('payment.updated', (data) => _emit('payment.updated', data))
+      ..on('delivery.updated', (data) => _emit('delivery.updated', data))
+      ..on('rider.location', (data) => _emit('rider.location', data))
       ..connect();
   }
 
@@ -104,6 +118,19 @@ class SocketRealtimeChannel implements RealtimeChannel {
       _retry = null;
       if (!_closed) _socket.connect();
     });
+  }
+
+  @override
+  Future<int> sendLocation({required double lat, required double lng, double? accuracy}) async {
+    if (_closed || !_socket.connected) return 0;
+    try {
+      final ack = await _socket
+          .emitWithAckAsync('rider.location', {'lat': lat, 'lng': lng, 'accuracy': accuracy})
+          .timeout(const Duration(seconds: 10));
+      return ack is Map && ack['ok'] == true ? (ack['tracking'] as num? ?? 0).toInt() : 0;
+    } on Object {
+      return 0;
+    }
   }
 
   @override

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:qc_app/app.dart';
@@ -143,6 +144,7 @@ class FakeOrders implements OrdersRepository, AdminOrdersRepository {
       totalPaise: o.totalPaise,
       placedAt: o.placedAt,
       customerPhone: o.customerPhone,
+      address: o.address,
       history: [...o.history, StatusChange(status: OrderStatus.cancelled, at: DateTime(2026, 11, 23, 11))],
     );
   }
@@ -217,6 +219,7 @@ class FakeOrders implements OrdersRepository, AdminOrdersRepository {
       totalPaise: o.totalPaise,
       placedAt: o.placedAt,
       customerPhone: o.customerPhone,
+      address: o.address,
       cancelReason: reason,
       history: [...o.history, StatusChange(status: status, at: DateTime(2026, 11, 23, 11))],
       nextStatuses: next,
@@ -253,6 +256,7 @@ class FakeOrders implements OrdersRepository, AdminOrdersRepository {
       totalPaise: o.totalPaise,
       placedAt: o.placedAt,
       customerPhone: o.customerPhone,
+      address: o.address,
       customerName: 'Meena',
       history: o.history,
       nextStatuses: asCustomer ? const [OrderStatus.cancelled] : const [OrderStatus.confirmed, OrderStatus.rejected],
@@ -274,6 +278,16 @@ class FakeChannel implements RealtimeChannel {
   final _connection = StreamController<bool>.broadcast();
   Future<String?> Function()? token;
   bool closed = false;
+  final List<(double, double)> sentLocations = [];
+
+  @override
+  Future<int> sendLocation({required double lat, required double lng, double? accuracy}) async {
+    sentLocations.add((lat, lng));
+    return 1;
+  }
+
+  void emitData(String type, Map<String, Object?> data) =>
+      _events.add(RealtimeEvent(type: type, orderId: data['orderId']! as String, status: data['status'] as String?, data: data));
 
   void connect() => _connection.add(true);
   void emit(String type, String orderId, [String? status]) =>
@@ -333,6 +347,7 @@ Future<Harness> pumpShop(
   FakeChannel? channel,
   PushService? push,
   void Function(FakeOrders orders)? setup,
+  List<Override> extraOverrides = const [],
 }) async {
   usePhoneScreen(tester);
   quoteDebounce = Duration.zero;
@@ -363,6 +378,7 @@ Future<Harness> pumpShop(
             return channel;
           }),
         if (push != null) pushServiceProvider.overrideWithValue(push),
+        ...extraOverrides,
       ],
       child: const QcApp(),
     ),

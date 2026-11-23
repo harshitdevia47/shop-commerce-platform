@@ -355,7 +355,7 @@ abstract class AppLocalizations {
   /// No description provided for @roleRider.
   ///
   /// In en, this message translates to:
-  /// **'Delivery partner'**
+  /// **'Rider'**
   String get roleRider;
 
   /// No description provided for @roleCustomer.
@@ -387,12 +387,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Deliveries'**
   String get riderTitle;
-
-  /// No description provided for @riderComingSoon.
-  ///
-  /// In en, this message translates to:
-  /// **'Deliveries assigned to you will appear here.'**
-  String get riderComingSoon;
 
   /// No description provided for @errorPhoneInvalid.
   ///
@@ -1455,6 +1449,312 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Order updates'**
   String get notificationChannelOrders;
+
+  /// No description provided for @deliveryPartner.
+  ///
+  /// In en, this message translates to:
+  /// **'Your delivery partner'**
+  String get deliveryPartner;
+
+  /// No description provided for @deliveryOtpLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery code'**
+  String get deliveryOtpLabel;
+
+  /// No description provided for @deliveryOtpHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell this code to the rider when your order arrives.'**
+  String get deliveryOtpHint;
+
+  /// No description provided for @deliveryRiderDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km away · about {minutes} min'**
+  String deliveryRiderDistance(String km, int minutes);
+
+  /// No description provided for @deliveryRiderOnTheWay.
+  ///
+  /// In en, this message translates to:
+  /// **'On the way to you'**
+  String get deliveryRiderOnTheWay;
+
+  /// No description provided for @deliveryTrackOnMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Track on map'**
+  String get deliveryTrackOnMap;
+
+  /// No description provided for @callRider.
+  ///
+  /// In en, this message translates to:
+  /// **'Call rider'**
+  String get callRider;
+
+  /// No description provided for @deliverySection.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery'**
+  String get deliverySection;
+
+  /// No description provided for @assignRider.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign rider'**
+  String get assignRider;
+
+  /// No description provided for @changeRider.
+  ///
+  /// In en, this message translates to:
+  /// **'Change rider'**
+  String get changeRider;
+
+  /// No description provided for @chooseRider.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a rider'**
+  String get chooseRider;
+
+  /// No description provided for @noRiders.
+  ///
+  /// In en, this message translates to:
+  /// **'No riders yet. Add them in Team.'**
+  String get noRiders;
+
+  /// No description provided for @riderActiveCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} active'**
+  String riderActiveCount(int count);
+
+  /// No description provided for @noRiderYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No rider assigned yet'**
+  String get noRiderYet;
+
+  /// No description provided for @deliveryAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Rider assigned'**
+  String get deliveryAssigned;
+
+  /// No description provided for @deliveryPickedUp.
+  ///
+  /// In en, this message translates to:
+  /// **'On the way'**
+  String get deliveryPickedUp;
+
+  /// No description provided for @deliveryDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get deliveryDelivered;
+
+  /// No description provided for @deliveryCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get deliveryCancelled;
+
+  /// No description provided for @adminTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Team'**
+  String get adminTeam;
+
+  /// No description provided for @adminTeamSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Riders and staff'**
+  String get adminTeamSubtitle;
+
+  /// No description provided for @teamAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add person'**
+  String get teamAdd;
+
+  /// No description provided for @teamEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No riders or staff yet.'**
+  String get teamEmpty;
+
+  /// No description provided for @teamAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Added. They log in with this number.'**
+  String get teamAdded;
+
+  /// No description provided for @teamRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get teamRemove;
+
+  /// No description provided for @teamRemoveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name} from the team? They become a normal customer.'**
+  String teamRemoveConfirm(String name);
+
+  /// No description provided for @nameOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (optional)'**
+  String get nameOptional;
+
+  /// No description provided for @riderActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get riderActive;
+
+  /// No description provided for @riderDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get riderDone;
+
+  /// No description provided for @riderNoActive.
+  ///
+  /// In en, this message translates to:
+  /// **'No deliveries right now.'**
+  String get riderNoActive;
+
+  /// No description provided for @riderNoDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing delivered yet.'**
+  String get riderNoDone;
+
+  /// No description provided for @riderCollectCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect {amount} in cash'**
+  String riderCollectCash(String amount);
+
+  /// No description provided for @riderPrepaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid online · nothing to collect'**
+  String get riderPrepaid;
+
+  /// No description provided for @riderItems.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items'**
+  String riderItems(int count);
+
+  /// No description provided for @riderPickUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Picked up from shop'**
+  String get riderPickUp;
+
+  /// No description provided for @riderDeliver.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered · enter code'**
+  String get riderDeliver;
+
+  /// No description provided for @riderEnterOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask the customer for the 4-digit code'**
+  String get riderEnterOtp;
+
+  /// No description provided for @riderConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get riderConfirm;
+
+  /// No description provided for @riderNavigate.
+  ///
+  /// In en, this message translates to:
+  /// **'Navigate'**
+  String get riderNavigate;
+
+  /// No description provided for @riderNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note: {note}'**
+  String riderNote(String note);
+
+  /// No description provided for @riderSharingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing your location'**
+  String get riderSharingTitle;
+
+  /// No description provided for @riderSharingText.
+  ///
+  /// In en, this message translates to:
+  /// **'The customer can see you are on the way.'**
+  String get riderSharingText;
+
+  /// No description provided for @riderNeedsPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow location so the customer can track you'**
+  String get riderNeedsPermission;
+
+  /// No description provided for @riderGpsOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on GPS so the customer can track you'**
+  String get riderGpsOff;
+
+  /// No description provided for @riderCancelledReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled · return it to the shop'**
+  String get riderCancelledReturn;
+
+  /// No description provided for @errorOrderNotPacked.
+  ///
+  /// In en, this message translates to:
+  /// **'The shop has not packed this order yet.'**
+  String get errorOrderNotPacked;
+
+  /// No description provided for @errorDeliveryOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong code. {attempts} attempts left.'**
+  String errorDeliveryOtp(int attempts);
+
+  /// No description provided for @errorDeliveryOtpLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many wrong codes. Ask the shop to mark it delivered.'**
+  String get errorDeliveryOtpLocked;
+
+  /// No description provided for @errorDeliveryNotAssignable.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign a rider after accepting the order and before it leaves the shop.'**
+  String get errorDeliveryNotAssignable;
+
+  /// No description provided for @errorDeliveryStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'The rider has already picked this order up.'**
+  String get errorDeliveryStarted;
+
+  /// No description provided for @errorDeliveryClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'This delivery is no longer active.'**
+  String get errorDeliveryClosed;
+
+  /// No description provided for @errorOwnerLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'The owner\'s role can\'t be changed.'**
+  String get errorOwnerLocked;
 }
 
 class _AppLocalizationsDelegate

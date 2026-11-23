@@ -6,6 +6,8 @@ import '../../../core/utils/launcher.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/splash_view.dart';
+import '../../delivery/presentation/delivery_providers.dart';
+import '../../delivery/presentation/delivery_widgets.dart';
 import '../../orders/domain/order_models.dart';
 import '../../orders/presentation/orders_providers.dart';
 import '../../orders/presentation/widgets/bill_summary.dart';
@@ -28,6 +30,7 @@ class _AdminOrderDetailScreenState extends ConsumerState<AdminOrderDetailScreen>
     ref
       ..invalidate(adminOrderProvider(widget.orderId))
       ..invalidate(adminPaymentProvider(widget.orderId))
+      ..invalidate(adminDeliveryProvider(widget.orderId))
       ..invalidate(adminOrdersProvider);
   }
 
@@ -128,6 +131,7 @@ class _AdminOrderDetailScreenState extends ConsumerState<AdminOrderDetailScreen>
             Card(
               child: ListTile(leading: const Icon(Icons.sticky_note_2_outlined), title: Text(l10n.customerNote), subtitle: Text(note)),
             ),
+          AdminRiderCard(order: order),
           Card(child: OrderTimeline(order: order)),
           Card(
             child: ListTile(

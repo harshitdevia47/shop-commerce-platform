@@ -155,7 +155,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get roleStaff => 'Staff';
 
   @override
-  String get roleRider => 'Delivery partner';
+  String get roleRider => 'Rider';
 
   @override
   String get roleCustomer => 'Customer';
@@ -173,9 +173,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get riderTitle => 'Deliveries';
-
-  @override
-  String get riderComingSoon => 'Deliveries assigned to you will appear here.';
 
   @override
   String get errorPhoneInvalid => 'Enter a valid 10-digit mobile number.';
@@ -760,4 +757,176 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationChannelOrders => 'Order updates';
+
+  @override
+  String get deliveryPartner => 'Your delivery partner';
+
+  @override
+  String get deliveryOtpLabel => 'Delivery code';
+
+  @override
+  String get deliveryOtpHint =>
+      'Tell this code to the rider when your order arrives.';
+
+  @override
+  String deliveryRiderDistance(String km, int minutes) {
+    return '$km km away · about $minutes min';
+  }
+
+  @override
+  String get deliveryRiderOnTheWay => 'On the way to you';
+
+  @override
+  String get deliveryTrackOnMap => 'Track on map';
+
+  @override
+  String get callRider => 'Call rider';
+
+  @override
+  String get deliverySection => 'Delivery';
+
+  @override
+  String get assignRider => 'Assign rider';
+
+  @override
+  String get changeRider => 'Change rider';
+
+  @override
+  String get chooseRider => 'Choose a rider';
+
+  @override
+  String get noRiders => 'No riders yet. Add them in Team.';
+
+  @override
+  String riderActiveCount(int count) {
+    return '$count active';
+  }
+
+  @override
+  String get noRiderYet => 'No rider assigned yet';
+
+  @override
+  String get deliveryAssigned => 'Rider assigned';
+
+  @override
+  String get deliveryPickedUp => 'On the way';
+
+  @override
+  String get deliveryDelivered => 'Delivered';
+
+  @override
+  String get deliveryCancelled => 'Cancelled';
+
+  @override
+  String get adminTeam => 'Team';
+
+  @override
+  String get adminTeamSubtitle => 'Riders and staff';
+
+  @override
+  String get teamAdd => 'Add person';
+
+  @override
+  String get teamEmpty => 'No riders or staff yet.';
+
+  @override
+  String get teamAdded => 'Added. They log in with this number.';
+
+  @override
+  String get teamRemove => 'Remove';
+
+  @override
+  String teamRemoveConfirm(String name) {
+    return 'Remove $name from the team? They become a normal customer.';
+  }
+
+  @override
+  String get nameOptional => 'Name (optional)';
+
+  @override
+  String get riderActive => 'Active';
+
+  @override
+  String get riderDone => 'Done';
+
+  @override
+  String get riderNoActive => 'No deliveries right now.';
+
+  @override
+  String get riderNoDone => 'Nothing delivered yet.';
+
+  @override
+  String riderCollectCash(String amount) {
+    return 'Collect $amount in cash';
+  }
+
+  @override
+  String get riderPrepaid => 'Paid online · nothing to collect';
+
+  @override
+  String riderItems(int count) {
+    return '$count items';
+  }
+
+  @override
+  String get riderPickUp => 'Picked up from shop';
+
+  @override
+  String get riderDeliver => 'Delivered · enter code';
+
+  @override
+  String get riderEnterOtp => 'Ask the customer for the 4-digit code';
+
+  @override
+  String get riderConfirm => 'Confirm';
+
+  @override
+  String get riderNavigate => 'Navigate';
+
+  @override
+  String riderNote(String note) {
+    return 'Note: $note';
+  }
+
+  @override
+  String get riderSharingTitle => 'Sharing your location';
+
+  @override
+  String get riderSharingText => 'The customer can see you are on the way.';
+
+  @override
+  String get riderNeedsPermission =>
+      'Allow location so the customer can track you';
+
+  @override
+  String get riderGpsOff => 'Turn on GPS so the customer can track you';
+
+  @override
+  String get riderCancelledReturn => 'Cancelled · return it to the shop';
+
+  @override
+  String get errorOrderNotPacked => 'The shop has not packed this order yet.';
+
+  @override
+  String errorDeliveryOtp(int attempts) {
+    return 'Wrong code. $attempts attempts left.';
+  }
+
+  @override
+  String get errorDeliveryOtpLocked =>
+      'Too many wrong codes. Ask the shop to mark it delivered.';
+
+  @override
+  String get errorDeliveryNotAssignable =>
+      'Assign a rider after accepting the order and before it leaves the shop.';
+
+  @override
+  String get errorDeliveryStarted =>
+      'The rider has already picked this order up.';
+
+  @override
+  String get errorDeliveryClosed => 'This delivery is no longer active.';
+
+  @override
+  String get errorOwnerLocked => 'The owner\'s role can\'t be changed.';
 }

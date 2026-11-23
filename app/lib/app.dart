@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/providers.dart';
 import 'core/push/push_registration.dart';
 import 'features/orders/presentation/order_live_updates.dart';
+import 'features/rider_deliveries/presentation/location_sharing.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'l10n/app_localizations.dart';
@@ -16,10 +17,11 @@ class QcApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final client = ref.watch(clientConfigProvider);
-    // Background work tied to the signed-in user: live order updates and push registration.
+    // Background work tied to the signed-in user: live updates, push registration, rider location.
     ref
       ..watch(orderLiveUpdatesProvider)
-      ..watch(pushRegistrationProvider);
+      ..watch(pushRegistrationProvider)
+      ..watch(locationSharingProvider);
     return MaterialApp.router(
       title: client.appName,
       debugShowCheckedModeBanner: false,

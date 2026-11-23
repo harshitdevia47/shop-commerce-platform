@@ -153,7 +153,7 @@ class AppLocalizationsGu extends AppLocalizations {
   String get roleStaff => 'સ્ટાફ';
 
   @override
-  String get roleRider => 'ડિલિવરી પાર્ટનર';
+  String get roleRider => 'રાઇડર';
 
   @override
   String get roleCustomer => 'ગ્રાહક';
@@ -171,9 +171,6 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get riderTitle => 'ડિલિવરી';
-
-  @override
-  String get riderComingSoon => 'તમને સોંપેલી ડિલિવરી અહીં દેખાશે.';
 
   @override
   String get errorPhoneInvalid => 'માન્ય 10 અંકનો મોબાઇલ નંબર દાખલ કરો.';
@@ -754,4 +751,174 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get notificationChannelOrders => 'ઓર્ડર અપડેટ';
+
+  @override
+  String get deliveryPartner => 'તમારા ડિલિવરી પાર્ટનર';
+
+  @override
+  String get deliveryOtpLabel => 'ડિલિવરી કોડ';
+
+  @override
+  String get deliveryOtpHint => 'ઓર્ડર આવે ત્યારે આ કોડ રાઇડરને કહો.';
+
+  @override
+  String deliveryRiderDistance(String km, int minutes) {
+    return '$km કિમી દૂર · આશરે $minutes મિનિટ';
+  }
+
+  @override
+  String get deliveryRiderOnTheWay => 'તમારી તરફ આવી રહ્યા છે';
+
+  @override
+  String get deliveryTrackOnMap => 'નકશા પર જુઓ';
+
+  @override
+  String get callRider => 'રાઇડરને કૉલ કરો';
+
+  @override
+  String get deliverySection => 'ડિલિવરી';
+
+  @override
+  String get assignRider => 'રાઇડર સોંપો';
+
+  @override
+  String get changeRider => 'રાઇડર બદલો';
+
+  @override
+  String get chooseRider => 'રાઇડર પસંદ કરો';
+
+  @override
+  String get noRiders => 'હજી કોઈ રાઇડર નથી. ટીમમાં ઉમેરો.';
+
+  @override
+  String riderActiveCount(int count) {
+    return '$count ચાલુ';
+  }
+
+  @override
+  String get noRiderYet => 'હજી રાઇડર સોંપાયો નથી';
+
+  @override
+  String get deliveryAssigned => 'રાઇડર સોંપાયો';
+
+  @override
+  String get deliveryPickedUp => 'રસ્તામાં';
+
+  @override
+  String get deliveryDelivered => 'પહોંચાડ્યો';
+
+  @override
+  String get deliveryCancelled => 'રદ';
+
+  @override
+  String get adminTeam => 'ટીમ';
+
+  @override
+  String get adminTeamSubtitle => 'રાઇડર અને સ્ટાફ';
+
+  @override
+  String get teamAdd => 'વ્યક્તિ ઉમેરો';
+
+  @override
+  String get teamEmpty => 'હજી કોઈ રાઇડર કે સ્ટાફ નથી.';
+
+  @override
+  String get teamAdded => 'ઉમેર્યા. તેઓ આ નંબરથી લૉગિન કરશે.';
+
+  @override
+  String get teamRemove => 'દૂર કરો';
+
+  @override
+  String teamRemoveConfirm(String name) {
+    return '$name ને ટીમમાંથી દૂર કરવા છે? તેઓ સામાન્ય ગ્રાહક બની જશે.';
+  }
+
+  @override
+  String get nameOptional => 'નામ (વૈકલ્પિક)';
+
+  @override
+  String get riderActive => 'ચાલુ';
+
+  @override
+  String get riderDone => 'પૂરી';
+
+  @override
+  String get riderNoActive => 'હમણાં કોઈ ડિલિવરી નથી.';
+
+  @override
+  String get riderNoDone => 'હજી કંઈ પહોંચાડ્યું નથી.';
+
+  @override
+  String riderCollectCash(String amount) {
+    return '$amount રોકડા લેવા';
+  }
+
+  @override
+  String get riderPrepaid => 'ઓનલાઇન ચૂકવેલ · કંઈ લેવાનું નથી';
+
+  @override
+  String riderItems(int count) {
+    return '$count વસ્તુઓ';
+  }
+
+  @override
+  String get riderPickUp => 'દુકાનેથી લીધો';
+
+  @override
+  String get riderDeliver => 'પહોંચાડ્યો · કોડ નાખો';
+
+  @override
+  String get riderEnterOtp => 'ગ્રાહક પાસેથી 4 અંકનો કોડ માગો';
+
+  @override
+  String get riderConfirm => 'ખાતરી કરો';
+
+  @override
+  String get riderNavigate => 'રસ્તો બતાવો';
+
+  @override
+  String riderNote(String note) {
+    return 'નોંધ: $note';
+  }
+
+  @override
+  String get riderSharingTitle => 'તમારું લોકેશન શેર થાય છે';
+
+  @override
+  String get riderSharingText => 'ગ્રાહક જોઈ શકે છે કે તમે આવી રહ્યા છો.';
+
+  @override
+  String get riderNeedsPermission =>
+      'ગ્રાહક તમને ટ્રૅક કરી શકે તે માટે લોકેશનની મંજૂરી આપો';
+
+  @override
+  String get riderGpsOff => 'ગ્રાહક તમને ટ્રૅક કરી શકે તે માટે GPS ચાલુ કરો';
+
+  @override
+  String get riderCancelledReturn => 'રદ · દુકાને પાછો આપો';
+
+  @override
+  String get errorOrderNotPacked => 'દુકાને હજી આ ઓર્ડર પેક કર્યો નથી.';
+
+  @override
+  String errorDeliveryOtp(int attempts) {
+    return 'ખોટો કોડ. $attempts પ્રયાસ બાકી.';
+  }
+
+  @override
+  String get errorDeliveryOtpLocked =>
+      'ઘણા ખોટા કોડ. દુકાનને પહોંચાડ્યાનું નોંધવા કહો.';
+
+  @override
+  String get errorDeliveryNotAssignable =>
+      'ઓર્ડર સ્વીકાર્યા પછી અને દુકાનમાંથી નીકળે તે પહેલાં રાઇડર સોંપો.';
+
+  @override
+  String get errorDeliveryStarted => 'રાઇડરે આ ઓર્ડર લઈ લીધો છે.';
+
+  @override
+  String get errorDeliveryClosed => 'આ ડિલિવરી હવે ચાલુ નથી.';
+
+  @override
+  String get errorOwnerLocked => 'માલિકની ભૂમિકા બદલી શકાતી નથી.';
 }

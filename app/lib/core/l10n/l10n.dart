@@ -114,6 +114,14 @@ String errorMessage(AppLocalizations l10n, Object error) {
     'ORDER_STATUS_CHANGED' || 'ORDER_STATUS_INVALID' => l10n.errorOrderChanged,
     'PAYMENT_CLOSED' => l10n.errorPaymentClosed,
     'ADDRESS_LIMIT' => l10n.errorAddressLimit,
+    'ORDER_NOT_PACKED' => l10n.errorOrderNotPacked,
+    'DELIVERY_OTP_INVALID' => l10n.errorDeliveryOtp(error.detailInt('attemptsLeft') ?? 0),
+    'OTP_ATTEMPTS_EXCEEDED' => l10n.errorDeliveryOtpLocked,
+    'DELIVERY_NOT_ASSIGNABLE' || 'NOT_A_DELIVERY_ORDER' => l10n.errorDeliveryNotAssignable,
+    'DELIVERY_ALREADY_STARTED' => l10n.errorDeliveryStarted,
+    'DELIVERY_CLOSED' || 'DELIVERY_NOT_STARTED' || 'ORDER_CLOSED' || 'DELIVERY_CHANGED' => l10n.errorDeliveryClosed,
+    'OWNER_ROLE_LOCKED' => l10n.errorOwnerLocked,
+    'RIDER_NOT_FOUND' || 'DELIVERY_NOT_FOUND' || 'TEAM_MEMBER_NOT_FOUND' => l10n.errorNotFound,
     _ => l10n.errorGeneric,
   };
 }
