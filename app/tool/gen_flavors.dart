@@ -4,7 +4,7 @@
 //   pubspec.yaml                          generated asset block
 //   flutter_launcher_icons-<slug>.yaml    launcher icon config per flavor
 //   android/app/flavors.gradle            productFlavors (if android/ exists)
-//   android/app/src/<slug>/google-services.json  (if present in the client folder)
+//   FIREBASE_* defines                    from <slug>/google-services.json, if present (push)
 //
 // Run from app/:  dart run tool/gen_flavors.dart
 // Validate clients first with the backend CLI: (cd ../backend && npm run client -- validate)
@@ -84,8 +84,31 @@ void writeDefines(Directory out, Client client) {
     'COLOR_SURFACE': colors['surface'] as String? ?? '',
     'DEFAULT_LOCALE': client.locale['default'] as String,
     'SUPPORTED_LOCALES': (client.locale['supported'] as List<dynamic>).join(','),
+    ...firebaseDefines(client),
   };
   File('${out.path}/${client.slug}.json').writeAsStringSync('${const JsonEncoder.withIndent('  ').convert(defines)}\n');
+}
+
+/// Push notifications: Firebase app values from the client's google-services.json, if present.
+/// The app initializes Firebase from these defines (no google-services Gradle plugin).
+Map<String, String> firebaseDefines(Client client) {
+  final file = File('${client.dir.path}/google-services.json');
+  if (!file.existsSync()) return {};
+  final json = jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
+  final project = json['project_info'] as Map<String, dynamic>;
+  final package = client.build['androidPackage'] as String;
+  final entry = (json['client'] as List<dynamic>).cast<Map<String, dynamic>>().where((c) {
+    final info = (c['client_info'] as Map<String, dynamic>)['android_client_info'] as Map<String, dynamic>;
+    return info['package_name'] == package;
+  }).firstOrNull;
+  if (entry == null) fail('${client.slug}: google-services.json has no Android app for $package');
+  final apiKeys = (entry['api_key'] as List<dynamic>).cast<Map<String, dynamic>>();
+  return {
+    'FIREBASE_API_KEY': apiKeys.first['current_key'] as String,
+    'FIREBASE_APP_ID': (entry['client_info'] as Map<String, dynamic>)['mobilesdk_app_id'] as String,
+    'FIREBASE_SENDER_ID': project['project_number'] as String,
+    'FIREBASE_PROJECT_ID': project['project_id'] as String,
+  };
 }
 
 void copyAssets(Directory appDir, Client client) {
@@ -144,11 +167,6 @@ void writeAndroidFlavors(Directory appDir, List<Client> clients) {
       ..writeln('            resValue "string", "app_name", ${_groovyString(client.build['appName'] as String)}')
       ..writeln('        }');
 
-    final services = File('${client.dir.path}/google-services.json');
-    if (services.existsSync()) {
-      final dir = Directory('${androidApp.path}/src/${client.slug}')..createSync(recursive: true);
-      services.copySync('${dir.path}/google-services.json');
-    }
   }
 
   File('${androidApp.path}/flavors.gradle').writeAsStringSync('''

@@ -1449,6 +1449,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reason: {reason}'**
   String rejectedBecause(String reason);
+
+  /// Android notification channel name (Settings > Apps > Notifications)
+  ///
+  /// In en, this message translates to:
+  /// **'Order updates'**
+  String get notificationChannelOrders;
 }
 
 class _AppLocalizationsDelegate

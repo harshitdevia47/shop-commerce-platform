@@ -752,4 +752,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String rejectedBecause(String reason) {
     return 'कारण: $reason';
   }
+
+  @override
+  String get notificationChannelOrders => 'ऑर्डर अपडेट';
 }

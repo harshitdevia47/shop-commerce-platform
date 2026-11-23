@@ -6,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../core/l10n/l10n.dart';
 import '../../../core/providers.dart';
+import '../../../core/realtime/realtime_providers.dart';
 import '../../../core/utils/launcher.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/widgets/error_view.dart';
@@ -22,7 +23,7 @@ class OrderDetailScreen extends ConsumerStatefulWidget {
   final String orderId;
   final bool justPlaced;
 
-  /// Until realtime updates arrive (Phase 4), open orders refresh on this interval.
+  /// Open orders refresh on this interval only while live updates are down.
   static const refreshEvery = Duration(seconds: 30);
 
   @override
@@ -37,7 +38,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
     super.initState();
     _timer = Timer.periodic(OrderDetailScreen.refreshEvery, (_) {
       final order = ref.read(orderProvider(widget.orderId)).value;
-      if (order != null && !order.status.isDone) _refresh();
+      if (order != null && !order.status.isDone && !ref.isLive) _refresh();
     });
   }
 

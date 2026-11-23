@@ -16,6 +16,7 @@ class ClientConfig {
     required this.defaultLocale,
     required this.supportedLocales,
     this.surfaceColor,
+    this.firebase,
   });
 
   /// Reads the compile-time defines. Throws if the app was built without a client file.
@@ -29,6 +30,10 @@ class ClientConfig {
       'COLOR_SURFACE': String.fromEnvironment('COLOR_SURFACE'),
       'DEFAULT_LOCALE': String.fromEnvironment('DEFAULT_LOCALE'),
       'SUPPORTED_LOCALES': String.fromEnvironment('SUPPORTED_LOCALES'),
+      'FIREBASE_API_KEY': String.fromEnvironment('FIREBASE_API_KEY'),
+      'FIREBASE_APP_ID': String.fromEnvironment('FIREBASE_APP_ID'),
+      'FIREBASE_SENDER_ID': String.fromEnvironment('FIREBASE_SENDER_ID'),
+      'FIREBASE_PROJECT_ID': String.fromEnvironment('FIREBASE_PROJECT_ID'),
     });
   }
 
@@ -60,6 +65,7 @@ class ClientConfig {
       surfaceColor: surface.isEmpty ? null : parseHexColor(surface),
       defaultLocale: defaultLocale,
       supportedLocales: supported,
+      firebase: FirebaseConfig.fromMap(values),
     );
   }
 
@@ -72,6 +78,30 @@ class ClientConfig {
   final Color? surfaceColor;
   final Locale defaultLocale;
   final List<Locale> supportedLocales;
+
+  /// Push notifications (FCM). Null when the client folder has no google-services.json.
+  final FirebaseConfig? firebase;
+}
+
+/// Values from the client's google-services.json (written by gen_flavors). Not secrets:
+/// they identify the app to Firebase; sending pushes needs the server's service account.
+@immutable
+class FirebaseConfig {
+  const FirebaseConfig({required this.apiKey, required this.appId, required this.senderId, required this.projectId});
+
+  static FirebaseConfig? fromMap(Map<String, String> values) {
+    final apiKey = values['FIREBASE_API_KEY'] ?? '';
+    final appId = values['FIREBASE_APP_ID'] ?? '';
+    final senderId = values['FIREBASE_SENDER_ID'] ?? '';
+    final projectId = values['FIREBASE_PROJECT_ID'] ?? '';
+    if ([apiKey, appId, senderId, projectId].any((v) => v.isEmpty)) return null;
+    return FirebaseConfig(apiKey: apiKey, appId: appId, senderId: senderId, projectId: projectId);
+  }
+
+  final String apiKey;
+  final String appId;
+  final String senderId;
+  final String projectId;
 }
 
 /// Parses `#RRGGBB`.

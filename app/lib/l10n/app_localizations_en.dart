@@ -757,4 +757,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String rejectedBecause(String reason) {
     return 'Reason: $reason';
   }
+
+  @override
+  String get notificationChannelOrders => 'Order updates';
 }

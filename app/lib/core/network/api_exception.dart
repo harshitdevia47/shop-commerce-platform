@@ -25,7 +25,7 @@ class ApiException implements Exception {
     };
     return ApiException(
       isNetwork ? networkError : 'UNKNOWN',
-      error.message ?? 'Request failed',
+      error.message ?? (error.error != null ? 'Request failed: ${error.error}' : 'Request failed'),
       statusCode: error.response?.statusCode,
     );
   }

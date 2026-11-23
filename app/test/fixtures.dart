@@ -191,6 +191,8 @@ class FakeAuthApi implements AuthApi {
   UserRole role;
   String? lastPhone;
   int logouts = 0;
+  String? lastLogoutDeviceToken;
+  final devices = <(String, String)>[];
   AppUser? profile;
 
   AuthSession _session(String phone) {
@@ -222,7 +224,13 @@ class FakeAuthApi implements AuthApi {
   Future<AuthSession> refresh(String refreshToken) async => _session(lastPhone ?? '+919876543210');
 
   @override
-  Future<void> logout(String refreshToken) async => logouts++;
+  Future<void> logout(String refreshToken, {String? deviceToken}) async {
+    logouts++;
+    lastLogoutDeviceToken = deviceToken;
+  }
+
+  @override
+  Future<void> registerDevice({required String token, required String locale}) async => devices.add((token, locale));
 
   @override
   Future<AppUser> me() async => profile!;

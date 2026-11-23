@@ -48,12 +48,16 @@ class AuthController extends AsyncNotifier<AppUser?> {
 
   Future<void> logout() async {
     final store = ref.read(sessionStoreProvider);
+    final api = ref.read(authApiProvider);
+    final push = ref.read(pushServiceProvider);
     final session = await store.read();
     await store.clear();
     state = const AsyncData(null);
     if (session != null) {
       try {
-        await ref.read(authApiProvider).logout(session.refreshToken);
+        // Tells the server to stop pushing this account's notifications to this phone.
+        final deviceToken = await push.token().timeout(const Duration(seconds: 3), onTimeout: () => null);
+        await api.logout(session.refreshToken, deviceToken: deviceToken);
       } on Object {
         // Best effort: the local session is already gone.
       }

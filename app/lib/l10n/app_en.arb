@@ -398,5 +398,9 @@
         "type": "String"
       }
     }
+  },
+  "notificationChannelOrders": "Order updates",
+  "@notificationChannelOrders": {
+    "description": "Android notification channel name (Settings > Apps > Notifications)"
   }
 }

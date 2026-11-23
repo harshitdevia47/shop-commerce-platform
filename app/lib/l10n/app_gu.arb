@@ -224,5 +224,6 @@
   "payWithUpi": "UPI થી {amount} ચૂકવો",
   "payOnDelivery": "ડિલિવરી વખતે {amount} રોકડા ચૂકવો",
   "utrShown": "UTR {utr}",
-  "rejectedBecause": "કારણ: {reason}"
+  "rejectedBecause": "કારણ: {reason}",
+  "notificationChannelOrders": "ઓર્ડર અપડેટ"
 }

@@ -24,6 +24,7 @@ import '../../features/orders/presentation/checkout_screen.dart';
 import '../../features/orders/presentation/my_orders_screen.dart';
 import '../../features/orders/presentation/order_detail_screen.dart';
 import '../../features/rider_deliveries/presentation/rider_home_screen.dart';
+import '../providers.dart';
 import 'routes.dart';
 
 /// Pure redirect rules (unit-testable).
@@ -172,7 +173,25 @@ final routerProvider = Provider<GoRouter>((ref) {
     if (target != null) router.go(target);
   }, fireImmediately: true);
 
+  // Tapped push notifications open their page (e.g. /orders/<id>) when the signed-in role may see it.
+  void openFromNotification(String? route) {
+    if (route == null) return;
+    final user = ref.read(authControllerProvider).value;
+    if (user != null && authRedirect(user: user, location: route) == null) unawaited(router.push(route));
+  }
+
+  final push = ref.read(pushServiceProvider);
+  final taps = push.taps.listen(openFromNotification);
+  // A notification that launched the app: open it once the saved session has loaded.
+  late final ProviderSubscription<AsyncValue<AppUser?>> launch;
+  launch = ref.listen(authControllerProvider, (_, next) {
+    if (next.isLoading) return;
+    launch.close();
+    unawaited(push.takeLaunchRoute().then(openFromNotification));
+  }, fireImmediately: true);
+
   ref.onDispose(() {
+    unawaited(taps.cancel());
     router.dispose();
     authChanges.dispose();
   });

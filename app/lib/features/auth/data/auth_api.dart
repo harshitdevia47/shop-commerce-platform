@@ -7,10 +7,20 @@ abstract interface class AuthApi {
   Future<OtpRequestResult> requestOtp(String phone);
   Future<AuthSession> verifyOtp(String phone, String code);
   Future<AuthSession> refresh(String refreshToken);
-  Future<void> logout(String refreshToken);
+  /// [deviceToken]: stop push notifications to this phone for the account.
+  Future<void> logout(String refreshToken, {String? deviceToken});
   Future<AppUser> me();
+
+  /// Registers this phone's push token (notifications are written in [locale]).
+  Future<void> registerDevice({required String token, required String locale});
   Future<AppUser> updateMe({String? name, String? locale});
 }
+
+/// `POST /auth/refresh` on a Dio without the auth interceptor. Top-level so the authenticated
+/// Dio's interceptor can call it without depending on [AuthApi] (which depends on that Dio).
+Future<AuthSession> refreshSession(Dio publicDio, String refreshToken) async => AuthSession.fromJson(
+  await unwrap<Map<String, dynamic>>(publicDio.post<dynamic>('/api/v1/auth/refresh', data: {'refreshToken': refreshToken})),
+);
 
 class HttpAuthApi implements AuthApi {
   /// [publicDio] has no auth interceptor (used for /auth/*, including refresh);
@@ -33,15 +43,16 @@ class HttpAuthApi implements AuthApi {
   );
 
   @override
-  Future<AuthSession> refresh(String refreshToken) async => AuthSession.fromJson(
-    await unwrap<Map<String, dynamic>>(
-      _public.post<dynamic>('/api/v1/auth/refresh', data: {'refreshToken': refreshToken}),
-    ),
-  );
+  Future<AuthSession> refresh(String refreshToken) => refreshSession(_public, refreshToken);
 
   @override
-  Future<void> logout(String refreshToken) async {
-    await _public.post<dynamic>('/api/v1/auth/logout', data: {'refreshToken': refreshToken});
+  Future<void> logout(String refreshToken, {String? deviceToken}) async {
+    await _public.post<dynamic>('/api/v1/auth/logout', data: {'refreshToken': refreshToken, 'deviceToken': ?deviceToken});
+  }
+
+  @override
+  Future<void> registerDevice({required String token, required String locale}) async {
+    await _authed.put<dynamic>('/api/v1/me/devices', data: {'token': token, 'platform': 'android', 'locale': locale});
   }
 
   @override

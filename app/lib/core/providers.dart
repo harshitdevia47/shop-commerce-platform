@@ -8,9 +8,11 @@ import 'config/env_config.dart';
 import 'config/shop_settings.dart';
 import 'config/shop_settings_repository.dart';
 import '../features/auth/data/session_store.dart';
+import '../features/auth/data/auth_api.dart';
 import '../features/auth/presentation/auth_controller.dart';
 import 'network/api_client.dart';
 import 'network/auth_interceptor.dart';
+import 'push/push_service.dart';
 
 // ---- Overridden in main() / tests ----
 
@@ -18,23 +20,38 @@ final clientConfigProvider = Provider<ClientConfig>((ref) => throw Unimplemented
 final envConfigProvider = Provider<EnvConfig>((ref) => throw UnimplementedError('override in main'));
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) => throw UnimplementedError('override in main'));
 
+/// Push notifications; `main()` overrides it with Firebase when the client has a Firebase app.
+final pushServiceProvider = Provider<PushService>((ref) => const NoPushService());
+
 // ---- Infrastructure ----
 
 final sessionStoreProvider = Provider<SessionStore>((ref) => SecureSessionStore());
 
 /// No auth: shop config, /auth/* (including token refresh).
-final publicDioProvider = Provider<Dio>(
-  (ref) => createDio(ref.watch(envConfigProvider), ref.watch(clientConfigProvider)),
-);
+final publicDioProvider = Provider<Dio>((ref) {
+  final dio = createDio(ref.watch(envConfigProvider), ref.watch(clientConfigProvider));
+  final adapter = ref.watch(httpAdapterProvider);
+  if (adapter != null) dio.httpClientAdapter = adapter;
+  return dio;
+});
+
+/// Tests replace the network with a fake server here; null = real HTTP.
+final httpAdapterProvider = Provider<HttpClientAdapter?>((ref) => null);
 
 /// Authenticated calls: attaches the access token and refreshes it transparently.
+///
+/// The interceptor must not read [authApiProvider]: that provider depends on this one, and
+/// Riverpod rejects the cycle at refresh time (every request then fails once the token expires).
 final Provider<Dio> dioProvider = Provider<Dio>((ref) {
   final dio = createDio(ref.watch(envConfigProvider), ref.watch(clientConfigProvider));
+  final adapter = ref.watch(httpAdapterProvider);
+  if (adapter != null) dio.httpClientAdapter = adapter;
+  final publicDio = ref.watch(publicDioProvider);
   dio.interceptors.add(
     AuthInterceptor(
       store: ref.watch(sessionStoreProvider),
-      refresh: (token) => ref.read(authApiProvider).refresh(token),
-      retryDio: ref.watch(publicDioProvider),
+      refresh: (token) => refreshSession(publicDio, token),
+      retryDio: publicDio,
       onSessionRefreshed: (session) => ref.read(authControllerProvider.notifier).sessionRefreshed(session),
       onSessionExpired: () => ref.read(authControllerProvider.notifier).sessionExpired(),
     ),

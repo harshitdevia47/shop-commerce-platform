@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../l10n/l10n.dart';
@@ -11,6 +12,7 @@ class ErrorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    if (kDebugMode) debugPrint('ErrorView: $error');
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),

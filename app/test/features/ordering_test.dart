@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -5,6 +7,9 @@ import 'package:qc_app/app.dart';
 import 'package:qc_app/core/config/shop_settings.dart';
 import 'package:qc_app/core/network/api_exception.dart';
 import 'package:qc_app/core/providers.dart';
+import 'package:qc_app/core/push/push_service.dart';
+import 'package:qc_app/core/realtime/realtime_channel.dart';
+import 'package:qc_app/core/realtime/realtime_providers.dart';
 import 'package:qc_app/core/utils/launcher.dart';
 import 'package:qc_app/features/auth/data/session_store.dart';
 import 'package:qc_app/features/auth/domain/auth_models.dart';
@@ -114,8 +119,13 @@ class FakeOrders implements OrdersRepository, AdminOrdersRepository {
   @override
   Future<PageResult<Order>> myOrders({String? cursor}) async => PageResult(store.values.toList().reversed.toList(), null);
 
+  int orderFetches = 0;
+
   @override
-  Future<Order> order(String id) async => store[id]!;
+  Future<Order> order(String id) async {
+    orderFetches++;
+    return store[id]!;
+  }
 
   @override
   Future<Order> cancel(String id, {String? reason}) async {
@@ -259,6 +269,55 @@ AuthSession sessionFor(UserRole role) => AuthSession(
   user: AppUser(id: 'u', phone: '+919876543210', role: role, name: role == UserRole.owner ? 'Ramesh' : null),
 );
 
+class FakeChannel implements RealtimeChannel {
+  final _events = StreamController<RealtimeEvent>.broadcast();
+  final _connection = StreamController<bool>.broadcast();
+  Future<String?> Function()? token;
+  bool closed = false;
+
+  void connect() => _connection.add(true);
+  void emit(String type, String orderId, [String? status]) =>
+      _events.add(RealtimeEvent(type: type, orderId: orderId, status: status));
+
+  @override
+  Stream<RealtimeEvent> get events => _events.stream;
+
+  @override
+  Stream<bool> get connection => _connection.stream;
+
+  @override
+  void close() => closed = true;
+}
+
+class FakePush implements PushService {
+  FakePush({this.launchRoute});
+
+  String? launchRoute;
+  int permissionRequests = 0;
+  final _taps = StreamController<String>.broadcast();
+
+  void tap(String route) => _taps.add(route);
+
+  @override
+  Future<String?> token() async => 'fcm-token-1';
+
+  @override
+  Stream<String> get tokenRefresh => const Stream.empty();
+
+  @override
+  Stream<String> get taps => _taps.stream;
+
+  @override
+  Future<String?> takeLaunchRoute() async {
+    final route = launchRoute;
+    launchRoute = null;
+    return route;
+  }
+
+  @override
+  Future<void> requestPermission() async => permissionRequests++;
+}
+
 class Harness {
   Harness(this.orders, this.launched, this.prefs);
   final FakeOrders orders;
@@ -271,12 +330,16 @@ Future<Harness> pumpShop(
   AuthSession? session,
   FakeAuthApi? auth,
   Map<String, Object> prefsValues = const {},
+  FakeChannel? channel,
+  PushService? push,
+  void Function(FakeOrders orders)? setup,
 }) async {
   usePhoneScreen(tester);
   quoteDebounce = Duration.zero;
   SharedPreferences.setMockInitialValues(prefsValues);
   final prefs = await SharedPreferences.getInstance();
   final orders = FakeOrders();
+  setup?.call(orders);
   final launched = <Uri>[];
   await tester.pumpWidget(
     ProviderScope(
@@ -294,6 +357,12 @@ Future<Harness> pumpShop(
           launched.add(uri);
           return true;
         }),
+        if (channel != null)
+          realtimeConnectorProvider.overrideWithValue((token) {
+            channel.token = token;
+            return channel;
+          }),
+        if (push != null) pushServiceProvider.overrideWithValue(push),
       ],
       child: const QcApp(),
     ),
@@ -496,5 +565,98 @@ void main() {
     await tester.tap(find.byKey(const Key('confirmRejectButton')));
     await tester.pumpAndSettle();
     expect(h.orders.statusCalls.last, ('o1', OrderStatus.rejected, 'Out of rice'));
+  });
+
+  group('live updates', () {
+    testWidgets("the customer's open order changes as soon as the shop accepts it", (tester) async {
+      final channel = FakeChannel();
+      final h = await pumpShop(tester, session: sessionFor(UserRole.customer), channel: channel);
+      h.orders.seed(asCustomer: true);
+      channel.connect();
+      await tester.tap(find.byKey(const Key('myOrdersButton')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Order #7'));
+      await tester.pumpAndSettle();
+      expect(await channel.token!(), 'a');
+      final cancel = find.byKey(const Key('cancelOrderButton'), skipOffstage: false);
+      expect(cancel, findsOneWidget);
+      final fetchesBefore = h.orders.orderFetches;
+
+      await h.orders.setStatus('o1', OrderStatus.confirmed);
+      channel.emit('order.updated', 'o1', 'CONFIRMED');
+      await tester.pumpAndSettle();
+
+      expect(h.orders.orderFetches, greaterThan(fetchesBefore));
+      expect(cancel, findsNothing); // accepted orders can no longer be cancelled by the customer
+    });
+
+    testWidgets("a new order appears in the owner's inbox without refreshing", (tester) async {
+      final channel = FakeChannel();
+      final h = await pumpShop(tester, session: sessionFor(UserRole.owner), channel: channel);
+      await tester.tap(find.byKey(const Key('adminOrdersTile')));
+      await tester.pumpAndSettle();
+      expect(find.text('New (1)'), findsNothing);
+
+      h.orders.seed();
+      channel.emit('order.updated', 'o1', 'PLACED');
+      await tester.pumpAndSettle();
+
+      expect(find.text('New (1)'), findsOneWidget);
+    });
+
+    testWidgets('the channel closes on logout', (tester) async {
+      final channel = FakeChannel();
+      await pumpShop(tester, session: sessionFor(UserRole.customer), channel: channel);
+      await tester.tap(find.byKey(const Key('accountButton')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('logoutButton')));
+      await tester.pumpAndSettle();
+      expect(channel.closed, isTrue);
+    });
+  });
+
+  group('push notifications', () {
+    testWidgets('registers the phone after login, opens tapped orders, and unregisters on logout', (tester) async {
+      final auth = FakeAuthApi();
+      final push = FakePush();
+      await pumpShop(tester, session: sessionFor(UserRole.customer), auth: auth, push: push, setup: (o) => o.seed(asCustomer: true));
+      expect(push.permissionRequests, 1);
+      expect(auth.devices, [('fcm-token-1', 'en')]);
+
+      push.tap('/admin/orders/o1'); // not a customer page: ignored
+      await tester.pumpAndSettle();
+      expect(find.byType(OrderDetailScreen), findsNothing);
+
+      push.tap('/orders/o1');
+      await tester.pumpAndSettle();
+      expect(find.byType(OrderDetailScreen), findsOneWidget);
+      expect(find.text('Order #7'), findsWidgets);
+
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('accountButton')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('logoutButton')));
+      await tester.pumpAndSettle();
+      expect(auth.lastLogoutDeviceToken, 'fcm-token-1');
+    });
+
+    testWidgets('a notification that launched the app opens its order', (tester) async {
+      await pumpShop(
+        tester,
+        session: sessionFor(UserRole.owner),
+        push: FakePush(launchRoute: '/admin/orders/o1'),
+        setup: (o) => o.seed(),
+      );
+      expect(find.text('Accept order'), findsOneWidget);
+    });
+
+    testWidgets('guests get no registration', (tester) async {
+      final auth = FakeAuthApi();
+      final push = FakePush();
+      await pumpShop(tester, auth: auth, push: push);
+      expect(auth.devices, isEmpty);
+      expect(push.permissionRequests, 0);
+    });
   });
 }

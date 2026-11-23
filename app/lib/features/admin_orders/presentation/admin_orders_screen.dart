@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../core/l10n/l10n.dart';
+import '../../../core/realtime/realtime_providers.dart';
 import '../../../core/router/routes.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/widgets/error_view.dart';
@@ -12,7 +13,7 @@ import '../../orders/domain/order_models.dart';
 import '../../orders/presentation/orders_providers.dart';
 import '../../orders/presentation/widgets/order_widgets.dart';
 
-/// Shop's order inbox: New / In progress / Completed. Polls until realtime arrives (Phase 4).
+/// Shop's order inbox: New / In progress / Completed. Live updates; polls while they are down.
 class AdminOrdersScreen extends ConsumerStatefulWidget {
   const AdminOrdersScreen({super.key});
 
@@ -29,7 +30,9 @@ class _AdminOrdersScreenState extends ConsumerState<AdminOrdersScreen> {
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(AdminOrdersScreen.refreshEvery, (_) => ref.invalidate(adminOrdersProvider));
+    _timer = Timer.periodic(AdminOrdersScreen.refreshEvery, (_) {
+      if (!ref.isLive) ref.invalidate(adminOrdersProvider);
+    });
   }
 
   @override
