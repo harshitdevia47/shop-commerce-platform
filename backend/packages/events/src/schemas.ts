@@ -63,6 +63,20 @@ export const EVENTS = {
     version: 1,
     payload: z.object({ orderId: uuid, orderNumber: z.number().int().positive(), customerId: uuid, amountPaise: paise }),
   },
+  'delivery.status_changed': {
+    stream: 'delivery',
+    version: 1,
+    payload: z.object({
+      deliveryId: uuid,
+      orderId: uuid,
+      number: z.number().int().positive(),
+      customerId: uuid,
+      riderId: uuid,
+      /** Set on a reassignment: the rider who no longer has this delivery. */
+      previousRiderId: uuid.nullable(),
+      status: z.enum(['ASSIGNED', 'PICKED_UP', 'DELIVERED', 'CANCELLED']),
+    }),
+  },
 } as const;
 
 export type EventType = keyof typeof EVENTS;

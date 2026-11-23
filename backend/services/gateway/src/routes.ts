@@ -23,6 +23,7 @@ export interface UpstreamUrls {
   media: string;
   order: string;
   payment: string;
+  delivery: string;
 }
 
 /**
@@ -45,6 +46,12 @@ export function buildRoutes(upstreams: UpstreamUrls): RouteRule[] {
     { prefix: '/api/v1/admin/orders', target: upstreams.order, auth: 'required', roles: ADMIN_ROLES },
     { prefix: '/api/v1/payments', target: upstreams.payment, auth: 'required' },
     { prefix: '/api/v1/admin/payments', target: upstreams.payment, auth: 'required', roles: ADMIN_ROLES },
+    // Owner manages staff and riders.
+    { prefix: '/api/v1/admin/team', target: upstreams.identity, auth: 'required', roles: ['OWNER'] },
+    { prefix: '/api/v1/admin/riders', target: upstreams.delivery, auth: 'required', roles: ADMIN_ROLES },
+    { prefix: '/api/v1/admin/deliveries', target: upstreams.delivery, auth: 'required', roles: ADMIN_ROLES },
+    { prefix: '/api/v1/rider', target: upstreams.delivery, auth: 'required', roles: ['RIDER'] },
+    { prefix: '/api/v1/deliveries', target: upstreams.delivery, auth: 'required' },
   ];
   // Longest prefix first so specific rules win.
   return rules.sort((a, b) => b.prefix.length - a.prefix.length);

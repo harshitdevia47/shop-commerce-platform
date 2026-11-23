@@ -8,6 +8,8 @@ import { devicesRouter } from './modules/devices/devices.routes.js';
 import { createDevicesService } from './modules/devices/devices.service.js';
 import { createOtpService } from './modules/auth/otp.service.js';
 import { createTokenService } from './modules/auth/token.service.js';
+import { teamRouter } from './modules/team/team.routes.js';
+import { createTeamService } from './modules/team/team.service.js';
 import { usersRouter } from './modules/users/users.routes.js';
 import { createUsersService } from './modules/users/users.service.js';
 import type { SmsProvider } from './sms/sms-provider.js';
@@ -44,6 +46,7 @@ export async function createIdentityApp(deps: IdentityAppDeps): Promise<Express>
   const devices = createDevicesService(db);
   app.use(authRouter(otp, tokens, users, devices));
   app.use(devicesRouter(devices));
+  app.use(teamRouter(createTeamService(db, tokens)));
   app.use(addressesRouter(createAddressesService(db, now), users));
   app.use(usersRouter(users));
 

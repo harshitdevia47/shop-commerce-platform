@@ -477,6 +477,36 @@ describe('events (outbox)', () => {
   });
 });
 
+describe('internal: delivery service calls', () => {
+  const rider = (shopId: string = SHOP_A) => sign(shopId, randomUUID(), 'RIDER');
+  const walkTo = async (id: string, statuses: string[]) => {
+    for (const status of statuses) await request(app).post(`/api/v1/admin/orders/${id}/status`).set(owner()).send({ status }).expect(200);
+  };
+
+  it('rider takes a packed delivery order out and delivers it; history says RIDER', async () => {
+    const { id } = (await place()).body.data.order;
+    const early = await request(app).post(`/internal/orders/${id}/status`).set(rider()).send({ status: 'OUT_FOR_DELIVERY' });
+    expect(early.body.error.code).toBe('ORDER_STATUS_INVALID'); // not packed yet
+    await walkTo(id, ['CONFIRMED', 'PACKED']);
+
+    const snapshot = await request(app).get(`/internal/orders/${id}`).set(rider());
+    expect(snapshot.body.data).toMatchObject({ id, status: 'PACKED', address: { pincode: '364001' }, customer: { id: ALICE } });
+
+    expect((await request(app).post(`/internal/orders/${id}/status`).set(rider()).send({ status: 'OUT_FOR_DELIVERY' })).status).toBe(200);
+    const done = await request(app).post(`/internal/orders/${id}/status`).set(rider()).send({ status: 'DELIVERED' });
+    expect(done.body.data.status).toBe('DELIVERED');
+    expect(done.body.data.history.map((h: { byRole: string }) => h.byRole)).toEqual(['CUSTOMER', 'OWNER', 'OWNER', 'RIDER', 'RIDER']);
+  });
+
+  it('riders cannot do anything else, nor reach other shops', async () => {
+    const { id } = (await place()).body.data.order;
+    await walkTo(id, ['CONFIRMED', 'PACKED']);
+    expect((await request(app).post(`/internal/orders/${id}/status`).set(rider()).send({ status: 'REJECTED' })).status).toBe(400);
+    expect((await request(app).post(`/internal/orders/${id}/status`).set(rider(SHOP_B)).send({ status: 'OUT_FOR_DELIVERY' })).status).toBe(404);
+    expect((await request(app).get(`/internal/orders/${id}`).set(rider(SHOP_B))).status).toBe(404);
+  });
+});
+
 describe('internal: existing orders', () => {
   it("answers only for the caller's shop", async () => {
     const { id } = (await place()).body.data.order;

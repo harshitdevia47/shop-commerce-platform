@@ -136,6 +136,22 @@ services:
     deploy:
       resources: { limits: { memory: 256m } }
 
+  # Riders: assignment, pickup, delivery OTP; latest rider location in Redis.
+  delivery:
+    <<: *service
+    build: { context: ../backend, dockerfile: Dockerfile, args: { SERVICE: delivery } }
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/qc_delivery
+      REDIS_URL: redis://redis:6379
+      ORDER_URL: http://order:3000
+      IDENTITY_URL: http://identity:3000
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    deploy:
+      resources: { limits: { memory: 256m } }
+
   # Turns events into push notifications. No routes besides /health.
   notification:
     <<: *service
@@ -165,6 +181,7 @@ services:
       PORT: 3000
       REDIS_URL: redis://redis:6379
       JWT_PUBLIC_KEY_FILE: /run/secrets/jwt_public_key
+      DELIVERY_URL: http://delivery:3000
     secrets: [jwt_public_key]
     depends_on:
       redis: { condition: service_healthy }
@@ -183,6 +200,7 @@ services:
       MEDIA_URL: http://media:3000
       ORDER_URL: http://order:3000
       PAYMENT_URL: http://payment:3000
+      DELIVERY_URL: http://delivery:3000
       JWT_PUBLIC_KEY_FILE: /run/secrets/jwt_public_key
       TRUST_PROXY_HOPS: 1
     secrets: [jwt_public_key]
@@ -194,6 +212,7 @@ services:
       media: { condition: service_started }
       order: { condition: service_started }
       payment: { condition: service_started }
+      delivery: { condition: service_started }
     deploy:
       resources: { limits: { memory: 256m } }
 

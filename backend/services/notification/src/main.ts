@@ -20,7 +20,7 @@ if (push.name === 'console' && env.NODE_ENV === 'production') logger.warn('PUSH_
 const consumer = createConsumer({
   redis: new Redis(env.REDIS_URL),
   group: 'notification',
-  streams: ['order', 'payment'],
+  streams: ['order', 'payment', 'delivery'],
   types: NOTIFIED_EVENTS,
   handle: onceOnly(
     prismaProcessedEvents(db.processedEvent),

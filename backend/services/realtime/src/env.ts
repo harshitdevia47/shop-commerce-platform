@@ -6,6 +6,7 @@ const envSchema = z.object({
   REDIS_URL: z.string().url(),
   JWT_PUBLIC_KEY: z.string().includes('BEGIN PUBLIC KEY', { message: 'JWT_PUBLIC_KEY(_FILE) must be a PEM public key' }),
   JWT_ISSUER: z.string().min(1).default('qc-identity'),
+  DELIVERY_URL: z.string().url(),
 });
 
 export type RealtimeEnv = z.infer<typeof envSchema>;

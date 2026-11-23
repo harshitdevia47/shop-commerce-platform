@@ -34,8 +34,11 @@ describe('status machine', () => {
     expect(canTransition('OUT_FOR_DELIVERY', 'DELIVERED', 'DELIVERY', 'OWNER')).toBe(true);
   });
 
-  it('riders and strangers get nothing (rider flow is Phase 5)', () => {
-    expect(nextStatuses('OUT_FOR_DELIVERY', 'DELIVERY', 'RIDER')).toEqual([]);
+  it('riders only take packed delivery orders out and deliver them; strangers get nothing', () => {
+    expect(nextStatuses('PACKED', 'DELIVERY', 'RIDER')).toEqual(['OUT_FOR_DELIVERY']);
+    expect(nextStatuses('OUT_FOR_DELIVERY', 'DELIVERY', 'RIDER')).toEqual(['DELIVERED']);
+    expect(nextStatuses('PACKED', 'PICKUP', 'RIDER')).toEqual([]);
+    expect(nextStatuses('PLACED', 'DELIVERY', 'RIDER')).toEqual([]);
     expect(nextStatuses('PLACED', 'DELIVERY', undefined)).toEqual([]);
   });
 

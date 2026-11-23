@@ -15,6 +15,9 @@ const logger = createLogger('notification-test', 'silent');
 const SHOP = randomUUID();
 const CUSTOMER = randomUUID();
 const ORDER = randomUUID();
+const DELIVERY = randomUUID();
+const RIDER_NEW = randomUUID();
+const RIDER_OLD = randomUUID();
 
 const config: RuntimeConfig = {
   shop: {
@@ -159,6 +162,31 @@ describe('who gets what', () => {
     await deliver(event, once);
     await deliver(event, once);
     expect(sent).toHaveLength(2);
+  });
+
+  it('riders hear about new, reassigned and cancelled deliveries in their language', async () => {
+    devices.push(
+      { userId: RIDER_NEW, token: 'rider-new-hi', platform: 'android', locale: 'hi' },
+      { userId: RIDER_OLD, token: 'rider-old-en', platform: 'android', locale: 'en' },
+    );
+    const delivery = (status: 'ASSIGNED' | 'CANCELLED' | 'PICKED_UP', previousRiderId: string | null = null) =>
+      buildEvent('delivery.status_changed', SHOP, {
+        deliveryId: DELIVERY,
+        orderId: ORDER,
+        number: 12,
+        customerId: CUSTOMER,
+        riderId: RIDER_NEW,
+        previousRiderId,
+        status,
+      });
+    await deliver(delivery('ASSIGNED', RIDER_OLD));
+    await deliver(delivery('PICKED_UP'));
+    await deliver(delivery('CANCELLED'));
+    expect(sent.map((m) => [m.token, m.title, m.data.route])).toEqual([
+      ['rider-new-hi', 'नई डिलीवरी #12', `/rider/deliveries/${DELIVERY}`],
+      ['rider-old-en', 'Delivery #12 reassigned', '/rider'],
+      ['rider-new-hi', 'डिलीवरी #12 रद्द', `/rider/deliveries/${DELIVERY}`],
+    ]);
   });
 
   it('formats rupees with Indian grouping', () => {

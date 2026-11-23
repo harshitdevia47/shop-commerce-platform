@@ -489,6 +489,53 @@ describe('push devices', () => {
   });
 });
 
+describe('team (owner manages staff and riders)', () => {
+  async function owner(shopId = SHOP_A) {
+    const session = await login(shopId, '+919800000009');
+    await rawPrisma.user.update({ where: { id: session.user.id }, data: { role: 'OWNER' } });
+    return { id: session.user.id, headers: () => as(shopId, { userId: session.user.id, role: 'OWNER' }) };
+  }
+
+  it('owner adds a rider by phone, lists, removes; riders appear for delivery', async () => {
+    const o = await owner();
+    const added = await request(app).post('/api/v1/admin/team').set(o.headers()).send({ phone: '98111 22233', role: 'RIDER', name: 'Raju' });
+    expect(added.status).toBe(201);
+    expect(added.body.data).toMatchObject({ phone: '+919811122233', role: 'RIDER', name: 'Raju' });
+
+    const list = await request(app).get('/api/v1/admin/team').set(o.headers());
+    expect(list.body.data.map((m: { role: string }) => m.role)).toEqual(['OWNER', 'RIDER']);
+    const riders = await request(app).get('/internal/users/riders').set(as(SHOP_A));
+    expect(riders.body.data).toEqual([{ id: added.body.data.id, name: 'Raju', phone: '+919811122233' }]);
+    expect((await request(app).get('/internal/users/riders').set(as(SHOP_B))).body.data).toEqual([]);
+
+    expect((await request(app).delete(`/api/v1/admin/team/${added.body.data.id}`).set(o.headers())).status).toBe(204);
+    expect((await request(app).get('/internal/users/riders').set(as(SHOP_A))).body.data).toEqual([]);
+  });
+
+  it('promoting a logged-in customer ends their sessions', async () => {
+    const customer = await login(SHOP_A, '+919800000001');
+    clock = new Date(clock.getTime() + 60_000);
+    const o = await owner();
+    await request(app).post('/api/v1/admin/team').set(o.headers()).send({ phone: '+919800000001', role: 'STAFF' }).expect(201);
+    const refreshed = await request(app).post('/api/v1/auth/refresh').set(as(SHOP_A)).send({ refreshToken: customer.refreshToken });
+    expect(refreshed.status).toBe(401);
+  });
+
+  it("only the owner manages the team; the owner's role is locked; shops are separate", async () => {
+    const o = await owner();
+    expect((await request(app).get('/api/v1/admin/team').set(as(SHOP_A, { userId: o.id, role: 'STAFF' }))).status).toBe(403);
+    const self = await request(app).post('/api/v1/admin/team').set(o.headers()).send({ phone: '+919800000009', role: 'RIDER' });
+    expect(self.body.error.code).toBe('OWNER_ROLE_LOCKED');
+    expect((await request(app).delete(`/api/v1/admin/team/${o.id}`).set(o.headers())).status).toBe(404);
+
+    const rider = (await request(app).post('/api/v1/admin/team').set(o.headers()).send({ phone: '+919811122233', role: 'RIDER' })).body.data;
+    clock = new Date(clock.getTime() + 60_000);
+    const other = await owner(SHOP_B);
+    expect((await request(app).delete(`/api/v1/admin/team/${rider.id}`).set(other.headers())).status).toBe(404);
+    expect((await request(app).get('/api/v1/admin/team').set(other.headers())).body.data).toHaveLength(1);
+  });
+});
+
 describe('rawPrisma usage guard', () => {
   it('is only referenced in db.ts and main.ts within src/', () => {
     const srcDir = fileURLToPath(new URL('../src/', import.meta.url));

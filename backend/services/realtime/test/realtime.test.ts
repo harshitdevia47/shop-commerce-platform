@@ -6,7 +6,7 @@ import { buildEvent } from '@qc/events';
 import { SignJWT, exportSPKI, generateKeyPair } from 'jose';
 import { io as connect, type Socket } from 'socket.io-client';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
-import { attachRealtime } from '../src/realtime.js';
+import { attachRealtime, type ReportLocation } from '../src/realtime.js';
 
 const ISSUER = 'qc-identity';
 const SHOP_A = randomUUID();
@@ -19,6 +19,18 @@ let server: Server;
 let url: string;
 let realtime: ReturnType<typeof attachRealtime>;
 const sockets: Socket[] = [];
+let reported: { shopId: string; userId: string; lat: number }[] = [];
+/** Fake delivery service: rider R1 of shop A is on the way with ALICE's order. */
+const R1 = randomUUID();
+const TRACKED_ORDER = randomUUID();
+const reportLocation: ReportLocation = async (identity, ping) => {
+  reported.push({ shopId: identity.shopId, userId: identity.userId, lat: ping.lat });
+  const onTheWay = identity.shopId === SHOP_A && identity.userId === R1;
+  return {
+    targets: onTheWay ? [{ orderId: TRACKED_ORDER, customerId: ALICE }] : [],
+    location: onTheWay ? { ...ping, at: '2026-11-23T10:00:00.000Z' } : null,
+  };
+};
 
 async function token(shopId: string, userId: string, role: Role, ttlSeconds = 900) {
   return new SignJWT({ shopId, role, typ: 'access' })
@@ -59,6 +71,7 @@ beforeAll(async () => {
   realtime = attachRealtime(server, {
     verify: await createAccessTokenVerifier(await exportSPKI(keys.publicKey), ISSUER),
     logger: createLogger('realtime-test', 'silent'),
+    reportLocation,
   });
   await new Promise<void>((resolve) => server.listen(0, resolve));
   url = `http://localhost:${(server.address() as AddressInfo).port}`;
@@ -145,5 +158,65 @@ describe('order and payment updates', () => {
       { name: 'order.updated', orderId, number: 7, status: 'CONFIRMED' },
       { name: 'payment.updated', orderId, status: 'PAID' },
     ]);
+  });
+});
+
+describe('deliveries and rider location', () => {
+  const ping = (socket: Socket, body: unknown) =>
+    new Promise<{ ok: boolean; tracking: number }>((resolve) => socket.emit('rider.location', body, resolve));
+
+  it("a rider's location reaches that order's customer and the shop, nobody else", async () => {
+    reported = [];
+    const rider = await as(SHOP_A, R1, 'RIDER');
+    const alice = record(await as(SHOP_A, ALICE, 'CUSTOMER'));
+    const bob = record(await as(SHOP_A, BOB, 'CUSTOMER'));
+    const owner = record(await as(SHOP_A, randomUUID(), 'OWNER'));
+
+    expect(await ping(rider, { lat: 21.76, lng: 72.15, accuracy: 8 })).toEqual({ ok: true, tracking: 1 });
+    await settle();
+    const update = { name: 'rider.location', orderId: TRACKED_ORDER, lat: 21.76, lng: 72.15, accuracy: 8, at: '2026-11-23T10:00:00.000Z' };
+    expect(alice).toEqual([update]);
+    expect(owner).toEqual([update]);
+    expect(bob).toEqual([]);
+    expect(reported).toEqual([{ shopId: SHOP_A, userId: R1, lat: 21.76 }]);
+  });
+
+  it('ignores pings from non-riders, junk, and pings faster than every few seconds', async () => {
+    reported = [];
+    const customer = await as(SHOP_A, ALICE, 'CUSTOMER');
+    expect(await ping(customer, { lat: 1, lng: 1 })).toEqual({ ok: false, tracking: 0 });
+    const rider = await as(SHOP_A, R1, 'RIDER');
+    expect(await ping(rider, { lat: 'x', lng: 1 })).toEqual({ ok: false, tracking: 0 });
+    expect(await ping(rider, { lat: 91, lng: 1 })).toEqual({ ok: false, tracking: 0 });
+    expect((await ping(rider, { lat: 21, lng: 72 })).ok).toBe(true);
+    expect((await ping(rider, { lat: 21, lng: 72 })).ok).toBe(false);
+    expect(reported).toHaveLength(1);
+  });
+
+  it('delivery changes reach the shop, the customer, the rider and a replaced rider', async () => {
+    const newRider = randomUUID();
+    const oldRider = randomUUID();
+    const riderSeen = record(await as(SHOP_A, newRider, 'RIDER'));
+    const oldSeen = record(await as(SHOP_A, oldRider, 'RIDER'));
+    const alice = record(await as(SHOP_A, ALICE, 'CUSTOMER'));
+    const owner = record(await as(SHOP_A, randomUUID(), 'OWNER'));
+    const orderId = randomUUID();
+    await realtime.handle(
+      buildEvent('delivery.status_changed', SHOP_A, {
+        deliveryId: randomUUID(),
+        orderId,
+        number: 4,
+        customerId: ALICE,
+        riderId: newRider,
+        previousRiderId: oldRider,
+        status: 'ASSIGNED',
+      }),
+    );
+    await settle();
+    const update = { name: 'delivery.updated', orderId, status: 'ASSIGNED' };
+    expect(riderSeen).toEqual([update]);
+    expect(alice).toEqual([update]);
+    expect(owner).toEqual([update]);
+    expect(oldSeen).toEqual([{ ...update, mine: false }]);
   });
 });

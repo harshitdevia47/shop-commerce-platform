@@ -92,6 +92,17 @@ export function ordersRouter(orders: OrdersService): Router {
   );
   router.use('/api/v1/admin/orders', admin);
 
+  // Internal only (delivery service): order snapshot for the rider, and rider status changes.
+  // The delivery service has checked the assignment (and the OTP) and calls in the rider's context.
+  router.get('/internal/orders/:id', requireShop, handler({ params: idParams }, ({ params }) => orders.getForShop(params.id)));
+  router.post(
+    '/internal/orders/:id/status',
+    requireShop,
+    handler({ params: idParams, body: z.object({ status: z.enum(['OUT_FOR_DELIVERY', 'DELIVERED']) }).strict() }, ({ params, body }) =>
+      orders.setStatus(params.id, body.status),
+    ),
+  );
+
   // Internal only (catalog/payment sweepers). The gateway never routes /internal.
   router.post(
     '/internal/orders/existing',

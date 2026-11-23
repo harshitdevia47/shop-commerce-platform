@@ -100,11 +100,18 @@ FCM is the only Firebase service used. One Firebase project serves every shop ap
 Who gets what: new orders, customer cancellations and UPI references go to the shop's owner and staff;
 order progress and payment confirmations go to the customer. Each phone gets the text in its app language.
 
-## 8. Events (how services stay in sync)
+## 8. Riders
+
+The owner adds riders in the app (Dashboard → Team) by phone number; riders install the same shop app and
+log in with OTP. From a server shell: `docker compose exec identity node dist/users.js set-role <slug> <phone> RIDER`.
+Rider phones share their location only while carrying an order; Android shows a "Sharing your location"
+notification during that time.
+
+## 9. Events (how services stay in sync)
 
 Order and payment write events to their own `outbox_events` table in the same transaction as the change;
-a relay publishes them to Redis Streams (`qc:events:order`, `qc:events:payment`). Catalog (stock release),
-payment (void), notification (push) and realtime (live screens) consume them. Events that keep failing land in
+a relay publishes them to Redis Streams (`qc:events:order`, `qc:events:payment`, `qc:events:delivery`). Catalog (stock release),
+payment (void), delivery (cancel/sync), notification (push) and realtime (live screens) consume them. Events that keep failing land in
 `qc:events:dead`:
 
 ```bash
