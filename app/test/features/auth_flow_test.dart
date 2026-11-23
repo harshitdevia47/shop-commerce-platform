@@ -5,6 +5,7 @@ import 'package:qc_app/app.dart';
 import 'package:qc_app/core/config/shop_settings.dart';
 import 'package:qc_app/core/network/api_exception.dart';
 import 'package:qc_app/core/providers.dart';
+import 'package:qc_app/features/catalog/presentation/catalog_providers.dart';
 import 'package:qc_app/features/auth/data/auth_api.dart';
 import 'package:qc_app/features/auth/data/session_store.dart';
 import 'package:qc_app/features/auth/domain/auth_models.dart';
@@ -70,6 +71,7 @@ Future<void> pumpApp(WidgetTester tester, {required FakeAuthApi api, SessionStor
         envConfigProvider.overrideWithValue(testEnv),
         sharedPreferencesProvider.overrideWithValue(prefs),
         shopSettingsRepositoryProvider.overrideWithValue(FakeRepository(ShopSettings.fromJson(shopConfigJson()))),
+        catalogRepositoryProvider.overrideWithValue(FakeCatalogRepository()),
         sessionStoreProvider.overrideWithValue(store ?? InMemorySessionStore()),
         authApiProvider.overrideWithValue(api),
       ],

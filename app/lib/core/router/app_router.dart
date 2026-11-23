@@ -3,11 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/account/presentation/account_screen.dart';
+import '../../features/admin_catalog/presentation/admin_categories_screen.dart';
+import '../../features/admin_catalog/presentation/admin_products_screen.dart';
+import '../../features/admin_catalog/presentation/product_edit_screen.dart';
 import '../../features/admin_dashboard/presentation/admin_home_screen.dart';
 import '../../features/auth/domain/auth_models.dart';
 import '../../features/auth/presentation/auth_controller.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/otp_screen.dart';
+import '../../features/catalog/presentation/category_screen.dart';
+import '../../features/catalog/presentation/product_detail_screen.dart';
+import '../../features/catalog/presentation/search_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/rider_deliveries/presentation/rider_home_screen.dart';
 import 'routes.dart';
@@ -46,6 +52,15 @@ final routerProvider = Provider<GoRouter>((ref) {
     },
     routes: [
       GoRoute(path: Routes.home, builder: (context, state) => const HomeScreen()),
+      GoRoute(path: Routes.search, builder: (context, state) => const SearchScreen()),
+      GoRoute(
+        path: '/c/:id',
+        builder: (context, state) => CategoryScreen(categoryId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/p/:id',
+        builder: (context, state) => ProductDetailScreen(productId: state.pathParameters['id']!),
+      ),
       GoRoute(
         path: Routes.login,
         builder: (context, state) => const LoginScreen(),
@@ -62,7 +77,24 @@ final routerProvider = Provider<GoRouter>((ref) {
         ],
       ),
       GoRoute(path: Routes.account, builder: (context, state) => const AccountScreen()),
-      GoRoute(path: Routes.admin, builder: (context, state) => const AdminHomeScreen()),
+      GoRoute(
+        path: Routes.admin,
+        builder: (context, state) => const AdminHomeScreen(),
+        routes: [
+          GoRoute(
+            path: 'products',
+            builder: (context, state) => const AdminProductsScreen(),
+            routes: [
+              GoRoute(path: 'new', builder: (context, state) => const ProductEditScreen()),
+              GoRoute(
+                path: ':id',
+                builder: (context, state) => ProductEditScreen(productId: state.pathParameters['id']),
+              ),
+            ],
+          ),
+          GoRoute(path: 'categories', builder: (context, state) => const AdminCategoriesScreen()),
+        ],
+      ),
       GoRoute(path: Routes.rider, builder: (context, state) => const RiderHomeScreen()),
     ],
   );

@@ -9,6 +9,14 @@ abstract final class Routes {
   static const account = '/account';
   static const admin = '/admin';
   static const rider = '/rider';
+  static const search = '/search';
+  static const adminProducts = '/admin/products';
+  static const adminNewProduct = '/admin/products/new';
+  static const adminCategories = '/admin/categories';
+
+  static String product(String id) => '/p/$id';
+  static String category(String id) => '/c/$id';
+  static String adminProduct(String id) => '/admin/products/$id';
 
   /// Landing page for a signed-in user.
   static String homeFor(UserRole role) => switch (role) {

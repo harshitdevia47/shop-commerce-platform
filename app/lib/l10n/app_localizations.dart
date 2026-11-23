@@ -379,7 +379,7 @@ abstract class AppLocalizations {
   /// No description provided for @adminComingSoon.
   ///
   /// In en, this message translates to:
-  /// **'Orders, products and sales will appear here.'**
+  /// **'Orders and sales will appear here.'**
   String get adminComingSoon;
 
   /// No description provided for @riderTitle.
@@ -447,6 +447,438 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your session expired. Please log in again.'**
   String get sessionExpired;
+
+  /// No description provided for @searchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for products'**
+  String get searchHint;
+
+  /// No description provided for @categoriesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop by category'**
+  String get categoriesTitle;
+
+  /// No description provided for @allProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'All products'**
+  String get allProducts;
+
+  /// No description provided for @allInCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get allInCategory;
+
+  /// No description provided for @outOfStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of stock'**
+  String get outOfStock;
+
+  /// No description provided for @noProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'No products here yet'**
+  String get noProducts;
+
+  /// No description provided for @searchPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Type at least 2 letters to search'**
+  String get searchPrompt;
+
+  /// No description provided for @loadMoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load more. Tap to retry.'**
+  String get loadMoreFailed;
+
+  /// No description provided for @chooseVariant.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an option'**
+  String get chooseVariant;
+
+  /// No description provided for @productDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Product details'**
+  String get productDetails;
+
+  /// No description provided for @orderingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Ordering opens soon'**
+  String get orderingSoon;
+
+  /// No description provided for @shopInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop info'**
+  String get shopInfo;
+
+  /// No description provided for @adminProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Products'**
+  String get adminProducts;
+
+  /// No description provided for @adminProductsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add products, prices, photos and stock'**
+  String get adminProductsSubtitle;
+
+  /// No description provided for @adminCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get adminCategories;
+
+  /// No description provided for @adminCategoriesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Organise how customers browse'**
+  String get adminCategoriesSubtitle;
+
+  /// No description provided for @addProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Add product'**
+  String get addProduct;
+
+  /// No description provided for @editProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit product'**
+  String get editProduct;
+
+  /// No description provided for @addCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Add category'**
+  String get addCategory;
+
+  /// No description provided for @editCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit category'**
+  String get editCategory;
+
+  /// No description provided for @statusAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get statusAll;
+
+  /// No description provided for @statusVisible.
+  ///
+  /// In en, this message translates to:
+  /// **'Visible'**
+  String get statusVisible;
+
+  /// No description provided for @statusHidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden'**
+  String get statusHidden;
+
+  /// No description provided for @nameEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (English)'**
+  String get nameEnglish;
+
+  /// No description provided for @nameGujarati.
+  ///
+  /// In en, this message translates to:
+  /// **'Name in Gujarati'**
+  String get nameGujarati;
+
+  /// No description provided for @nameHindi.
+  ///
+  /// In en, this message translates to:
+  /// **'Name in Hindi'**
+  String get nameHindi;
+
+  /// No description provided for @descriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get descriptionLabel;
+
+  /// No description provided for @categoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get categoryLabel;
+
+  /// No description provided for @noCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'No category'**
+  String get noCategory;
+
+  /// No description provided for @parentCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Inside category'**
+  String get parentCategory;
+
+  /// No description provided for @topLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Top level'**
+  String get topLevel;
+
+  /// No description provided for @photos.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get photos;
+
+  /// No description provided for @addPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Add photo'**
+  String get addPhoto;
+
+  /// No description provided for @takePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get takePhoto;
+
+  /// No description provided for @pickFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get pickFromGallery;
+
+  /// No description provided for @uploadingPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading photo…'**
+  String get uploadingPhoto;
+
+  /// No description provided for @pricesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get pricesTitle;
+
+  /// No description provided for @unitsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sizes and prices'**
+  String get unitsTitle;
+
+  /// No description provided for @optionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Options and prices'**
+  String get optionsTitle;
+
+  /// No description provided for @unitLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit, e.g. 500 g'**
+  String get unitLabel;
+
+  /// No description provided for @priceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Price ₹'**
+  String get priceLabel;
+
+  /// No description provided for @mrpLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'MRP ₹'**
+  String get mrpLabel;
+
+  /// No description provided for @stockLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock (optional)'**
+  String get stockLabel;
+
+  /// No description provided for @inStockLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'In stock'**
+  String get inStockLabel;
+
+  /// No description provided for @addVariant.
+  ///
+  /// In en, this message translates to:
+  /// **'Add another'**
+  String get addVariant;
+
+  /// No description provided for @remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove;
+
+  /// No description provided for @visibleToCustomers.
+  ///
+  /// In en, this message translates to:
+  /// **'Visible to customers'**
+  String get visibleToCustomers;
+
+  /// No description provided for @tagsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Search words, comma separated'**
+  String get tagsLabel;
+
+  /// No description provided for @moreDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'More details'**
+  String get moreDetails;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @deleteProductConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this product? Customers will no longer see it.'**
+  String get deleteProductConfirm;
+
+  /// No description provided for @deleteCategoryConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this category?'**
+  String get deleteCategoryConfirm;
+
+  /// No description provided for @requiredField.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get requiredField;
+
+  /// No description provided for @invalidPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid amount'**
+  String get invalidPrice;
+
+  /// No description provided for @mrpBelowPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'MRP cannot be less than price'**
+  String get mrpBelowPrice;
+
+  /// No description provided for @emptyCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'No categories yet'**
+  String get emptyCategories;
+
+  /// No description provided for @axisSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Size'**
+  String get axisSize;
+
+  /// No description provided for @axisColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Colour'**
+  String get axisColor;
+
+  /// No description provided for @axisMaterial.
+  ///
+  /// In en, this message translates to:
+  /// **'Material'**
+  String get axisMaterial;
+
+  /// No description provided for @axisFlavour.
+  ///
+  /// In en, this message translates to:
+  /// **'Flavour'**
+  String get axisFlavour;
+
+  /// No description provided for @axisStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage'**
+  String get axisStorage;
+
+  /// No description provided for @errorInvalidVariants.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the sizes and prices.'**
+  String get errorInvalidVariants;
+
+  /// No description provided for @errorInvalidDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the product details.'**
+  String get errorInvalidDetails;
+
+  /// No description provided for @errorCategoryNotEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Move or delete its products and sub-categories first.'**
+  String get errorCategoryNotEmpty;
+
+  /// No description provided for @errorCategoryParent.
+  ///
+  /// In en, this message translates to:
+  /// **'A category can only be inside a top-level category.'**
+  String get errorCategoryParent;
+
+  /// No description provided for @errorPhotoTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'This photo is too large.'**
+  String get errorPhotoTooLarge;
+
+  /// No description provided for @errorPhotoInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is not a supported photo.'**
+  String get errorPhotoInvalid;
+
+  /// No description provided for @errorNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This item is no longer available.'**
+  String get errorNotFound;
+
+  /// No description provided for @errorInvalidInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Please check what you entered.'**
+  String get errorInvalidInput;
+
+  /// No description provided for @percentOff.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% off'**
+  String percentOff(int percent);
+
+  /// No description provided for @variantCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 option} other{{count} options}}'**
+  String variantCount(int count);
 }
 
 class _AppLocalizationsDelegate

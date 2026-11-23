@@ -1,8 +1,19 @@
+import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:qc_app/core/config/client_config.dart';
 import 'package:qc_app/core/config/env_config.dart';
 import 'package:qc_app/core/config/shop_settings.dart';
 import 'package:qc_app/core/config/shop_settings_repository.dart';
+import 'package:qc_app/core/network/api_exception.dart';
+import 'package:qc_app/features/catalog/data/catalog_repository.dart';
+import 'package:qc_app/features/catalog/domain/catalog_models.dart';
+
+/// 360x800 dp, a typical Android phone.
+void usePhoneScreen(WidgetTester tester) {
+  tester.view.physicalSize = const Size(1080, 2400);
+  tester.view.devicePixelRatio = 3;
+  addTearDown(tester.view.reset);
+}
 
 const testEnv = EnvConfig(env: 'test', apiBaseUrl: 'http://localhost');
 
@@ -57,7 +68,18 @@ Map<String, dynamic> shopConfigJson({bool deliveryEnabled = true, bool upi = tru
     'handwrittenListUpload': true,
     'someFutureFlag': true,
   },
-  'catalog': {'variantStyle': 'units', 'variantAxes': <String>[], 'customFields': <Map<String, dynamic>>[]},
+  'catalog': {
+    'variantStyle': 'units',
+    'variantAxes': <String>[],
+    'customFields': [
+      {
+        'key': 'brand',
+        'type': 'text',
+        'label': {'en': 'Brand', 'gu': 'બ્રાન્ડ', 'hi': 'ब्रांड'},
+        'required': false,
+      },
+    ],
+  },
 };
 
 class FakeRepository implements ShopSettingsRepository {
@@ -73,4 +95,88 @@ class FakeRepository implements ShopSettingsRepository {
     if (value is ShopSettings) return value;
     throw value;
   }
+}
+
+// ---- Catalog ----
+
+Map<String, dynamic> productJson({
+  String id = 'p1',
+  String name = 'Basmati Rice',
+  Map<String, String>? nameI18n = const {'gu': 'બાસમતી ચોખા'},
+  bool inStock = true,
+  bool isActive = true,
+  List<Map<String, dynamic>>? variants,
+}) => {
+  'id': id,
+  'categoryId': 'c1',
+  'name': name,
+  'nameI18n': nameI18n,
+  'description': 'Long grain rice',
+  'descriptionI18n': null,
+  'customFields': {'brand': 'India Gate'},
+  'tags': ['chawal'],
+  'images': <Map<String, dynamic>>[],
+  'inStock': inStock,
+  'isActive': isActive,
+  'variants':
+      variants ??
+      [
+        {
+          'id': '$id-v1',
+          'label': '1 kg',
+          'labelI18n': null,
+          'options': <String, String>{},
+          'pricePaise': 12000,
+          'mrpPaise': 14000,
+          'inStock': inStock,
+          'stockQty': null,
+          'sku': null,
+          'isAvailable': true,
+        },
+        {
+          'id': '$id-v2',
+          'label': '5 kg',
+          'labelI18n': null,
+          'options': <String, String>{},
+          'pricePaise': 55000,
+          'mrpPaise': null,
+          'inStock': inStock,
+          'stockQty': null,
+          'sku': null,
+          'isAvailable': true,
+        },
+      ],
+};
+
+/// In-memory catalog: pages of [pageSize]; filters by category and name.
+class FakeCatalogRepository implements CatalogRepository {
+  FakeCatalogRepository({List<ProductCategory>? categories, List<Product>? products, this.pageSize = 20})
+    : categoryList = categories ?? [const ProductCategory(id: 'c1', name: 'Staples', nameI18n: {'gu': 'અનાજ'})],
+      productList = products ?? [Product.fromJson(productJson())];
+
+  final List<ProductCategory> categoryList;
+  final List<Product> productList;
+  final int pageSize;
+  final List<String?> queries = [];
+
+  @override
+  Future<List<ProductCategory>> categories() async => categoryList;
+
+  @override
+  Future<PageResult<Product>> products({String? categoryId, String? query, String? cursor, int limit = 20}) async {
+    queries.add(query);
+    final matching = productList
+        .where((p) => categoryId == null || p.categoryId == categoryId)
+        .where((p) => query == null || p.name.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+    final start = cursor == null ? 0 : int.parse(cursor);
+    final end = (start + pageSize).clamp(0, matching.length);
+    return PageResult(matching.sublist(start, end), end < matching.length ? '$end' : null);
+  }
+
+  @override
+  Future<Product> product(String id) async => productList.firstWhere(
+    (p) => p.id == id,
+    orElse: () => throw const ApiException('PRODUCT_NOT_FOUND', 'not found', statusCode: 404),
+  );
 }

@@ -1,20 +1,22 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../core/config/shop_settings.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/providers.dart';
-import '../../../core/utils/money.dart';
 import '../../../core/router/routes.dart';
+import '../../../core/utils/money.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/language_menu.dart';
 import '../../../core/widgets/splash_view.dart';
-import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/auth_controller.dart';
+import '../../catalog/presentation/catalog_providers.dart';
+import '../../catalog/presentation/widgets/category_strip.dart';
+import '../../catalog/presentation/widgets/product_grid.dart';
+import 'shop_info_sheet.dart';
 
-/// Phase 0 home: proves the config pipeline end to end (build-time branding +
-/// runtime shop settings + localization). Replaced by the catalog home in Phase 2.
+/// Customer home: search, categories and all products of the shop.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -36,121 +38,135 @@ class _HomeContent extends ConsumerWidget {
 
   final ShopSettings settings;
 
+  Future<void> _refresh(WidgetRef ref) async {
+    ref.invalidate(categoriesProvider);
+    await Future.wait([
+      ref.read(shopSettingsProvider.notifier).refresh(),
+      ref.read(productListProvider(const ProductFilter()).notifier).refresh(),
+    ]);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    final theme = Theme.of(context);
     final locale = ref.watch(localeProvider);
     final client = ref.watch(clientConfigProvider);
-    final enabledFeatures = Feature.values.where(settings.isEnabled).toList();
     final isSignedIn = ref.watch(authControllerProvider).value != null;
+    final delivery = settings.delivery;
 
     return Scaffold(
-      appBar: AppBar(
-        leading: Padding(
-          padding: const EdgeInsets.all(10),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.asset(client.logoAsset, errorBuilder: (_, _, _) => const SizedBox.shrink()),
-          ),
-        ),
-        title: Text(settings.shop.localizedName(locale)),
-        actions: [
-          const LanguageMenu(),
-          IconButton(
-            key: const Key('accountButton'),
-            tooltip: isSignedIn ? l10n.account : l10n.login,
-            icon: Icon(isSignedIn ? Icons.account_circle_outlined : Icons.login),
-            onPressed: () => context.push(isSignedIn ? Routes.account : Routes.login),
-          ),
-        ],
-      ),
       body: RefreshIndicator(
-        onRefresh: () => ref.read(shopSettingsProvider.notifier).refresh(),
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            Text(l10n.welcome(settings.shop.localizedName(locale)), style: Theme.of(context).textTheme.headlineSmall),
-            const SizedBox(height: 16),
-            _Section(title: l10n.deliveryTitle, children: _deliveryLines(l10n, settings.delivery)),
-            const SizedBox(height: 12),
-            _Section(
-              title: l10n.paymentTitle,
-              children: [
-                if (settings.payments.cod) _Line(icon: Icons.payments_outlined, text: l10n.paymentCod),
-                if (settings.payments.upiEnabled) _Line(icon: Icons.qr_code_2, text: l10n.paymentUpi),
-              ],
-            ),
-            if (enabledFeatures.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              _Section(
-                title: l10n.featuresTitle,
-                children: [
-                  for (final feature in enabledFeatures)
-                    _Line(icon: Icons.check_circle_outline, text: feature.label(l10n)),
-                ],
+        onRefresh: () => _refresh(ref),
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              pinned: true,
+              leading: Padding(
+                padding: const EdgeInsets.all(10),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.asset(client.logoAsset, errorBuilder: (_, _, _) => const SizedBox.shrink()),
+                ),
               ),
-            ],
+              title: Text(settings.shop.localizedName(locale)),
+              actions: [
+                const LanguageMenu(),
+                IconButton(
+                  key: const Key('accountButton'),
+                  tooltip: isSignedIn ? l10n.account : l10n.login,
+                  icon: Icon(isSignedIn ? Icons.account_circle_outlined : Icons.login),
+                  onPressed: () => context.push(isSignedIn ? Routes.account : Routes.login),
+                ),
+              ],
+              bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(64),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                  child: Material(
+                    color: theme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    child: InkWell(
+                      key: const Key('searchBox'),
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: () => context.push(Routes.search),
+                      child: SizedBox(
+                        height: 48,
+                        child: Row(
+                          children: [
+                            const SizedBox(width: 12),
+                            Icon(Icons.search, color: theme.colorScheme.outline),
+                            const SizedBox(width: 8),
+                            Text(l10n.searchHint, style: TextStyle(color: theme.colorScheme.outline)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+                child: Text(l10n.welcome(settings.shop.localizedName(locale)), style: theme.textTheme.titleLarge),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Row(
+                  spacing: 8,
+                  children: [
+                    ActionChip(
+                      key: const Key('shopInfoButton'),
+                      avatar: const Icon(Icons.info_outline, size: 18),
+                      label: Text(l10n.shopInfo),
+                      onPressed: () => ShopInfoPanel.show(context, settings),
+                    ),
+                    if (delivery.enabled)
+                      _InfoChip(icon: Icons.bolt_outlined, text: l10n.deliveryEta(delivery.etaMinutes))
+                    else
+                      _InfoChip(icon: Icons.storefront_outlined, text: l10n.deliveryUnavailable),
+                    if (delivery.enabled && delivery.freeAbovePaise != null)
+                      _InfoChip(
+                        icon: Icons.local_offer_outlined,
+                        text: l10n.deliveryFreeAbove(formatPaise(delivery.freeAbovePaise!)),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(child: _Heading(l10n.categoriesTitle)),
+            const SliverToBoxAdapter(child: CategoryStrip()),
+            SliverToBoxAdapter(child: _Heading(l10n.allProducts)),
+            const ProductGridSliver(ProductFilter()),
           ],
         ),
       ),
     );
   }
-
-  List<Widget> _deliveryLines(AppLocalizations l10n, DeliveryRules delivery) {
-    if (!delivery.enabled) return [_Line(icon: Icons.storefront_outlined, text: l10n.deliveryUnavailable)];
-    return [
-      _Line(icon: Icons.bolt_outlined, text: l10n.deliveryEta(delivery.etaMinutes)),
-      if (delivery.minOrderPaise > 0)
-        _Line(icon: Icons.shopping_basket_outlined, text: l10n.deliveryMinOrder(formatPaise(delivery.minOrderPaise))),
-      if (delivery.feePaise > 0)
-        _Line(icon: Icons.delivery_dining_outlined, text: l10n.deliveryFee(formatPaise(delivery.feePaise))),
-      if (delivery.freeAbovePaise case final freeAbove?)
-        _Line(icon: Icons.local_offer_outlined, text: l10n.deliveryFreeAbove(formatPaise(freeAbove))),
-    ];
-  }
 }
 
-class _Section extends StatelessWidget {
-  const _Section({required this.title, required this.children});
+class _Heading extends StatelessWidget {
+  const _Heading(this.text);
 
-  final String title;
-  final List<Widget> children;
+  final String text;
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 4),
-            ...children,
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+    child: Text(text, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+  );
 }
 
-class _Line extends StatelessWidget {
-  const _Line({required this.icon, required this.text});
+class _InfoChip extends StatelessWidget {
+  const _InfoChip({required this.icon, required this.text});
 
   final IconData icon;
   final String text;
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
-          const SizedBox(width: 12),
-          Expanded(child: Text(text)),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Chip(avatar: Icon(icon, size: 18), label: Text(text));
 }

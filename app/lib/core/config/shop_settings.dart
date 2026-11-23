@@ -131,14 +131,67 @@ class PaymentOptions {
 
 @immutable
 class CatalogSettings {
-  const CatalogSettings({required this.variantStyle, required this.variantAxes});
+  const CatalogSettings({required this.variantStyle, required this.variantAxes, this.customFields = const []});
 
   factory CatalogSettings.fromJson(Map<String, dynamic> json) => CatalogSettings(
-    variantStyle: json['variantStyle'] as String,
+    variantStyle: VariantStyle.fromWire(json['variantStyle'] as String),
     variantAxes: (json['variantAxes'] as List<dynamic>).cast<String>(),
+    customFields: [
+      for (final field in json['customFields'] as List<dynamic>? ?? const [])
+        CustomFieldDef.fromJson(field as Map<String, dynamic>),
+    ],
   );
 
-  /// `single` | `units` | `options`
-  final String variantStyle;
+  final VariantStyle variantStyle;
+
+  /// Option axes for [VariantStyle.options], e.g. `size`, `color`.
   final List<String> variantAxes;
+  final List<CustomFieldDef> customFields;
+}
+
+/// How a shop's products vary. Wire names match backend `VARIANT_STYLES`.
+enum VariantStyle {
+  /// One price per product.
+  single,
+
+  /// Pack sizes such as "500 g" and "1 kg".
+  units,
+
+  /// Combinations of axes such as size and colour.
+  options;
+
+  static VariantStyle fromWire(String value) =>
+      VariantStyle.values.firstWhere((v) => v.name == value, orElse: () => VariantStyle.units);
+}
+
+enum CustomFieldType { text, number, boolean, select }
+
+/// Extra product detail a shop collects (e.g. brand, fabric). Mirrors `customFieldSchema`.
+@immutable
+class CustomFieldDef {
+  const CustomFieldDef({
+    required this.key,
+    required this.type,
+    required this.label,
+    this.required = false,
+    this.options = const [],
+  });
+
+  factory CustomFieldDef.fromJson(Map<String, dynamic> json) => CustomFieldDef(
+    key: json['key'] as String,
+    type: CustomFieldType.values.firstWhere((t) => t.name == json['type'], orElse: () => CustomFieldType.text),
+    label: (json['label'] as Map<String, dynamic>).cast<String, String>(),
+    required: json['required'] as bool? ?? false,
+    options: (json['options'] as List<dynamic>? ?? const []).cast<String>(),
+  );
+
+  final String key;
+  final CustomFieldType type;
+
+  /// `{en, gu?, hi?}`
+  final Map<String, String> label;
+  final bool required;
+  final List<String> options;
+
+  String localizedLabel(Locale locale) => label[locale.languageCode] ?? label['en'] ?? key;
 }

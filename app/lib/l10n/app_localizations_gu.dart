@@ -167,7 +167,7 @@ class AppLocalizationsGu extends AppLocalizations {
   }
 
   @override
-  String get adminComingSoon => 'ઓર્ડર, પ્રોડક્ટ અને વેચાણ અહીં દેખાશે.';
+  String get adminComingSoon => 'ઓર્ડર અને વેચાણ અહીં દેખાશે.';
 
   @override
   String get riderTitle => 'ડિલિવરી';
@@ -205,4 +205,233 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get sessionExpired => 'તમારું સત્ર પૂરું થયું. ફરી લૉગિન કરો.';
+
+  @override
+  String get searchHint => 'ઉત્પાદનો શોધો';
+
+  @override
+  String get categoriesTitle => 'શ્રેણી પ્રમાણે ખરીદો';
+
+  @override
+  String get allProducts => 'બધા ઉત્પાદનો';
+
+  @override
+  String get allInCategory => 'બધું';
+
+  @override
+  String get outOfStock => 'સ્ટોકમાં નથી';
+
+  @override
+  String get noProducts => 'અહીં હજી કોઈ ઉત્પાદન નથી';
+
+  @override
+  String get searchPrompt => 'શોધવા માટે ઓછામાં ઓછા 2 અક્ષર લખો';
+
+  @override
+  String get loadMoreFailed => 'વધુ લોડ ન થયું. ફરી પ્રયાસ કરવા ટેપ કરો.';
+
+  @override
+  String get chooseVariant => 'વિકલ્પ પસંદ કરો';
+
+  @override
+  String get productDetails => 'ઉત્પાદનની વિગતો';
+
+  @override
+  String get orderingSoon => 'ઓર્ડર ટૂંક સમયમાં શરૂ થશે';
+
+  @override
+  String get shopInfo => 'દુકાનની માહિતી';
+
+  @override
+  String get adminProducts => 'ઉત્પાદનો';
+
+  @override
+  String get adminProductsSubtitle => 'ઉત્પાદનો, કિંમત, ફોટા અને સ્ટોક ઉમેરો';
+
+  @override
+  String get adminCategories => 'શ્રેણીઓ';
+
+  @override
+  String get adminCategoriesSubtitle => 'ગ્રાહકો કેવી રીતે જુએ તે ગોઠવો';
+
+  @override
+  String get addProduct => 'ઉત્પાદન ઉમેરો';
+
+  @override
+  String get editProduct => 'ઉત્પાદન બદલો';
+
+  @override
+  String get addCategory => 'શ્રેણી ઉમેરો';
+
+  @override
+  String get editCategory => 'શ્રેણી બદલો';
+
+  @override
+  String get statusAll => 'બધા';
+
+  @override
+  String get statusVisible => 'દેખાય છે';
+
+  @override
+  String get statusHidden => 'છુપાયેલા';
+
+  @override
+  String get nameEnglish => 'નામ (અંગ્રેજી)';
+
+  @override
+  String get nameGujarati => 'ગુજરાતીમાં નામ';
+
+  @override
+  String get nameHindi => 'હિન્દીમાં નામ';
+
+  @override
+  String get descriptionLabel => 'વર્ણન';
+
+  @override
+  String get categoryLabel => 'શ્રેણી';
+
+  @override
+  String get noCategory => 'કોઈ શ્રેણી નહીં';
+
+  @override
+  String get parentCategory => 'કઈ શ્રેણીની અંદર';
+
+  @override
+  String get topLevel => 'મુખ્ય શ્રેણી';
+
+  @override
+  String get photos => 'ફોટા';
+
+  @override
+  String get addPhoto => 'ફોટો ઉમેરો';
+
+  @override
+  String get takePhoto => 'કેમેરા';
+
+  @override
+  String get pickFromGallery => 'ગેલેરી';
+
+  @override
+  String get uploadingPhoto => 'ફોટો અપલોડ થાય છે…';
+
+  @override
+  String get pricesTitle => 'કિંમત';
+
+  @override
+  String get unitsTitle => 'માપ અને કિંમત';
+
+  @override
+  String get optionsTitle => 'વિકલ્પો અને કિંમત';
+
+  @override
+  String get unitLabel => 'એકમ, દા.ત. 500 ગ્રામ';
+
+  @override
+  String get priceLabel => 'કિંમત ₹';
+
+  @override
+  String get mrpLabel => 'MRP ₹';
+
+  @override
+  String get stockLabel => 'સ્ટોક (વૈકલ્પિક)';
+
+  @override
+  String get inStockLabel => 'સ્ટોકમાં છે';
+
+  @override
+  String get addVariant => 'બીજું ઉમેરો';
+
+  @override
+  String get remove => 'દૂર કરો';
+
+  @override
+  String get visibleToCustomers => 'ગ્રાહકોને દેખાય';
+
+  @override
+  String get tagsLabel => 'શોધ શબ્દો, અલ્પવિરામથી અલગ';
+
+  @override
+  String get moreDetails => 'વધુ વિગતો';
+
+  @override
+  String get delete => 'કાઢી નાખો';
+
+  @override
+  String get cancel => 'રદ કરો';
+
+  @override
+  String get deleteProductConfirm =>
+      'આ ઉત્પાદન કાઢી નાખવું છે? ગ્રાહકો તેને જોઈ શકશે નહીં.';
+
+  @override
+  String get deleteCategoryConfirm => 'આ શ્રેણી કાઢી નાખવી છે?';
+
+  @override
+  String get requiredField => 'જરૂરી';
+
+  @override
+  String get invalidPrice => 'સાચી રકમ લખો';
+
+  @override
+  String get mrpBelowPrice => 'MRP કિંમતથી ઓછી ન હોઈ શકે';
+
+  @override
+  String get emptyCategories => 'હજી કોઈ શ્રેણી નથી';
+
+  @override
+  String get axisSize => 'સાઇઝ';
+
+  @override
+  String get axisColor => 'રંગ';
+
+  @override
+  String get axisMaterial => 'મટીરિયલ';
+
+  @override
+  String get axisFlavour => 'સ્વાદ';
+
+  @override
+  String get axisStorage => 'સ્ટોરેજ';
+
+  @override
+  String get errorInvalidVariants => 'માપ અને કિંમત તપાસો.';
+
+  @override
+  String get errorInvalidDetails => 'ઉત્પાદનની વિગતો તપાસો.';
+
+  @override
+  String get errorCategoryNotEmpty =>
+      'પહેલાં તેના ઉત્પાદનો અને પેટા-શ્રેણીઓ ખસેડો અથવા કાઢો.';
+
+  @override
+  String get errorCategoryParent =>
+      'શ્રેણી ફક્ત મુખ્ય શ્રેણીની અંદર જ હોઈ શકે.';
+
+  @override
+  String get errorPhotoTooLarge => 'આ ફોટો ખૂબ મોટો છે.';
+
+  @override
+  String get errorPhotoInvalid => 'આ ફાઇલ માન્ય ફોટો નથી.';
+
+  @override
+  String get errorNotFound => 'આ વસ્તુ હવે ઉપલબ્ધ નથી.';
+
+  @override
+  String get errorInvalidInput => 'તમે લખેલું તપાસો.';
+
+  @override
+  String percentOff(int percent) {
+    return '$percent% છૂટ';
+  }
+
+  @override
+  String variantCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count વિકલ્પો',
+      one: '1 વિકલ્પ',
+    );
+    return '$_temp0';
+  }
 }

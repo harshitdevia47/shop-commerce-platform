@@ -39,3 +39,28 @@ Future<T> unwrap<T>(Future<Response<dynamic>> request) async {
     throw cause is ApiException ? cause : ApiException.fromDio(error);
   }
 }
+
+/// Unwraps `{ "data": [...], "nextCursor": "..." }` list responses.
+Future<({List<dynamic> items, String? nextCursor})> unwrapList(Future<Response<dynamic>> request) async {
+  try {
+    final body = (await request).data as Map<String, dynamic>;
+    return (items: body['data'] as List<dynamic>, nextCursor: body['nextCursor'] as String?);
+  } on DioException catch (error) {
+    final cause = error.error;
+    throw cause is ApiException ? cause : ApiException.fromDio(error);
+  }
+}
+
+/// Absolute URL for a server path such as `/media/...` (images are served next to the API).
+String resolveServerUrl(String baseUrl, String path) =>
+    path.startsWith('http') ? path : Uri.parse(baseUrl).resolve(path).toString();
+
+/// Sends a request whose response has no body (e.g. 204 on delete); rethrows [ApiException].
+Future<void> send(Future<Response<dynamic>> request) async {
+  try {
+    await request;
+  } on DioException catch (error) {
+    final cause = error.error;
+    throw cause is ApiException ? cause : ApiException.fromDio(error);
+  }
+}

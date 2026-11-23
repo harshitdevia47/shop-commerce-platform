@@ -29,6 +29,16 @@ extension RoleLabel on UserRole {
   };
 }
 
+/// Label of a variant option axis (backend `VARIANT_AXES`).
+String axisLabel(AppLocalizations l10n, String axis) => switch (axis) {
+  'size' => l10n.axisSize,
+  'color' => l10n.axisColor,
+  'material' => l10n.axisMaterial,
+  'flavour' => l10n.axisFlavour,
+  'storage' => l10n.axisStorage,
+  _ => axis,
+};
+
 /// Maps backend error codes to user-facing text. Add codes here as features land.
 String errorMessage(AppLocalizations l10n, Object error) {
   if (error is! ApiException) return l10n.errorGeneric;
@@ -44,6 +54,13 @@ String errorMessage(AppLocalizations l10n, Object error) {
     'USER_BLOCKED' => l10n.errorUserBlocked,
     'SMS_SEND_FAILED' => l10n.errorSmsFailed,
     'REFRESH_TOKEN_INVALID' || 'REFRESH_TOKEN_EXPIRED' || 'REFRESH_TOKEN_REUSED' => l10n.sessionExpired,
+    'PRODUCT_INVALID_VARIANTS' => l10n.errorInvalidVariants,
+    'PRODUCT_INVALID_CUSTOM_FIELDS' => l10n.errorInvalidDetails,
+    'CATEGORY_NOT_EMPTY' => l10n.errorCategoryNotEmpty,
+    'CATEGORY_PARENT_INVALID' => l10n.errorCategoryParent,
+    'MEDIA_TOO_LARGE' || 'PAYLOAD_TOO_LARGE' => l10n.errorPhotoTooLarge,
+    'MEDIA_INVALID_IMAGE' || 'MEDIA_INVALID_UPLOAD' => l10n.errorPhotoInvalid,
+    'PRODUCT_NOT_FOUND' || 'CATEGORY_NOT_FOUND' || 'VARIANT_NOT_FOUND' || 'MEDIA_NOT_FOUND' => l10n.errorNotFound,
     _ => l10n.errorGeneric,
   };
 }

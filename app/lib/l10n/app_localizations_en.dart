@@ -169,7 +169,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get adminComingSoon => 'Orders, products and sales will appear here.';
+  String get adminComingSoon => 'Orders and sales will appear here.';
 
   @override
   String get riderTitle => 'Deliveries';
@@ -209,4 +209,233 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sessionExpired => 'Your session expired. Please log in again.';
+
+  @override
+  String get searchHint => 'Search for products';
+
+  @override
+  String get categoriesTitle => 'Shop by category';
+
+  @override
+  String get allProducts => 'All products';
+
+  @override
+  String get allInCategory => 'All';
+
+  @override
+  String get outOfStock => 'Out of stock';
+
+  @override
+  String get noProducts => 'No products here yet';
+
+  @override
+  String get searchPrompt => 'Type at least 2 letters to search';
+
+  @override
+  String get loadMoreFailed => 'Couldn\'t load more. Tap to retry.';
+
+  @override
+  String get chooseVariant => 'Choose an option';
+
+  @override
+  String get productDetails => 'Product details';
+
+  @override
+  String get orderingSoon => 'Ordering opens soon';
+
+  @override
+  String get shopInfo => 'Shop info';
+
+  @override
+  String get adminProducts => 'Products';
+
+  @override
+  String get adminProductsSubtitle => 'Add products, prices, photos and stock';
+
+  @override
+  String get adminCategories => 'Categories';
+
+  @override
+  String get adminCategoriesSubtitle => 'Organise how customers browse';
+
+  @override
+  String get addProduct => 'Add product';
+
+  @override
+  String get editProduct => 'Edit product';
+
+  @override
+  String get addCategory => 'Add category';
+
+  @override
+  String get editCategory => 'Edit category';
+
+  @override
+  String get statusAll => 'All';
+
+  @override
+  String get statusVisible => 'Visible';
+
+  @override
+  String get statusHidden => 'Hidden';
+
+  @override
+  String get nameEnglish => 'Name (English)';
+
+  @override
+  String get nameGujarati => 'Name in Gujarati';
+
+  @override
+  String get nameHindi => 'Name in Hindi';
+
+  @override
+  String get descriptionLabel => 'Description';
+
+  @override
+  String get categoryLabel => 'Category';
+
+  @override
+  String get noCategory => 'No category';
+
+  @override
+  String get parentCategory => 'Inside category';
+
+  @override
+  String get topLevel => 'Top level';
+
+  @override
+  String get photos => 'Photos';
+
+  @override
+  String get addPhoto => 'Add photo';
+
+  @override
+  String get takePhoto => 'Camera';
+
+  @override
+  String get pickFromGallery => 'Gallery';
+
+  @override
+  String get uploadingPhoto => 'Uploading photo…';
+
+  @override
+  String get pricesTitle => 'Price';
+
+  @override
+  String get unitsTitle => 'Sizes and prices';
+
+  @override
+  String get optionsTitle => 'Options and prices';
+
+  @override
+  String get unitLabel => 'Unit, e.g. 500 g';
+
+  @override
+  String get priceLabel => 'Price ₹';
+
+  @override
+  String get mrpLabel => 'MRP ₹';
+
+  @override
+  String get stockLabel => 'Stock (optional)';
+
+  @override
+  String get inStockLabel => 'In stock';
+
+  @override
+  String get addVariant => 'Add another';
+
+  @override
+  String get remove => 'Remove';
+
+  @override
+  String get visibleToCustomers => 'Visible to customers';
+
+  @override
+  String get tagsLabel => 'Search words, comma separated';
+
+  @override
+  String get moreDetails => 'More details';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get deleteProductConfirm =>
+      'Delete this product? Customers will no longer see it.';
+
+  @override
+  String get deleteCategoryConfirm => 'Delete this category?';
+
+  @override
+  String get requiredField => 'Required';
+
+  @override
+  String get invalidPrice => 'Enter a valid amount';
+
+  @override
+  String get mrpBelowPrice => 'MRP cannot be less than price';
+
+  @override
+  String get emptyCategories => 'No categories yet';
+
+  @override
+  String get axisSize => 'Size';
+
+  @override
+  String get axisColor => 'Colour';
+
+  @override
+  String get axisMaterial => 'Material';
+
+  @override
+  String get axisFlavour => 'Flavour';
+
+  @override
+  String get axisStorage => 'Storage';
+
+  @override
+  String get errorInvalidVariants => 'Check the sizes and prices.';
+
+  @override
+  String get errorInvalidDetails => 'Check the product details.';
+
+  @override
+  String get errorCategoryNotEmpty =>
+      'Move or delete its products and sub-categories first.';
+
+  @override
+  String get errorCategoryParent =>
+      'A category can only be inside a top-level category.';
+
+  @override
+  String get errorPhotoTooLarge => 'This photo is too large.';
+
+  @override
+  String get errorPhotoInvalid => 'This file is not a supported photo.';
+
+  @override
+  String get errorNotFound => 'This item is no longer available.';
+
+  @override
+  String get errorInvalidInput => 'Please check what you entered.';
+
+  @override
+  String percentOff(int percent) {
+    return '$percent% off';
+  }
+
+  @override
+  String variantCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count options',
+      one: '1 option',
+    );
+    return '$_temp0';
+  }
 }

@@ -49,7 +49,7 @@ void main() {
       expect(settings.shop.localizedName(const Locale('en')), 'Sharma Kirana');
       expect(settings.delivery.freeAbovePaise, 50000);
       expect(settings.payments.upiVpa, 'sharmakirana@okaxis');
-      expect(settings.catalog.variantStyle, 'units');
+      expect(settings.catalog.variantStyle, VariantStyle.units);
     });
 
     test('maps known feature flags and ignores unknown ones', () {
