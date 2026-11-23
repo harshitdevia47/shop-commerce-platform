@@ -21,8 +21,7 @@ class AppLocalizationsGu extends AppLocalizations {
   String get errorGeneric => 'કંઈક ખોટું થયું. કૃપા કરીને ફરી પ્રયાસ કરો.';
 
   @override
-  String get errorNetwork =>
-      'ઇન્ટરનેટ કનેક્શન નથી. તમારું નેટવર્ક તપાસો અને ફરી પ્રયાસ કરો.';
+  String get errorNetwork => 'ઇન્ટરનેટ કનેક્શન નથી. તમારું નેટવર્ક તપાસો અને ફરી પ્રયાસ કરો.';
 
   @override
   String get errorShopInactive => 'આ દુકાન હાલમાં ઓર્ડર લેતી નથી.';
@@ -86,6 +85,5 @@ class AppLocalizationsGu extends AppLocalizations {
   String get featureOrderNotes => 'ઓર્ડરમાં નોંધ ઉમેરો';
 
   @override
-  String get featureHandwrittenListUpload =>
-      'તમારી ખરીદીની યાદીનો ફોટો અપલોડ કરો';
+  String get featureHandwrittenListUpload => 'તમારી ખરીદીની યાદીનો ફોટો અપલોડ કરો';
 }

@@ -1,14 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 /// Per-shop feature flags. Wire names match backend `FEATURE_KEYS`.
-enum Feature {
-  deliverySlots,
-  storePickup,
-  returns,
-  prescriptionUpload,
-  orderNotes,
-  handwrittenListUpload,
-}
+enum Feature { deliverySlots, storePickup, returns, prescriptionUpload, orderNotes, handwrittenListUpload }
 
 /// Runtime shop configuration served by `GET /api/v1/shop/config`.
 /// Mirrors `RuntimeConfig` in backend/packages/config-schema.

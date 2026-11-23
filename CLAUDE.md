@@ -121,6 +121,7 @@ Single source per client: `clients/<slug>/client.json` + assets (`logo.png`, `ic
 ## 9. Flutter conventions
 
 - Feature-first: `lib/features/<feature>/{data,domain,presentation}`; shared code in `lib/core/`.
+- Flutter ≥ 3.47: import `package:material_ui/material_ui.dart` (not `package:flutter/material.dart`, deprecated) and `cupertino_ui` for Cupertino; `flutter_localizations` only for `GlobalWidgetsLocalizations`.
 - Role areas: customer features, `admin_*` features (OWNER/STAFF), `rider_*` features (RIDER). Router `redirect` gates by role.
 - Quick-commerce UX standards: skeleton loaders, optimistic cart updates, sticky cart bar, debounced instant search, cached images, pull-to-refresh, graceful offline state.
 - No hard-coded strings: ARB files in `lib/l10n/` for en, gu, hi; add keys to all three in the same change. Access with `context.l10n`; map backend error codes in `core/l10n/l10n.dart#errorMessage`. Bundle Noto Sans fonts if Gujarati/Devanagari rendering is poor on target devices.

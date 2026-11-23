@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:qc_app/core/config/client_config.dart';
 import 'package:qc_app/core/config/shop_settings.dart';
@@ -33,10 +33,7 @@ void main() {
     });
 
     test('rejects a default locale that is not supported', () {
-      expect(
-        () => ClientConfig.fromMap({...valid, 'SUPPORTED_LOCALES': 'en'}),
-        throwsA(isA<StateError>()),
-      );
+      expect(() => ClientConfig.fromMap({...valid, 'SUPPORTED_LOCALES': 'en'}), throwsA(isA<StateError>()));
     });
 
     test('rejects bad colours', () {

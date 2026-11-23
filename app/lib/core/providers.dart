@@ -13,9 +13,7 @@ import 'network/api_client.dart';
 
 final clientConfigProvider = Provider<ClientConfig>((ref) => throw UnimplementedError('override in main'));
 final envConfigProvider = Provider<EnvConfig>((ref) => throw UnimplementedError('override in main'));
-final sharedPreferencesProvider = Provider<SharedPreferences>(
-  (ref) => throw UnimplementedError('override in main'),
-);
+final sharedPreferencesProvider = Provider<SharedPreferences>((ref) => throw UnimplementedError('override in main'));
 
 // ---- Infrastructure ----
 

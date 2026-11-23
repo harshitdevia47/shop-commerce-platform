@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/config/shop_settings.dart';
@@ -56,10 +56,7 @@ class _HomeContent extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Text(
-              l10n.welcome(settings.shop.localizedName(locale)),
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
+            Text(l10n.welcome(settings.shop.localizedName(locale)), style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 16),
             _Section(title: l10n.deliveryTitle, children: _deliveryLines(l10n, settings.delivery)),
             const SizedBox(height: 12),

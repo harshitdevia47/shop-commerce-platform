@@ -21,8 +21,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorGeneric => 'Something went wrong. Please try again.';
 
   @override
-  String get errorNetwork =>
-      'No internet connection. Check your network and try again.';
+  String get errorNetwork => 'No internet connection. Check your network and try again.';
 
   @override
   String get errorShopInactive => 'This shop is not taking orders right now.';
@@ -56,8 +55,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get deliveryUnavailable =>
-      'Delivery is not available. Pick up from the store.';
+  String get deliveryUnavailable => 'Delivery is not available. Pick up from the store.';
 
   @override
   String get paymentTitle => 'Payment options';
@@ -87,6 +85,5 @@ class AppLocalizationsEn extends AppLocalizations {
   String get featureOrderNotes => 'Add notes to your order';
 
   @override
-  String get featureHandwrittenListUpload =>
-      'Upload a photo of your shopping list';
+  String get featureHandwrittenListUpload => 'Upload a photo of your shopping list';
 }

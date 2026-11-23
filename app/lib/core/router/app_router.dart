@@ -12,9 +12,7 @@ abstract final class Routes {
 final routerProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
     initialLocation: Routes.home,
-    routes: [
-      GoRoute(path: Routes.home, builder: (context, state) => const HomeScreen()),
-    ],
+    routes: [GoRoute(path: Routes.home, builder: (context, state) => const HomeScreen())],
   );
   ref.onDispose(router.dispose);
   return router;

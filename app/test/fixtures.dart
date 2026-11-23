@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:qc_app/core/config/client_config.dart';
 
 const testClient = ClientConfig(
@@ -52,9 +52,5 @@ Map<String, dynamic> shopConfigJson({bool deliveryEnabled = true, bool upi = tru
     'handwrittenListUpload': true,
     'someFutureFlag': true,
   },
-  'catalog': {
-    'variantStyle': 'units',
-    'variantAxes': <String>[],
-    'customFields': <Map<String, dynamic>>[],
-  },
+  'catalog': {'variantStyle': 'units', 'variantAxes': <String>[], 'customFields': <Map<String, dynamic>>[]},
 };

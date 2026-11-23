@@ -10,7 +10,10 @@ class EnvConfig {
     if (apiBaseUrl.isEmpty) {
       throw StateError('Missing API_BASE_URL. Build with --dart-define-from-file=config/env.dev.json');
     }
-    return const EnvConfig(env: String.fromEnvironment('ENV', defaultValue: 'dev'), apiBaseUrl: apiBaseUrl);
+    return const EnvConfig(
+      env: String.fromEnvironment('ENV', defaultValue: 'dev'),
+      apiBaseUrl: apiBaseUrl,
+    );
   }
 
   final String env;
