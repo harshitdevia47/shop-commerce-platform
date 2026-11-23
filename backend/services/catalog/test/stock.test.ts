@@ -6,6 +6,11 @@ import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createCatalogApp } from '../src/app.js';
 import { createDb } from '../src/db.js';
+import { getContext, runWithContext } from '@qc/common';
+import { buildEvent, type AnyEvent } from '@qc/events';
+import { orderEventsHandler } from '../src/consumers/order-events.js';
+import { sweepOrphanReservations } from '../src/jobs/orphan-sweeper.js';
+import { createStockService } from '../src/modules/stock/stock.service.js';
 
 const SECRET = process.env.INTERNAL_HMAC_SECRET!;
 const { rawPrisma, db } = createDb(process.env.DATABASE_URL!);
@@ -46,6 +51,7 @@ beforeAll(() => {
 async function clean() {
   const where = { shopId: { in: [SHOP_A, SHOP_B] } };
   await rawPrisma.stockReservation.deleteMany({ where });
+  await rawPrisma.processedEvent.deleteMany({ where });
   await rawPrisma.productImage.deleteMany({ where });
   await rawPrisma.variant.deleteMany({ where });
   await rawPrisma.product.deleteMany({ where });
@@ -166,5 +172,77 @@ describe('reserve / release', () => {
       .set(signInternalHeaders({ requestId: randomUUID() }, SECRET))
       .send({ orderId: randomUUID(), items: [{ variantId: randomUUID(), qty: 1 }] });
     expect(res.status).toBe(400);
+  });
+});
+
+describe('order events and orphan sweeper', () => {
+  const stock = createStockService(db);
+  const deliver = (event: AnyEvent) =>
+    runWithContext({ requestId: event.eventId, shopId: event.shopId }, () => orderEventsHandler(stock)(event));
+  const changed = (orderId: string, to: 'REJECTED' | 'PACKED', shopId = SHOP_A) =>
+    buildEvent('order.status_changed', shopId, {
+      orderId,
+      number: 1,
+      customerId: randomUUID(),
+      fulfillment: 'DELIVERY',
+      from: 'PLACED',
+      to,
+      byRole: 'OWNER',
+      reason: to === 'REJECTED' ? 'closed' : null,
+    });
+
+  it('a rejected order gives stock back once, even if the event repeats', async () => {
+    const { variantId } = await product(10);
+    const orderId = randomUUID();
+    await reserve(orderId, [{ variantId, qty: 4 }]);
+    await deliver(changed(orderId, 'PACKED'));
+    expect(await stockOf(variantId)).toBe(6);
+    await deliver(changed(orderId, 'REJECTED'));
+    await deliver(changed(orderId, 'REJECTED'));
+    expect(await stockOf(variantId)).toBe(10);
+  });
+
+  it("events never release another shop's stock", async () => {
+    const { variantId } = await product(10);
+    const orderId = randomUUID();
+    await reserve(orderId, [{ variantId, qty: 4 }]);
+    await deliver(changed(orderId, 'REJECTED', SHOP_B));
+    expect(await stockOf(variantId)).toBe(6);
+  });
+
+  it('order.placed commits; the sweeper releases only reservations whose order does not exist', async () => {
+    const { variantId } = await product(10);
+    const placedOrder = randomUUID();
+    const realOrder = randomUUID();
+    const orphan = randomUUID();
+    for (const id of [placedOrder, realOrder, orphan]) await reserve(id, [{ variantId, qty: 2 }]);
+    await deliver(
+      buildEvent('order.placed', SHOP_A, {
+        orderId: placedOrder,
+        number: 1,
+        customerId: randomUUID(),
+        totalPaise: 100,
+        itemCount: 1,
+        fulfillment: 'PICKUP',
+        paymentMethod: 'COD',
+      }),
+    );
+    expect(await stockOf(variantId)).toBe(4);
+
+    const stale = async () =>
+      (await rawPrisma.stockReservation.findMany({ where: { shopId: SHOP_A, committedAt: null, releasedAt: null } })).map((r) => ({
+        shopId: r.shopId,
+        orderId: r.orderId,
+      }));
+    expect((await stale()).map((r) => r.orderId).sort()).toEqual([realOrder, orphan].sort());
+    const result = await sweepOrphanReservations(
+      stale,
+      { existing: async (ids) => (getContext()!.shopId === SHOP_A ? ids.filter((id) => id === realOrder) : []) },
+      stock,
+      createLogger('sweeper-test', 'silent'),
+    );
+    expect(result).toEqual({ committed: 1, released: 1 });
+    expect(await stockOf(variantId)).toBe(6);
+    expect(await stale()).toEqual([]);
   });
 });

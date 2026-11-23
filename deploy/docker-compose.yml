@@ -76,10 +76,13 @@ services:
     environment:
       PORT: 3000
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/qc_catalog
+      REDIS_URL: redis://redis:6379
       TENANT_URL: http://tenant:3000
       MEDIA_URL: http://media:3000
+      ORDER_URL: http://order:3000
     depends_on:
       postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
     deploy:
       resources: { limits: { memory: 256m } }
 
@@ -107,9 +110,12 @@ services:
     environment:
       PORT: 3000
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/qc_payment
+      REDIS_URL: redis://redis:6379
       TENANT_URL: http://tenant:3000
+      ORDER_URL: http://order:3000
     depends_on:
       postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
     deploy:
       resources: { limits: { memory: 256m } }
 
@@ -119,14 +125,51 @@ services:
     environment:
       PORT: 3000
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/qc_order
+      REDIS_URL: redis://redis:6379
       TENANT_URL: http://tenant:3000
       IDENTITY_URL: http://identity:3000
       CATALOG_URL: http://catalog:3000
       PAYMENT_URL: http://payment:3000
     depends_on:
       postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
     deploy:
       resources: { limits: { memory: 256m } }
+
+  # Turns events into push notifications. No routes besides /health.
+  notification:
+    <<: *service
+    build: { context: ../backend, dockerfile: Dockerfile, args: { SERVICE: notification } }
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/qc_notification
+      REDIS_URL: redis://redis:6379
+      TENANT_URL: http://tenant:3000
+      IDENTITY_URL: http://identity:3000
+      # PUSH_PROVIDER (console | fcm) comes from .env. For fcm, put the Firebase service account
+      # at deploy/secrets/fcm/service-account.json (gitignored).
+      FCM_SERVICE_ACCOUNT_FILE: ${FCM_SERVICE_ACCOUNT_FILE:-}
+    volumes:
+      - ./secrets/fcm:/run/fcm:ro
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    deploy:
+      resources: { limits: { memory: 192m } }
+
+  # Socket.IO for live order updates; nginx proxies /socket.io/ here directly.
+  realtime:
+    <<: *service
+    build: { context: ../backend, dockerfile: Dockerfile, args: { SERVICE: realtime } }
+    environment:
+      PORT: 3000
+      REDIS_URL: redis://redis:6379
+      JWT_PUBLIC_KEY_FILE: /run/secrets/jwt_public_key
+    secrets: [jwt_public_key]
+    depends_on:
+      redis: { condition: service_healthy }
+    deploy:
+      resources: { limits: { memory: 192m } }
 
   gateway:
     <<: *service
@@ -165,7 +208,7 @@ services:
       - ./nginx/certs:/etc/nginx/certs:ro
       - media:/srv/media:ro
     networks: [internal]
-    depends_on: [gateway]
+    depends_on: [gateway, realtime]
 
 networks:
   internal:

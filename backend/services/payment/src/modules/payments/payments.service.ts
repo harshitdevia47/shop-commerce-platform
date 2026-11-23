@@ -1,5 +1,6 @@
 import { Errors, getContext, isRole, ADMIN_ROLES, requireShopId, type ShopConfigSource } from '@qc/common';
 import type { PaymentsConfig } from '@qc/config-schema';
+import { buildEvent, toOutboxRow, type EventType } from '@qc/events';
 import type { Db } from '../../db.js';
 import { Prisma, type Payment, type PaymentMethod, type PaymentStatus } from '../../generated/prisma/client.js';
 import { PROVIDERS } from '../../providers/payment-provider.js';
@@ -16,7 +17,29 @@ export function createPaymentsService(
   db: Db,
   config: ShopConfigSource<{ payments: PaymentsConfig }>,
   now: () => Date = () => new Date(),
+  events?: { kick(): void },
 ) {
+  /** Updates a payment and writes the matching event in one transaction. */
+  async function updateWithEvent(
+    payment: Payment,
+    data: Prisma.PaymentUpdateInput,
+    type: Extract<EventType, 'payment.utr_submitted' | 'payment.marked_paid'>,
+  ): Promise<Payment> {
+    const updated = await db.$transaction(async (tx) => {
+      const row = await tx.payment.update({ where: { id: payment.id }, data });
+      const event = buildEvent(type, requireShopId(), {
+        orderId: row.orderId,
+        orderNumber: row.orderNumber,
+        customerId: row.customerId,
+        amountPaise: row.amountPaise,
+      });
+      await tx.outboxEvent.create({ data: toOutboxRow(event) as Prisma.OutboxEventUncheckedCreateInput });
+      return row;
+    });
+    events?.kick();
+    return updated;
+  }
+
   async function toPublic(payment: Payment) {
     const live = payment.status === 'PENDING' || payment.status === 'SUBMITTED';
     const instructions = live ? PROVIDERS[payment.method].instructions(payment, (await config.get()).payments) : {};
@@ -71,6 +94,11 @@ export function createPaymentsService(
       return { status: payment?.status ?? null };
     },
 
+    /** The order exists (order.placed or the sweeper's check): never void it as an orphan. */
+    async confirmOrder(orderId: string): Promise<void> {
+      await db.payment.updateMany({ where: { orderId, orderConfirmedAt: null }, data: { orderConfirmedAt: now() } });
+    },
+
     get: async (orderId: string) => toPublic(await findVisible(orderId)),
 
     async submitUtr(orderId: string, utr: string) {
@@ -79,7 +107,7 @@ export function createPaymentsService(
       if (payment.status !== 'PENDING' && payment.status !== 'SUBMITTED') {
         throw Errors.conflict('PAYMENT_CLOSED', 'This payment can no longer be changed');
       }
-      return toPublic(await db.payment.update({ where: { id: payment.id }, data: { utr, utrAt: now(), status: 'SUBMITTED' } }));
+      return toPublic(await updateWithEvent(payment, { utr, utrAt: now(), status: 'SUBMITTED' }, 'payment.utr_submitted'));
     },
 
     async markPaid(orderId: string) {
@@ -87,10 +115,7 @@ export function createPaymentsService(
       if (payment.status === 'PAID') return toPublic(payment);
       if (payment.status === 'VOID') throw Errors.conflict('PAYMENT_CLOSED', 'This order was cancelled');
       return toPublic(
-        await db.payment.update({
-          where: { id: payment.id },
-          data: { status: 'PAID', paidAt: now(), paidBy: getContext()!.userId! },
-        }),
+        await updateWithEvent(payment, { status: 'PAID', paidAt: now(), paidBy: getContext()!.userId! }, 'payment.marked_paid'),
       );
     },
 

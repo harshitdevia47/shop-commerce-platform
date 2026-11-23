@@ -101,15 +101,18 @@ model Variant {
 /// Stock held for an order (written by the order saga). Released on cancel/reject.
 /// One row per (order, variant) makes reserve and release idempotent.
 model StockReservation {
-  id         String    @id @default(uuid(7)) @db.Uuid
-  shopId     String    @map("shop_id") @db.Uuid
-  orderId    String    @map("order_id") @db.Uuid
-  variantId  String    @map("variant_id") @db.Uuid
-  qty        Int
+  id          String    @id @default(uuid(7)) @db.Uuid
+  shopId      String    @map("shop_id") @db.Uuid
+  orderId     String    @map("order_id") @db.Uuid
+  variantId   String    @map("variant_id") @db.Uuid
+  qty         Int
   /// Whether stock was actually decremented (false for untracked variants).
-  tracked    Boolean
-  releasedAt DateTime? @map("released_at") @db.Timestamptz(3)
-  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  tracked     Boolean
+  releasedAt  DateTime? @map("released_at") @db.Timestamptz(3)
+  /// Set once the order is known to exist (order.placed or the sweeper's check).
+  /// Uncommitted reservations older than a few minutes belong to a failed checkout and are released.
+  committedAt DateTime? @map("committed_at") @db.Timestamptz(3)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
 
   variant Variant @relation(fields: [shopId, variantId], references: [shopId, id], onDelete: Restrict, onUpdate: Restrict)
 
@@ -132,4 +135,15 @@ model ProductImage {
 
   @@index([shopId, productId, sortOrder])
   @@map("product_images")
+}
+
+/// Events this service already handled (consumer idempotency).
+model ProcessedEvent {
+  shopId      String   @map("shop_id") @db.Uuid
+  eventId     String   @map("event_id") @db.Uuid
+  type        String
+  processedAt DateTime @default(now()) @map("processed_at") @db.Timestamptz(3)
+
+  @@id([shopId, eventId])
+  @@map("processed_events")
 }

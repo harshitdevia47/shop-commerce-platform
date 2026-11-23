@@ -92,5 +92,14 @@ export function ordersRouter(orders: OrdersService): Router {
   );
   router.use('/api/v1/admin/orders', admin);
 
+  // Internal only (catalog/payment sweepers). The gateway never routes /internal.
+  router.post(
+    '/internal/orders/existing',
+    requireShop,
+    handler({ body: z.object({ ids: z.array(z.uuid()).min(1).max(200) }).strict() }, async ({ body }) => ({
+      ids: await orders.existing(body.ids),
+    })),
+  );
+
   return router;
 }

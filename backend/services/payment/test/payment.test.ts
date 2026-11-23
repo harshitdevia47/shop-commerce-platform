@@ -8,6 +8,11 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createPaymentApp } from '../src/app.js';
 import { createDb } from '../src/db.js';
 import { upiAmount } from '../src/providers/payment-provider.js';
+import { buildEvent, onceOnly, prismaProcessedEvents, type AnyEvent } from '@qc/events';
+import { runWithContext } from '@qc/common';
+import { orderEventsHandler } from '../src/consumers/order-events.js';
+import { sweepOrphanPayments } from '../src/jobs/orphan-sweeper.js';
+import { createPaymentsService } from '../src/modules/payments/payments.service.js';
 
 const SECRET = process.env.INTERNAL_HMAC_SECRET!;
 const { rawPrisma, db } = createDb(process.env.DATABASE_URL!);
@@ -46,11 +51,15 @@ beforeAll(() => {
     shopConfig: { get: async () => ({ payments: payments[getContext()!.shopId!]! }) },
   });
 });
-beforeEach(async () => {
-  await rawPrisma.payment.deleteMany({ where: { shopId: { in: [SHOP_A, SHOP_B] } } });
-});
+async function clean() {
+  const where = { shopId: { in: [SHOP_A, SHOP_B] } };
+  await rawPrisma.payment.deleteMany({ where });
+  await rawPrisma.outboxEvent.deleteMany({ where });
+  await rawPrisma.processedEvent.deleteMany({ where });
+}
+beforeEach(clean);
 afterAll(async () => {
-  await rawPrisma.payment.deleteMany({ where: { shopId: { in: [SHOP_A, SHOP_B] } } });
+  await clean();
   await rawPrisma.$disconnect();
 });
 
@@ -155,6 +164,92 @@ describe('isolation', () => {
     expect((await request(app).post(`/api/v1/admin/payments/orders/${orderId}/mark-paid`).set(owner(SHOP_B))).status).toBe(404);
     expect((await request(app).get('/api/v1/admin/payments').set(owner(SHOP_B))).body.data).toEqual([]);
     expect((await request(app).post('/internal/payments/void').set(svc(SHOP_B)).send({ orderId })).body.data.status).toBeNull();
+  });
+});
+
+describe('events', () => {
+  const service = createPaymentsService(db, { get: async () => ({ payments: payments[getContext()!.shopId!]! }) });
+  const statusOf = async (orderId: string) => (await rawPrisma.payment.findFirst({ where: { orderId } }))!;
+  const deliver = (event: AnyEvent, handler = orderEventsHandler(service)) =>
+    runWithContext({ requestId: event.eventId, shopId: event.shopId }, () => handler(event));
+  const statusChanged = (orderId: string, to: 'CANCELLED' | 'CONFIRMED', shopId = SHOP_A) =>
+    buildEvent('order.status_changed', shopId, {
+      orderId,
+      number: 42,
+      customerId: CUSTOMER,
+      fulfillment: 'DELIVERY',
+      from: 'PLACED',
+      to,
+      byRole: 'CUSTOMER',
+      reason: null,
+    });
+
+  it('UTR submission and mark paid write events with the payment change', async () => {
+    const { orderId } = await createPayment('UPI');
+    await request(app).post(`/api/v1/payments/orders/${orderId}/utr`).set(customer()).send({ utr: '123456789012' });
+    await request(app).post(`/api/v1/admin/payments/orders/${orderId}/mark-paid`).set(owner()).send({});
+    const rows = await rawPrisma.outboxEvent.findMany({ where: { shopId: SHOP_A }, orderBy: { id: 'asc' } });
+    expect(rows.map((r) => r.type)).toEqual(['payment.utr_submitted', 'payment.marked_paid']);
+    expect(rows[1]!.envelope).toMatchObject({ payload: { orderId, orderNumber: 42, customerId: CUSTOMER, amountPaise: 12050 } });
+  });
+
+  it('a cancelled order voids its payment; other changes do not', async () => {
+    const { orderId } = await createPayment('UPI');
+    await deliver(statusChanged(orderId, 'CONFIRMED'));
+    expect((await statusOf(orderId)).status).toBe('PENDING');
+    await deliver(statusChanged(orderId, 'CANCELLED'));
+    expect((await statusOf(orderId)).status).toBe('VOID');
+  });
+
+  it("events only touch their own shop's payments", async () => {
+    const { orderId } = await createPayment('COD', SHOP_A);
+    await deliver(statusChanged(orderId, 'CANCELLED', SHOP_B));
+    expect((await statusOf(orderId)).status).toBe('PENDING');
+  });
+
+  it('order.placed confirms the payment; a duplicate event is handled once', async () => {
+    const { orderId } = await createPayment('COD');
+    let calls = 0;
+    const counting = onceOnly(prismaProcessedEvents(db.processedEvent), async (event) => {
+      calls++;
+      await orderEventsHandler(service)(event);
+    });
+    const placed = buildEvent('order.placed', SHOP_A, {
+      orderId,
+      number: 42,
+      customerId: CUSTOMER,
+      totalPaise: 12050,
+      itemCount: 1,
+      fulfillment: 'PICKUP',
+      paymentMethod: 'COD',
+    });
+    await deliver(placed, counting);
+    await deliver(placed, counting);
+    expect(calls).toBe(1);
+    expect((await statusOf(orderId)).orderConfirmedAt).not.toBeNull();
+  });
+
+  it('the sweeper voids payments whose order never got created and confirms the rest', async () => {
+    const real = await createPayment('COD');
+    const orphan = await createPayment('UPI');
+    const other = await createPayment('COD', SHOP_B);
+    const askedBy: string[] = [];
+    const result = await sweepOrphanPayments(
+      async () => [real, orphan, other].map(({ orderId }) => ({ orderId, shopId: orderId === other.orderId ? SHOP_B : SHOP_A })),
+      {
+        existing: async (ids) => {
+          askedBy.push(getContext()!.shopId!);
+          return ids.filter((id) => id === real.orderId || id === other.orderId);
+        },
+      },
+      service,
+      createLogger('sweeper-test', 'silent'),
+    );
+    expect(result).toEqual({ confirmed: 2, voided: 1 });
+    expect(askedBy.sort()).toEqual([SHOP_A, SHOP_B].sort());
+    expect((await statusOf(orphan.orderId)).status).toBe('VOID');
+    expect((await statusOf(real.orderId)).status).toBe('PENDING');
+    expect((await statusOf(real.orderId)).orderConfirmedAt).not.toBeNull();
   });
 });
 

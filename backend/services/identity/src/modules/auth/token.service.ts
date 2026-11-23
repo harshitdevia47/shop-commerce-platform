@@ -109,9 +109,12 @@ export async function createTokenService(options: TokenServiceOptions) {
     },
 
     /** Logout: revokes every token of the session. Unknown tokens are ignored. */
-    async revoke(raw: string): Promise<void> {
+    /** Ends the session; returns its user (null for an unknown token). */
+    async revoke(raw: string): Promise<string | null> {
       const stored = await db.refreshToken.findUnique({ where: { tokenHash: hashToken(raw) } });
-      if (stored) await revokeFamily(stored.familyId, 'logout');
+      if (!stored) return null;
+      await revokeFamily(stored.familyId, 'logout');
+      return stored.userId;
     },
 
     /** Used when a user is blocked or their role changes. */

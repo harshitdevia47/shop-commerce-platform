@@ -138,6 +138,11 @@ export function createStockService(db: Db, now: () => Date = () => new Date()) {
       }
     },
 
+    /** The order exists (order.placed or the sweeper's check): never release it as an orphan. */
+    async commit(orderId: string): Promise<void> {
+      await db.stockReservation.updateMany({ where: { orderId, committedAt: null }, data: { committedAt: now() } });
+    },
+
     /** Gives held stock back (order cancelled/rejected/failed). Idempotent. */
     async release(orderId: string): Promise<void> {
       await db.$transaction(async (tx) => {

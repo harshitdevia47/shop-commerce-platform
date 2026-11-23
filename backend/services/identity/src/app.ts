@@ -4,6 +4,8 @@ import type { Db } from './db.js';
 import { addressesRouter } from './modules/addresses/addresses.routes.js';
 import { createAddressesService } from './modules/addresses/addresses.service.js';
 import { authRouter } from './modules/auth/auth.routes.js';
+import { devicesRouter } from './modules/devices/devices.routes.js';
+import { createDevicesService } from './modules/devices/devices.service.js';
 import { createOtpService } from './modules/auth/otp.service.js';
 import { createTokenService } from './modules/auth/token.service.js';
 import { usersRouter } from './modules/users/users.routes.js';
@@ -39,7 +41,9 @@ export async function createIdentityApp(deps: IdentityAppDeps): Promise<Express>
   const tokens = await createTokenService({ db, logger, ...deps.jwt, now });
 
   app.use(internalAuth(deps.internalSecret));
-  app.use(authRouter(otp, tokens, users));
+  const devices = createDevicesService(db);
+  app.use(authRouter(otp, tokens, users, devices));
+  app.use(devicesRouter(devices));
   app.use(addressesRouter(createAddressesService(db, now), users));
   app.use(usersRouter(users));
 

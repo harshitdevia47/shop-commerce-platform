@@ -8,6 +8,7 @@ export const TENANT_MODELS = [
   Prisma.ModelName.OrderItem,
   Prisma.ModelName.OrderStatusChange,
   Prisma.ModelName.OrderCounter,
+  Prisma.ModelName.OutboxEvent,
 ] as const;
 
 /**

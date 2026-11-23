@@ -10,6 +10,7 @@ import {
   type ShopConfigSource,
 } from '@qc/common';
 import type { RuntimeConfig } from '@qc/config-schema';
+import { buildEvent, toOutboxRow } from '@qc/events';
 import type { Db } from '../../db.js';
 import { Prisma, type Fulfillment, type OrderStatus, type PaymentMethod } from '../../generated/prisma/client.js';
 import type { CatalogPort, CheckoutAddress, IdentityPort, PaymentPort, PaymentView } from '../../upstreams.js';
@@ -89,9 +90,11 @@ export interface OrdersServiceDeps {
   catalog: CatalogPort;
   identity: IdentityPort;
   payments: PaymentPort;
+  /** Outbox relay: told to publish right after a transaction that wrote events commits. */
+  events?: { kick(): void };
 }
 
-export function createOrdersService({ db, logger, shopConfig, catalog, identity, payments }: OrdersServiceDeps) {
+export function createOrdersService({ db, logger, shopConfig, catalog, identity, payments, events }: OrdersServiceDeps) {
   const userId = () => getContext()!.userId!;
 
   async function quote(items: CartLine[], fulfillment: Fulfillment): Promise<Quote> {
@@ -135,7 +138,11 @@ export function createOrdersService({ db, logger, shopConfig, catalog, identity,
     return db.order.findFirst({ where: { customerId: userId(), idempotencyKey }, include: withDetails });
   }
 
-  /** Best effort compensation; failures are logged (the outbox in Phase 4 makes this durable). */
+  /**
+   * Best effort compensation (fast path). Durable fallbacks: catalog and payment consume
+   * `order.status_changed`, and their sweepers release/void anything held for an order
+   * that was never created (`POST /internal/orders/existing`).
+   */
   async function compensate(orderId: string, steps: { release?: boolean; void?: boolean }): Promise<void> {
     const results = await Promise.allSettled([
       steps.release ? catalog.release(orderId) : Promise.resolve(),
@@ -179,7 +186,21 @@ export function createOrdersService({ db, logger, shopConfig, catalog, identity,
           reason: reason ?? null,
         },
       });
+      // Catalog and payment also react to this event (release stock, void payment), so the
+      // compensation below is only the fast path; the event makes it durable.
+      const event = buildEvent('order.status_changed', requireShopId(), {
+        orderId: order.id,
+        number: order.number,
+        customerId: order.customerId,
+        fulfillment: order.fulfillment,
+        from: order.status,
+        to,
+        byRole: context.role ?? null,
+        reason: reason ?? null,
+      });
+      await tx.outboxEvent.create({ data: toOutboxRow(event) as Prisma.OutboxEventUncheckedCreateInput });
     });
+    events?.kick();
     if (TERMINAL_FAILED.includes(to)) await compensate(order.id, { release: true, void: true });
     return find(order.id, false);
   }
@@ -283,7 +304,18 @@ export function createOrdersService({ db, logger, shopConfig, catalog, identity,
           await tx.orderStatusChange.create({
             data: { shopId, orderId, from: null, to: 'PLACED', byUserId: userId(), byRole: getContext()!.role ?? null },
           });
+          const event = buildEvent('order.placed', shopId, {
+            orderId,
+            number,
+            customerId: userId(),
+            totalPaise: priced.totalPaise,
+            itemCount: priced.itemCount,
+            fulfillment: input.fulfillment,
+            paymentMethod: input.paymentMethod,
+          });
+          await tx.outboxEvent.create({ data: toOutboxRow(event) as Prisma.OutboxEventUncheckedCreateInput });
         });
+        events?.kick();
       } catch (err) {
         await compensate(orderId, { release: true, void: true });
         // Double tap: the other request with the same key created the order.
@@ -323,6 +355,12 @@ export function createOrdersService({ db, logger, shopConfig, catalog, identity,
         ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : {}),
       });
       return toPage(rows, query.limit, (o) => o.id, toOrderView);
+    },
+
+    /** Which of these order ids exist in this shop (used by catalog/payment sweepers). */
+    async existing(ids: string[]): Promise<string[]> {
+      const rows = await db.order.findMany({ where: { id: { in: ids } }, select: { id: true } });
+      return rows.map((r) => r.id);
     },
 
     getMine: async (id: string) => toOrderView(await find(id, true)),

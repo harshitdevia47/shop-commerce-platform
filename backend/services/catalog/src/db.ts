@@ -9,6 +9,7 @@ export const TENANT_MODELS = [
   Prisma.ModelName.Variant,
   Prisma.ModelName.ProductImage,
   Prisma.ModelName.StockReservation,
+  Prisma.ModelName.ProcessedEvent,
 ] as const;
 
 /**

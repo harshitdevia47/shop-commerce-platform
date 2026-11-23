@@ -14,6 +14,7 @@ export interface OrderAppDeps {
   catalog: CatalogPort;
   identity: IdentityPort;
   payments: PaymentPort;
+  events?: { kick(): void };
 }
 
 export function createOrderApp(deps: OrderAppDeps): Express {

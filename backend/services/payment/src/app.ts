@@ -11,13 +11,14 @@ export interface PaymentAppDeps {
   internalSecret: string;
   shopConfig: ShopConfigSource<{ payments: PaymentsConfig }>;
   now?: () => Date;
+  events?: { kick(): void };
 }
 
 export function createPaymentApp(deps: PaymentAppDeps): Express {
   const { db, logger } = deps;
   const app = createServiceApp({ service: 'payment', logger, ready: () => db.$queryRaw`SELECT 1` });
   app.use(internalAuth(deps.internalSecret));
-  app.use(paymentsRouter(createPaymentsService(db, deps.shopConfig, deps.now)));
+  app.use(paymentsRouter(createPaymentsService(db, deps.shopConfig, deps.now, deps.events)));
   finalizeApp(app, logger);
   return app;
 }

@@ -148,6 +148,7 @@ async function clean() {
   await rawPrisma.orderItem.deleteMany({ where });
   await rawPrisma.order.deleteMany({ where });
   await rawPrisma.orderCounter.deleteMany({ where });
+  await rawPrisma.outboxEvent.deleteMany({ where });
 }
 
 beforeEach(async () => {
@@ -418,6 +419,71 @@ describe('tenant and customer isolation', () => {
     expect((await request(app).post(`/api/v1/admin/orders/${id}/status`).set(owner(SHOP_B)).send({ status: 'CONFIRMED' })).status).toBe(404);
     expect((await request(app).get('/api/v1/admin/orders').set(owner(SHOP_B))).body.data).toEqual([]);
     expect((await request(app).get(`/api/v1/orders/${id}`).set(alice(SHOP_B))).status).toBe(404);
+  });
+});
+
+describe('events (outbox)', () => {
+  const outbox = () => rawPrisma.outboxEvent.findMany({ where: { shopId: SHOP_A }, orderBy: { id: 'asc' } });
+
+  it('placing writes order.placed in the same transaction', async () => {
+    const { order: placed } = (await place()).body.data;
+    const rows = await outbox();
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ type: 'order.placed', stream: 'order', shopId: SHOP_A });
+    expect(rows[0]!.envelope).toMatchObject({
+      eventId: rows[0]!.id,
+      shopId: SHOP_A,
+      version: 1,
+      payload: { orderId: placed.id, number: placed.number, customerId: ALICE, totalPaise: 34000, paymentMethod: 'COD' },
+    });
+  });
+
+  it('a failed placement or a refused status change writes nothing', async () => {
+    failPaymentCreate = true;
+    expect((await place()).status).toBe(503);
+    failPaymentCreate = false;
+    const { id } = (await place()).body.data.order;
+    await request(app).post(`/api/v1/admin/orders/${id}/status`).set(owner()).send({ status: 'DELIVERED' });
+    expect((await outbox()).map((r) => r.type)).toEqual(['order.placed']);
+  });
+
+  it('status changes write order.status_changed with who and why', async () => {
+    const { id } = (await place()).body.data.order;
+    await request(app).post(`/api/v1/admin/orders/${id}/status`).set(owner()).send({ status: 'REJECTED', reason: 'Closed today' });
+    const last = (await outbox()).at(-1)!;
+    expect(last.type).toBe('order.status_changed');
+    expect(last.envelope).toMatchObject({
+      payload: { orderId: id, from: 'PLACED', to: 'REJECTED', byRole: 'OWNER', reason: 'Closed today', customerId: ALICE },
+    });
+  });
+
+  it('the relay publishes outbox rows to Redis and deletes them', async () => {
+    const { Redis } = await import('ioredis');
+    const { createOutboxRelay, prismaOutboxStore, streamKey } = await import('@qc/events');
+    const redis = new Redis(process.env.TEST_REDIS_URL ?? 'redis://localhost:6380/15');
+    try {
+      await redis.del(streamKey('order'));
+      await place();
+      const [row] = await outbox();
+      const relay = createOutboxRelay({ store: prismaOutboxStore(rawPrisma), redis, logger: createLogger('relay', 'silent') });
+      expect(await relay.flush()).toBeGreaterThanOrEqual(1);
+      expect(await outbox()).toEqual([]);
+      const entries = await redis.xrange(streamKey('order'), '-', '+');
+      expect(entries.map(([, fields]) => JSON.parse(fields[1]!).eventId)).toContain(row!.id);
+    } finally {
+      await redis.del(streamKey('order'));
+      redis.disconnect();
+    }
+  });
+});
+
+describe('internal: existing orders', () => {
+  it("answers only for the caller's shop", async () => {
+    const { id } = (await place()).body.data.order;
+    const missing = randomUUID();
+    const ask = (shopId: string) => request(app).post('/internal/orders/existing').set(sign(shopId)).send({ ids: [id, missing] });
+    expect((await ask(SHOP_A)).body.data).toEqual({ ids: [id] });
+    expect((await ask(SHOP_B)).body.data).toEqual({ ids: [] });
   });
 });
 

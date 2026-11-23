@@ -36,6 +36,7 @@ model User {
 
   refreshTokens RefreshToken[]
   addresses     Address[]
+  devices       Device[]
 
   @@unique([shopId, phone])
   @@unique([shopId, id])
@@ -109,4 +110,24 @@ model Address {
 
   @@index([shopId, userId])
   @@map("addresses")
+}
+
+/// A phone that receives push notifications (FCM registration token) for a user.
+/// The same token moves to whoever logs in on that phone next.
+model Device {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  shopId    String   @map("shop_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  token     String
+  platform  String
+  /// App language on this phone (en | gu | hi): notifications are written in it.
+  locale    String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [shopId, userId], references: [shopId, id], onDelete: Cascade, onUpdate: Restrict)
+
+  @@unique([shopId, token])
+  @@index([shopId, userId])
+  @@map("devices")
 }

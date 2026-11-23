@@ -44,10 +44,36 @@ model Payment {
   paidAt       DateTime?     @map("paid_at") @db.Timestamptz(3)
   /// Staff user who marked it paid
   paidBy       String?       @map("paid_by") @db.Uuid
+  /// Set once the order is known to exist (order.placed or the sweeper's check).
+  /// Unconfirmed payments older than a few minutes belong to a failed checkout and are voided.
+  orderConfirmedAt DateTime? @map("order_confirmed_at") @db.Timestamptz(3)
   createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt    DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   @@unique([shopId, orderId])
   @@index([shopId, status, createdAt])
   @@map("payments")
+}
+
+/// Transactional outbox (see @qc/events). Published to Redis Streams and deleted by the relay.
+model OutboxEvent {
+  id        String   @id @db.Uuid
+  shopId    String   @map("shop_id") @db.Uuid
+  type      String
+  stream    String
+  envelope  Json
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@map("outbox_events")
+}
+
+/// Events this service already handled (consumer idempotency).
+model ProcessedEvent {
+  shopId      String   @map("shop_id") @db.Uuid
+  eventId     String   @map("event_id") @db.Uuid
+  type        String
+  processedAt DateTime @default(now()) @map("processed_at") @db.Timestamptz(3)
+
+  @@id([shopId, eventId])
+  @@map("processed_events")
 }

@@ -3,7 +3,11 @@ import { tenantScopeExtension } from '@qc/common';
 import { Prisma, PrismaClient } from './generated/prisma/client.js';
 
 /** Models that carry shop_id and must always be scoped to the request's shop. */
-export const TENANT_MODELS = [Prisma.ModelName.Payment] as const;
+export const TENANT_MODELS = [
+  Prisma.ModelName.Payment,
+  Prisma.ModelName.OutboxEvent,
+  Prisma.ModelName.ProcessedEvent,
+] as const;
 
 /**
  * `db` is the only client application code may use.

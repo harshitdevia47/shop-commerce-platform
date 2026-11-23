@@ -1,0 +1,26 @@
+// Notification service: turns domain events into push notifications (FCM).
+// It only stores which events it already handled.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  runtime             = "nodejs"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Events this service already handled (consumer idempotency: no double pushes).
+model ProcessedEvent {
+  shopId      String   @map("shop_id") @db.Uuid
+  eventId     String   @map("event_id") @db.Uuid
+  type        String
+  processedAt DateTime @default(now()) @map("processed_at") @db.Timestamptz(3)
+
+  @@id([shopId, eventId])
+  @@index([processedAt])
+  @@map("processed_events")
+}

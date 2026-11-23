@@ -4,7 +4,9 @@ import { z } from 'zod';
 const envSchema = z.object({
   ...commonEnv,
   DATABASE_URL: z.string().url(),
+  REDIS_URL: z.string().url(),
   TENANT_URL: z.string().url(),
+  ORDER_URL: z.string().url(),
   SHOP_CONFIG_CACHE_SECONDS: z.coerce.number().int().nonnegative().default(60),
 });
 

@@ -433,6 +433,62 @@ describe('/api/v1/me/addresses', () => {
   });
 });
 
+describe('push devices', () => {
+  const TOKEN = 'fcm-token-'.padEnd(40, 'a');
+  const OTHER = 'fcm-token-'.padEnd(40, 'b');
+  const register = (headers: Record<string, string>, token = TOKEN, locale = 'gu') =>
+    request(app).put('/api/v1/me/devices').set(headers).send({ token, platform: 'android', locale });
+  const targets = (shopId: string, body: Record<string, unknown>) =>
+    request(app).post('/internal/devices/targets').set(as(shopId)).send(body);
+
+  it('registers a phone; the token follows whoever logs in on it next', async () => {
+    const first = await login(SHOP_A, '+919800000001');
+    expect((await register(as(SHOP_A, { userId: first.user.id, role: 'CUSTOMER' }))).status).toBe(204);
+    clock = new Date(clock.getTime() + 60_000);
+    const second = await login(SHOP_A, '+919800000002');
+    await register(as(SHOP_A, { userId: second.user.id, role: 'CUSTOMER' }), TOKEN, 'hi');
+
+    const res = await targets(SHOP_A, { userIds: [first.user.id, second.user.id] });
+    expect(res.body.data).toEqual([{ userId: second.user.id, token: TOKEN, platform: 'android', locale: 'hi' }]);
+  });
+
+  it('admins target owner and staff only; blocked users get nothing', async () => {
+    const customer = await login(SHOP_A, '+919800000001');
+    const owner = await login(SHOP_A, '+919800000002');
+    await rawPrisma.user.update({ where: { id: owner.user.id }, data: { role: 'OWNER' } });
+    await register(as(SHOP_A, { userId: customer.user.id, role: 'CUSTOMER' }), TOKEN);
+    await register(as(SHOP_A, { userId: owner.user.id, role: 'OWNER' }), OTHER);
+
+    expect((await targets(SHOP_A, { admins: true })).body.data.map((t: { token: string }) => t.token)).toEqual([OTHER]);
+    expect((await targets(SHOP_A, {})).body.data).toEqual([]);
+    await rawPrisma.user.update({ where: { id: owner.user.id }, data: { isBlocked: true } });
+    expect((await targets(SHOP_A, { admins: true })).body.data).toEqual([]);
+  });
+
+  it("logout with the device token stops pushes to that phone; another shop sees nothing", async () => {
+    const session = await login();
+    await register(as(SHOP_A, { userId: session.user.id, role: 'CUSTOMER' }));
+    expect((await targets(SHOP_B, { userIds: [session.user.id] })).body.data).toEqual([]);
+    await request(app).post('/internal/devices/remove').set(as(SHOP_B)).send({ tokens: [TOKEN] });
+    expect((await targets(SHOP_A, { userIds: [session.user.id] })).body.data).toHaveLength(1);
+
+    await request(app)
+      .post('/api/v1/auth/logout')
+      .set(as(SHOP_A))
+      .send({ refreshToken: session.refreshToken, deviceToken: TOKEN })
+      .expect(204);
+    expect((await targets(SHOP_A, { userIds: [session.user.id] })).body.data).toEqual([]);
+  });
+
+  it('validates input and needs login', async () => {
+    const session = await login();
+    const headers = as(SHOP_A, { userId: session.user.id, role: 'CUSTOMER' });
+    expect((await request(app).put('/api/v1/me/devices').set(headers).send({ token: 'x', platform: 'android', locale: 'gu' })).status).toBe(400);
+    expect((await request(app).put('/api/v1/me/devices').set(headers).send({ token: TOKEN, platform: 'web', locale: 'gu' })).status).toBe(400);
+    expect((await register(as(SHOP_A))).status).toBe(401);
+  });
+});
+
 describe('rawPrisma usage guard', () => {
   it('is only referenced in db.ts and main.ts within src/', () => {
     const srcDir = fileURLToPath(new URL('../src/', import.meta.url));
