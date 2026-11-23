@@ -879,6 +879,576 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 option} other{{count} options}}'**
   String variantCount(int count);
+
+  /// No description provided for @addToCart.
+  ///
+  /// In en, this message translates to:
+  /// **'ADD'**
+  String get addToCart;
+
+  /// No description provided for @cartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cart'**
+  String get cartTitle;
+
+  /// No description provided for @viewCart.
+  ///
+  /// In en, this message translates to:
+  /// **'View cart'**
+  String get viewCart;
+
+  /// No description provided for @cartEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Your cart is empty'**
+  String get cartEmpty;
+
+  /// No description provided for @startShopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse products'**
+  String get startShopping;
+
+  /// No description provided for @billDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Bill details'**
+  String get billDetails;
+
+  /// No description provided for @itemTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Item total'**
+  String get itemTotal;
+
+  /// No description provided for @deliveryFeeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery fee'**
+  String get deliveryFeeLabel;
+
+  /// No description provided for @free.
+  ///
+  /// In en, this message translates to:
+  /// **'FREE'**
+  String get free;
+
+  /// No description provided for @toPay.
+  ///
+  /// In en, this message translates to:
+  /// **'To pay'**
+  String get toPay;
+
+  /// No description provided for @lineUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No longer available'**
+  String get lineUnavailable;
+
+  /// No description provided for @proceed.
+  ///
+  /// In en, this message translates to:
+  /// **'Proceed'**
+  String get proceed;
+
+  /// No description provided for @loginToOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in to place your order'**
+  String get loginToOrder;
+
+  /// No description provided for @deliveryOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery'**
+  String get deliveryOption;
+
+  /// No description provided for @pickupOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Store pickup'**
+  String get pickupOption;
+
+  /// No description provided for @checkoutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Checkout'**
+  String get checkoutTitle;
+
+  /// No description provided for @deliverTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliver to'**
+  String get deliverTo;
+
+  /// No description provided for @pickupFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick up from'**
+  String get pickupFrom;
+
+  /// No description provided for @addAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Add address'**
+  String get addAddress;
+
+  /// No description provided for @noAddresses.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a delivery address to continue'**
+  String get noAddresses;
+
+  /// No description provided for @addressLine1.
+  ///
+  /// In en, this message translates to:
+  /// **'House / flat, street'**
+  String get addressLine1;
+
+  /// No description provided for @addressLine2.
+  ///
+  /// In en, this message translates to:
+  /// **'Area (optional)'**
+  String get addressLine2;
+
+  /// No description provided for @landmarkLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Landmark (optional)'**
+  String get landmarkLabel;
+
+  /// No description provided for @cityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get cityLabel;
+
+  /// No description provided for @pincodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pincode'**
+  String get pincodeLabel;
+
+  /// No description provided for @invalidPincode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a 6-digit pincode'**
+  String get invalidPincode;
+
+  /// No description provided for @addressHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get addressHome;
+
+  /// No description provided for @addressWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Work'**
+  String get addressWork;
+
+  /// No description provided for @addressOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get addressOther;
+
+  /// No description provided for @paymentMethodTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get paymentMethodTitle;
+
+  /// No description provided for @noteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Note for the shop (optional)'**
+  String get noteLabel;
+
+  /// No description provided for @ordersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My orders'**
+  String get ordersTitle;
+
+  /// No description provided for @noOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'No orders yet'**
+  String get noOrders;
+
+  /// No description provided for @orderPlacedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order placed!'**
+  String get orderPlacedTitle;
+
+  /// No description provided for @statusPlaced.
+  ///
+  /// In en, this message translates to:
+  /// **'Placed'**
+  String get statusPlaced;
+
+  /// No description provided for @statusConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get statusConfirmed;
+
+  /// No description provided for @statusPacked.
+  ///
+  /// In en, this message translates to:
+  /// **'Packed'**
+  String get statusPacked;
+
+  /// No description provided for @statusOutForDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Out for delivery'**
+  String get statusOutForDelivery;
+
+  /// No description provided for @statusReadyForPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready for pickup'**
+  String get statusReadyForPickup;
+
+  /// No description provided for @statusDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get statusDelivered;
+
+  /// No description provided for @statusPickedUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Picked up'**
+  String get statusPickedUp;
+
+  /// No description provided for @statusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get statusCancelled;
+
+  /// No description provided for @statusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected by shop'**
+  String get statusRejected;
+
+  /// No description provided for @cancelOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel order'**
+  String get cancelOrder;
+
+  /// No description provided for @cancelOrderConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this order?'**
+  String get cancelOrderConfirm;
+
+  /// No description provided for @keepOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep order'**
+  String get keepOrder;
+
+  /// No description provided for @utrPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid? Enter the 12-digit UTR from your UPI app so the shop can confirm.'**
+  String get utrPrompt;
+
+  /// No description provided for @utrLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'UTR number'**
+  String get utrLabel;
+
+  /// No description provided for @submit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get submit;
+
+  /// No description provided for @utrInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'UTR is 12 digits'**
+  String get utrInvalid;
+
+  /// No description provided for @paymentPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment pending'**
+  String get paymentPending;
+
+  /// No description provided for @paymentSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment being verified'**
+  String get paymentSubmitted;
+
+  /// No description provided for @paymentPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get paymentPaid;
+
+  /// No description provided for @paymentVoid.
+  ///
+  /// In en, this message translates to:
+  /// **'Not charged'**
+  String get paymentVoid;
+
+  /// No description provided for @callShop.
+  ///
+  /// In en, this message translates to:
+  /// **'Call shop'**
+  String get callShop;
+
+  /// No description provided for @noUpiApp.
+  ///
+  /// In en, this message translates to:
+  /// **'No UPI app found on this phone'**
+  String get noUpiApp;
+
+  /// No description provided for @adminOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders'**
+  String get adminOrders;
+
+  /// No description provided for @adminOrdersSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New, in progress and completed orders'**
+  String get adminOrdersSubtitle;
+
+  /// No description provided for @tabNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get tabNew;
+
+  /// No description provided for @tabActive.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get tabActive;
+
+  /// No description provided for @tabDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get tabDone;
+
+  /// No description provided for @noOrdersHere.
+  ///
+  /// In en, this message translates to:
+  /// **'No orders here'**
+  String get noOrdersHere;
+
+  /// No description provided for @callCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Call customer'**
+  String get callCustomer;
+
+  /// No description provided for @markPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as paid'**
+  String get markPaid;
+
+  /// No description provided for @rejectOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get rejectOrder;
+
+  /// No description provided for @rejectReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason (shown to the customer)'**
+  String get rejectReason;
+
+  /// No description provided for @actionConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept order'**
+  String get actionConfirm;
+
+  /// No description provided for @actionPack.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark packed'**
+  String get actionPack;
+
+  /// No description provided for @actionOutForDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Send for delivery'**
+  String get actionOutForDelivery;
+
+  /// No description provided for @actionReadyForPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready for pickup'**
+  String get actionReadyForPickup;
+
+  /// No description provided for @actionDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark delivered'**
+  String get actionDelivered;
+
+  /// No description provided for @actionPickedUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer picked up'**
+  String get actionPickedUp;
+
+  /// No description provided for @customerNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer note'**
+  String get customerNote;
+
+  /// No description provided for @errorCartChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Some items changed. Please review your cart.'**
+  String get errorCartChanged;
+
+  /// No description provided for @errorOutOfStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Some items just ran out.'**
+  String get errorOutOfStock;
+
+  /// No description provided for @errorBelowMinimum.
+  ///
+  /// In en, this message translates to:
+  /// **'Your order is below the minimum amount.'**
+  String get errorBelowMinimum;
+
+  /// No description provided for @errorOutsideArea.
+  ///
+  /// In en, this message translates to:
+  /// **'The shop does not deliver to this address.'**
+  String get errorOutsideArea;
+
+  /// No description provided for @errorAddressRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a delivery address.'**
+  String get errorAddressRequired;
+
+  /// No description provided for @errorOptionUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This option is not available at this shop.'**
+  String get errorOptionUnavailable;
+
+  /// No description provided for @errorNotCancellable.
+  ///
+  /// In en, this message translates to:
+  /// **'This order can no longer be cancelled. Please call the shop.'**
+  String get errorNotCancellable;
+
+  /// No description provided for @errorOrderChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Someone else updated this order. Refreshed.'**
+  String get errorOrderChanged;
+
+  /// No description provided for @errorPaymentClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'This payment can no longer be changed.'**
+  String get errorPaymentClosed;
+
+  /// No description provided for @errorAddressLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'You have too many addresses. Delete one first.'**
+  String get errorAddressLimit;
+
+  /// No description provided for @cartItems.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item} other{{count} items}}'**
+  String cartItems(int count);
+
+  /// No description provided for @youSave.
+  ///
+  /// In en, this message translates to:
+  /// **'You save {amount}'**
+  String youSave(String amount);
+
+  /// No description provided for @freeDeliveryGap.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {amount} more for free delivery'**
+  String freeDeliveryGap(String amount);
+
+  /// No description provided for @minOrderGap.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {amount} more to order (minimum {minimum})'**
+  String minOrderGap(String amount, String minimum);
+
+  /// No description provided for @lineOnlyLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Only {count} left'**
+  String lineOnlyLeft(int count);
+
+  /// No description provided for @setQtyTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Change to {count}'**
+  String setQtyTo(int count);
+
+  /// No description provided for @placeOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Place order · {amount}'**
+  String placeOrder(String amount);
+
+  /// No description provided for @orderNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Order #{number}'**
+  String orderNumber(int number);
+
+  /// No description provided for @payWithUpi.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay {amount} with UPI'**
+  String payWithUpi(String amount);
+
+  /// No description provided for @payOnDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay {amount} in cash on delivery'**
+  String payOnDelivery(String amount);
+
+  /// No description provided for @utrShown.
+  ///
+  /// In en, this message translates to:
+  /// **'UTR {utr}'**
+  String utrShown(String utr);
+
+  /// No description provided for @rejectedBecause.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason: {reason}'**
+  String rejectedBecause(String reason);
 }
 
 class _AppLocalizationsDelegate

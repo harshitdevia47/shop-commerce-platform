@@ -8,6 +8,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/providers.dart';
 import '../../../core/router/routes.dart';
+import '../../../core/router/app_router.dart';
 import 'auth_controller.dart';
 
 /// Step 2: 6-digit code. Shown at /login/otp. On success goes to the home for the user's role.
@@ -66,10 +67,12 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
       _error = null;
     });
     try {
-      final user = await ref.read(authControllerProvider.notifier).verifyOtp(widget.args.phone, _code.text);
-      // Navigate explicitly: a redirect to `/` would not unwind the pushed login pages.
-      if (mounted) context.go(Routes.homeFor(user.role));
+      // On success the router's auth listener navigates: the role's home, then `returnTo`
+      // for customers. (OTP is only reachable while logged out, so login always changes the user.)
+      ref.read(pendingReturnToProvider.notifier).set(widget.args.returnTo);
+      await ref.read(authControllerProvider.notifier).verifyOtp(widget.args.phone, _code.text);
     } on Object catch (error) {
+      ref.read(pendingReturnToProvider.notifier).set(null);
       if (mounted) setState(() => _error = errorMessage(context.l10n, error));
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -133,8 +136,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                   : Text(l10n.verify),
             ),
             const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
               children: [
                 TextButton(onPressed: () => context.pop(), child: Text(l10n.changeNumber)),
                 TextButton(

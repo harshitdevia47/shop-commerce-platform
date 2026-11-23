@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../core/l10n/l10n.dart';
 import '../../../core/providers.dart';
+import '../../cart/presentation/widgets/cart_bar.dart';
 import 'catalog_providers.dart';
 import 'widgets/product_grid.dart';
 
@@ -29,6 +30,7 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
     final filter = ProductFilter(categoryId: _selected ?? widget.categoryId);
 
     return Scaffold(
+      bottomNavigationBar: const CartBar(),
       appBar: AppBar(title: Text(category?.localizedName(locale) ?? '')),
       body: RefreshIndicator(
         onRefresh: () => ref.read(productListProvider(filter).notifier).refresh(),

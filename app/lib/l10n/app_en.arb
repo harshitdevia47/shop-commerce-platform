@@ -216,5 +216,187 @@
         "type": "int"
       }
     }
+  },
+  "addToCart": "ADD",
+  "cartTitle": "Cart",
+  "viewCart": "View cart",
+  "cartEmpty": "Your cart is empty",
+  "startShopping": "Browse products",
+  "billDetails": "Bill details",
+  "itemTotal": "Item total",
+  "deliveryFeeLabel": "Delivery fee",
+  "free": "FREE",
+  "toPay": "To pay",
+  "lineUnavailable": "No longer available",
+  "proceed": "Proceed",
+  "loginToOrder": "Log in to place your order",
+  "deliveryOption": "Delivery",
+  "pickupOption": "Store pickup",
+  "checkoutTitle": "Checkout",
+  "deliverTo": "Deliver to",
+  "pickupFrom": "Pick up from",
+  "addAddress": "Add address",
+  "noAddresses": "Add a delivery address to continue",
+  "addressLine1": "House / flat, street",
+  "addressLine2": "Area (optional)",
+  "landmarkLabel": "Landmark (optional)",
+  "cityLabel": "City",
+  "pincodeLabel": "Pincode",
+  "invalidPincode": "Enter a 6-digit pincode",
+  "addressHome": "Home",
+  "addressWork": "Work",
+  "addressOther": "Other",
+  "paymentMethodTitle": "Payment",
+  "noteLabel": "Note for the shop (optional)",
+  "ordersTitle": "My orders",
+  "noOrders": "No orders yet",
+  "orderPlacedTitle": "Order placed!",
+  "statusPlaced": "Placed",
+  "statusConfirmed": "Confirmed",
+  "statusPacked": "Packed",
+  "statusOutForDelivery": "Out for delivery",
+  "statusReadyForPickup": "Ready for pickup",
+  "statusDelivered": "Delivered",
+  "statusPickedUp": "Picked up",
+  "statusCancelled": "Cancelled",
+  "statusRejected": "Rejected by shop",
+  "cancelOrder": "Cancel order",
+  "cancelOrderConfirm": "Cancel this order?",
+  "keepOrder": "Keep order",
+  "utrPrompt": "Paid? Enter the 12-digit UTR from your UPI app so the shop can confirm.",
+  "utrLabel": "UTR number",
+  "submit": "Submit",
+  "utrInvalid": "UTR is 12 digits",
+  "paymentPending": "Payment pending",
+  "paymentSubmitted": "Payment being verified",
+  "paymentPaid": "Paid",
+  "paymentVoid": "Not charged",
+  "callShop": "Call shop",
+  "noUpiApp": "No UPI app found on this phone",
+  "adminOrders": "Orders",
+  "adminOrdersSubtitle": "New, in progress and completed orders",
+  "tabNew": "New",
+  "tabActive": "In progress",
+  "tabDone": "Completed",
+  "noOrdersHere": "No orders here",
+  "callCustomer": "Call customer",
+  "markPaid": "Mark as paid",
+  "rejectOrder": "Reject",
+  "rejectReason": "Reason (shown to the customer)",
+  "actionConfirm": "Accept order",
+  "actionPack": "Mark packed",
+  "actionOutForDelivery": "Send for delivery",
+  "actionReadyForPickup": "Ready for pickup",
+  "actionDelivered": "Mark delivered",
+  "actionPickedUp": "Customer picked up",
+  "customerNote": "Customer note",
+  "errorCartChanged": "Some items changed. Please review your cart.",
+  "errorOutOfStock": "Some items just ran out.",
+  "errorBelowMinimum": "Your order is below the minimum amount.",
+  "errorOutsideArea": "The shop does not deliver to this address.",
+  "errorAddressRequired": "Choose a delivery address.",
+  "errorOptionUnavailable": "This option is not available at this shop.",
+  "errorNotCancellable": "This order can no longer be cancelled. Please call the shop.",
+  "errorOrderChanged": "Someone else updated this order. Refreshed.",
+  "errorPaymentClosed": "This payment can no longer be changed.",
+  "errorAddressLimit": "You have too many addresses. Delete one first.",
+  "cartItems": "{count, plural, =1{1 item} other{{count} items}}",
+  "@cartItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "youSave": "You save {amount}",
+  "@youSave": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "freeDeliveryGap": "Add {amount} more for free delivery",
+  "@freeDeliveryGap": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "minOrderGap": "Add {amount} more to order (minimum {minimum})",
+  "@minOrderGap": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "minimum": {
+        "type": "String"
+      }
+    }
+  },
+  "lineOnlyLeft": "Only {count} left",
+  "@lineOnlyLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "setQtyTo": "Change to {count}",
+  "@setQtyTo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "placeOrder": "Place order · {amount}",
+  "@placeOrder": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "orderNumber": "Order #{number}",
+  "@orderNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "payWithUpi": "Pay {amount} with UPI",
+  "@payWithUpi": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payOnDelivery": "Pay {amount} in cash on delivery",
+  "@payOnDelivery": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "utrShown": "UTR {utr}",
+  "@utrShown": {
+    "placeholders": {
+      "utr": {
+        "type": "String"
+      }
+    }
+  },
+  "rejectedBecause": "Reason: {reason}",
+  "@rejectedBecause": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
   }
 }

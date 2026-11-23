@@ -5,6 +5,8 @@ import 'package:qc_app/core/config/env_config.dart';
 import 'package:qc_app/core/config/shop_settings.dart';
 import 'package:qc_app/core/config/shop_settings_repository.dart';
 import 'package:qc_app/core/network/api_exception.dart';
+import 'package:qc_app/features/auth/data/auth_api.dart';
+import 'package:qc_app/features/auth/domain/auth_models.dart';
 import 'package:qc_app/features/catalog/data/catalog_repository.dart';
 import 'package:qc_app/features/catalog/domain/catalog_models.dart';
 
@@ -180,3 +182,53 @@ class FakeCatalogRepository implements CatalogRepository {
     orElse: () => throw const ApiException('PRODUCT_NOT_FOUND', 'not found', statusCode: 404),
   );
 }
+
+// ---- Auth ----
+
+class FakeAuthApi implements AuthApi {
+  FakeAuthApi({this.role = UserRole.customer});
+
+  UserRole role;
+  String? lastPhone;
+  int logouts = 0;
+  AppUser? profile;
+
+  AuthSession _session(String phone) {
+    profile ??= AppUser(id: 'user-1', phone: phone, role: role);
+    return AuthSession(
+      accessToken: 'access',
+      accessTokenExpiresAt: DateTime.utc(2030),
+      refreshToken: 'refresh',
+      refreshTokenExpiresAt: DateTime.utc(2030),
+      user: profile!,
+    );
+  }
+
+  @override
+  Future<OtpRequestResult> requestOtp(String phone) async {
+    lastPhone = phone;
+    return const OtpRequestResult(expiresInSeconds: 300, resendAfterSeconds: 30, debugCode: '123456');
+  }
+
+  @override
+  Future<AuthSession> verifyOtp(String phone, String code) async {
+    if (code != '123456') {
+      throw const ApiException('OTP_INVALID', 'wrong', statusCode: 400, details: {'attemptsLeft': 4});
+    }
+    return _session(phone);
+  }
+
+  @override
+  Future<AuthSession> refresh(String refreshToken) async => _session(lastPhone ?? '+919876543210');
+
+  @override
+  Future<void> logout(String refreshToken) async => logouts++;
+
+  @override
+  Future<AppUser> me() async => profile!;
+
+  @override
+  Future<AppUser> updateMe({String? name, String? locale}) async =>
+      profile = AppUser(id: profile!.id, phone: profile!.phone, role: profile!.role, name: name ?? profile!.name);
+}
+

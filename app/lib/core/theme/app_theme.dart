@@ -15,6 +15,13 @@ ThemeData buildAppTheme(ClientConfig client, {Brightness brightness = Brightness
     colorScheme: scheme,
     visualDensity: VisualDensity.standard,
     appBarTheme: AppBarTheme(backgroundColor: scheme.primary, foregroundColor: scheme.onPrimary, centerTitle: false),
+    // Tabs sit in the brand-coloured app bar.
+    tabBarTheme: TabBarThemeData(
+      labelColor: scheme.onPrimary,
+      unselectedLabelColor: scheme.onPrimary.withValues(alpha: 0.7),
+      indicatorColor: scheme.onPrimary,
+      dividerColor: Colors.transparent,
+    ),
     cardTheme: const CardThemeData(margin: EdgeInsets.zero, clipBehavior: Clip.antiAlias),
     filledButtonTheme: FilledButtonThemeData(style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48))),
   );

@@ -36,6 +36,17 @@ class AdminHomeScreen extends ConsumerWidget {
           const SizedBox(height: 24),
           Card(
             child: ListTile(
+              key: const Key('adminOrdersTile'),
+              leading: const Icon(Icons.receipt_long_outlined),
+              title: Text(l10n.adminOrders),
+              subtitle: Text(l10n.adminOrdersSubtitle),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push(Routes.adminOrders),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Card(
+            child: ListTile(
               key: const Key('adminProductsTile'),
               leading: const Icon(Icons.inventory_2_outlined),
               title: Text(l10n.adminProducts),
@@ -53,14 +64,6 @@ class AdminHomeScreen extends ConsumerWidget {
               subtitle: Text(l10n.adminCategoriesSubtitle),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => context.push(Routes.adminCategories),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.receipt_long_outlined),
-              title: Text(l10n.adminComingSoon),
-              subtitle: user == null ? null : Text(user.role.label(l10n)),
             ),
           ),
         ],

@@ -7,6 +7,7 @@ import '../../../../core/providers.dart';
 import '../../../../core/router/routes.dart';
 import '../../../../core/widgets/server_image.dart';
 import '../../../../core/widgets/skeleton.dart';
+import '../../../cart/presentation/widgets/add_to_cart_button.dart';
 import '../../domain/catalog_models.dart';
 import 'price_tag.dart';
 
@@ -60,7 +61,12 @@ class ProductCard extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Text(variantText, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
               ),
-            Padding(padding: const EdgeInsets.fromLTRB(8, 4, 8, 8), child: PriceTag(variant)),
+            // Price and ADD stacked: side by side they do not fit two-column grids on small phones.
+            Padding(padding: const EdgeInsets.fromLTRB(8, 4, 8, 6), child: PriceTag(variant)),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+              child: SizedBox(width: double.infinity, child: AddToCartButton(product: product, dense: true)),
+            ),
           ],
         ),
       ),
@@ -91,5 +97,5 @@ const productGridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
   maxCrossAxisExtent: 220,
   mainAxisSpacing: 8,
   crossAxisSpacing: 8,
-  mainAxisExtent: 290,
+  mainAxisExtent: 320,
 );

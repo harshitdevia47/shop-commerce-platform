@@ -10,10 +10,11 @@ void main() {
       expect(authRedirect(user: null, location: '/'), isNull);
       expect(authRedirect(user: null, location: '/login'), isNull);
       expect(authRedirect(user: null, location: '/login/otp'), isNull);
+      expect(authRedirect(user: null, location: '/cart'), isNull); // guests fill a cart, log in at checkout
     });
 
     test('is sent to login for protected areas', () {
-      for (final location in ['/account', '/admin', '/admin/orders', '/rider']) {
+      for (final location in ['/account', '/admin', '/admin/orders', '/rider', '/checkout', '/orders', '/orders/o1']) {
         expect(authRedirect(user: null, location: location), '/login', reason: location);
       }
     });

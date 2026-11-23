@@ -10,7 +10,10 @@ import 'auth_controller.dart';
 
 /// Step 1: phone number. Shown at /login.
 class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({this.returnTo, super.key});
+
+  /// Where a customer continues after logging in (e.g. `/checkout`).
+  final String? returnTo;
 
   @override
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
@@ -41,7 +44,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (!mounted) return;
       await context.push(
         Routes.otp,
-        extra: OtpRouteArgs(phone: phone, request: result),
+        extra: OtpRouteArgs(phone: phone, request: result, returnTo: widget.returnTo),
       );
     } on Object catch (error) {
       if (mounted) setState(() => _error = errorMessage(context.l10n, error));

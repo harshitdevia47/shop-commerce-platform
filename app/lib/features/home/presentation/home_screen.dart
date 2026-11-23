@@ -11,6 +11,7 @@ import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/language_menu.dart';
 import '../../../core/widgets/splash_view.dart';
 import '../../auth/presentation/auth_controller.dart';
+import '../../cart/presentation/widgets/cart_bar.dart';
 import '../../catalog/presentation/catalog_providers.dart';
 import '../../catalog/presentation/widgets/category_strip.dart';
 import '../../catalog/presentation/widgets/product_grid.dart';
@@ -56,6 +57,7 @@ class _HomeContent extends ConsumerWidget {
     final delivery = settings.delivery;
 
     return Scaffold(
+      bottomNavigationBar: const CartBar(),
       body: RefreshIndicator(
         onRefresh: () => _refresh(ref),
         child: CustomScrollView(
@@ -72,6 +74,13 @@ class _HomeContent extends ConsumerWidget {
               title: Text(settings.shop.localizedName(locale)),
               actions: [
                 const LanguageMenu(),
+                if (isSignedIn)
+                  IconButton(
+                    key: const Key('myOrdersButton'),
+                    tooltip: l10n.ordersTitle,
+                    icon: const Icon(Icons.receipt_long_outlined),
+                    onPressed: () => context.push(Routes.orders),
+                  ),
                 IconButton(
                   key: const Key('accountButton'),
                   tooltip: isSignedIn ? l10n.account : l10n.login,

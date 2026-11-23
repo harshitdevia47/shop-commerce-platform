@@ -438,4 +438,323 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get addToCart => 'ADD';
+
+  @override
+  String get cartTitle => 'Cart';
+
+  @override
+  String get viewCart => 'View cart';
+
+  @override
+  String get cartEmpty => 'Your cart is empty';
+
+  @override
+  String get startShopping => 'Browse products';
+
+  @override
+  String get billDetails => 'Bill details';
+
+  @override
+  String get itemTotal => 'Item total';
+
+  @override
+  String get deliveryFeeLabel => 'Delivery fee';
+
+  @override
+  String get free => 'FREE';
+
+  @override
+  String get toPay => 'To pay';
+
+  @override
+  String get lineUnavailable => 'No longer available';
+
+  @override
+  String get proceed => 'Proceed';
+
+  @override
+  String get loginToOrder => 'Log in to place your order';
+
+  @override
+  String get deliveryOption => 'Delivery';
+
+  @override
+  String get pickupOption => 'Store pickup';
+
+  @override
+  String get checkoutTitle => 'Checkout';
+
+  @override
+  String get deliverTo => 'Deliver to';
+
+  @override
+  String get pickupFrom => 'Pick up from';
+
+  @override
+  String get addAddress => 'Add address';
+
+  @override
+  String get noAddresses => 'Add a delivery address to continue';
+
+  @override
+  String get addressLine1 => 'House / flat, street';
+
+  @override
+  String get addressLine2 => 'Area (optional)';
+
+  @override
+  String get landmarkLabel => 'Landmark (optional)';
+
+  @override
+  String get cityLabel => 'City';
+
+  @override
+  String get pincodeLabel => 'Pincode';
+
+  @override
+  String get invalidPincode => 'Enter a 6-digit pincode';
+
+  @override
+  String get addressHome => 'Home';
+
+  @override
+  String get addressWork => 'Work';
+
+  @override
+  String get addressOther => 'Other';
+
+  @override
+  String get paymentMethodTitle => 'Payment';
+
+  @override
+  String get noteLabel => 'Note for the shop (optional)';
+
+  @override
+  String get ordersTitle => 'My orders';
+
+  @override
+  String get noOrders => 'No orders yet';
+
+  @override
+  String get orderPlacedTitle => 'Order placed!';
+
+  @override
+  String get statusPlaced => 'Placed';
+
+  @override
+  String get statusConfirmed => 'Confirmed';
+
+  @override
+  String get statusPacked => 'Packed';
+
+  @override
+  String get statusOutForDelivery => 'Out for delivery';
+
+  @override
+  String get statusReadyForPickup => 'Ready for pickup';
+
+  @override
+  String get statusDelivered => 'Delivered';
+
+  @override
+  String get statusPickedUp => 'Picked up';
+
+  @override
+  String get statusCancelled => 'Cancelled';
+
+  @override
+  String get statusRejected => 'Rejected by shop';
+
+  @override
+  String get cancelOrder => 'Cancel order';
+
+  @override
+  String get cancelOrderConfirm => 'Cancel this order?';
+
+  @override
+  String get keepOrder => 'Keep order';
+
+  @override
+  String get utrPrompt =>
+      'Paid? Enter the 12-digit UTR from your UPI app so the shop can confirm.';
+
+  @override
+  String get utrLabel => 'UTR number';
+
+  @override
+  String get submit => 'Submit';
+
+  @override
+  String get utrInvalid => 'UTR is 12 digits';
+
+  @override
+  String get paymentPending => 'Payment pending';
+
+  @override
+  String get paymentSubmitted => 'Payment being verified';
+
+  @override
+  String get paymentPaid => 'Paid';
+
+  @override
+  String get paymentVoid => 'Not charged';
+
+  @override
+  String get callShop => 'Call shop';
+
+  @override
+  String get noUpiApp => 'No UPI app found on this phone';
+
+  @override
+  String get adminOrders => 'Orders';
+
+  @override
+  String get adminOrdersSubtitle => 'New, in progress and completed orders';
+
+  @override
+  String get tabNew => 'New';
+
+  @override
+  String get tabActive => 'In progress';
+
+  @override
+  String get tabDone => 'Completed';
+
+  @override
+  String get noOrdersHere => 'No orders here';
+
+  @override
+  String get callCustomer => 'Call customer';
+
+  @override
+  String get markPaid => 'Mark as paid';
+
+  @override
+  String get rejectOrder => 'Reject';
+
+  @override
+  String get rejectReason => 'Reason (shown to the customer)';
+
+  @override
+  String get actionConfirm => 'Accept order';
+
+  @override
+  String get actionPack => 'Mark packed';
+
+  @override
+  String get actionOutForDelivery => 'Send for delivery';
+
+  @override
+  String get actionReadyForPickup => 'Ready for pickup';
+
+  @override
+  String get actionDelivered => 'Mark delivered';
+
+  @override
+  String get actionPickedUp => 'Customer picked up';
+
+  @override
+  String get customerNote => 'Customer note';
+
+  @override
+  String get errorCartChanged => 'Some items changed. Please review your cart.';
+
+  @override
+  String get errorOutOfStock => 'Some items just ran out.';
+
+  @override
+  String get errorBelowMinimum => 'Your order is below the minimum amount.';
+
+  @override
+  String get errorOutsideArea => 'The shop does not deliver to this address.';
+
+  @override
+  String get errorAddressRequired => 'Choose a delivery address.';
+
+  @override
+  String get errorOptionUnavailable =>
+      'This option is not available at this shop.';
+
+  @override
+  String get errorNotCancellable =>
+      'This order can no longer be cancelled. Please call the shop.';
+
+  @override
+  String get errorOrderChanged => 'Someone else updated this order. Refreshed.';
+
+  @override
+  String get errorPaymentClosed => 'This payment can no longer be changed.';
+
+  @override
+  String get errorAddressLimit =>
+      'You have too many addresses. Delete one first.';
+
+  @override
+  String cartItems(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String youSave(String amount) {
+    return 'You save $amount';
+  }
+
+  @override
+  String freeDeliveryGap(String amount) {
+    return 'Add $amount more for free delivery';
+  }
+
+  @override
+  String minOrderGap(String amount, String minimum) {
+    return 'Add $amount more to order (minimum $minimum)';
+  }
+
+  @override
+  String lineOnlyLeft(int count) {
+    return 'Only $count left';
+  }
+
+  @override
+  String setQtyTo(int count) {
+    return 'Change to $count';
+  }
+
+  @override
+  String placeOrder(String amount) {
+    return 'Place order · $amount';
+  }
+
+  @override
+  String orderNumber(int number) {
+    return 'Order #$number';
+  }
+
+  @override
+  String payWithUpi(String amount) {
+    return 'Pay $amount with UPI';
+  }
+
+  @override
+  String payOnDelivery(String amount) {
+    return 'Pay $amount in cash on delivery';
+  }
+
+  @override
+  String utrShown(String utr) {
+    return 'UTR $utr';
+  }
+
+  @override
+  String rejectedBecause(String reason) {
+    return 'Reason: $reason';
+  }
 }

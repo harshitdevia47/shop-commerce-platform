@@ -7,6 +7,8 @@ import '../../../core/providers.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/server_image.dart';
 import '../../../core/widgets/splash_view.dart';
+import '../../cart/presentation/widgets/add_to_cart_button.dart';
+import '../../cart/presentation/widgets/cart_bar.dart';
 import '../domain/catalog_models.dart';
 import 'catalog_providers.dart';
 import 'widgets/price_tag.dart';
@@ -21,6 +23,7 @@ class ProductDetailScreen extends ConsumerWidget {
     final product = ref.watch(productProvider(productId));
     return Scaffold(
       appBar: AppBar(title: Text(product.value?.localizedName(ref.watch(localeProvider)) ?? '')),
+      bottomNavigationBar: const CartBar(),
       body: switch (product) {
         AsyncValue(:final value?) => _ProductBody(product: value),
         AsyncValue(:final error?) => ErrorView(error: error, onRetry: () => ref.invalidate(productProvider(productId))),
@@ -129,7 +132,9 @@ class _ProductBodyState extends ConsumerState<_ProductBody> {
         ],
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: FilledButton.tonal(onPressed: null, child: Text(l10n.orderingSoon)),
+          child: _variant.inStock
+              ? AddToCartButton(product: product, variant: _variant)
+              : FilledButton.tonal(onPressed: null, child: Text(l10n.outOfStock)),
         ),
         if (description != null || details.isNotEmpty) ...[
           const Divider(height: 32),

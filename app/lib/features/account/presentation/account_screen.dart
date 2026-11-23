@@ -1,8 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../core/l10n/l10n.dart';
+import '../../../core/router/routes.dart';
 import '../../../core/widgets/language_menu.dart';
+import '../../auth/domain/auth_models.dart';
 import '../../auth/presentation/auth_controller.dart';
 
 /// Profile: name, language, logout. Shared by every role.
@@ -70,6 +73,17 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             decoration: InputDecoration(labelText: l10n.nameLabel, border: const OutlineInputBorder()),
           ),
           FilledButton(onPressed: _saving ? null : _save, child: Text(l10n.save)),
+          if (user.role == UserRole.customer) ...[
+            const SizedBox(height: 16),
+            ListTile(
+              key: const Key('accountOrdersTile'),
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.receipt_long_outlined),
+              title: Text(l10n.ordersTitle),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push(Routes.orders),
+            ),
+          ],
           const SizedBox(height: 32),
           OutlinedButton.icon(
             key: const Key('logoutButton'),

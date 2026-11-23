@@ -434,4 +434,322 @@ class AppLocalizationsHi extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get addToCart => 'जोड़ें';
+
+  @override
+  String get cartTitle => 'कार्ट';
+
+  @override
+  String get viewCart => 'कार्ट देखें';
+
+  @override
+  String get cartEmpty => 'आपका कार्ट खाली है';
+
+  @override
+  String get startShopping => 'प्रोडक्ट देखें';
+
+  @override
+  String get billDetails => 'बिल विवरण';
+
+  @override
+  String get itemTotal => 'आइटम कुल';
+
+  @override
+  String get deliveryFeeLabel => 'डिलीवरी शुल्क';
+
+  @override
+  String get free => 'मुफ़्त';
+
+  @override
+  String get toPay => 'भुगतान करें';
+
+  @override
+  String get lineUnavailable => 'अब उपलब्ध नहीं';
+
+  @override
+  String get proceed => 'आगे बढ़ें';
+
+  @override
+  String get loginToOrder => 'ऑर्डर करने के लिए लॉगिन करें';
+
+  @override
+  String get deliveryOption => 'डिलीवरी';
+
+  @override
+  String get pickupOption => 'दुकान से लें';
+
+  @override
+  String get checkoutTitle => 'चेकआउट';
+
+  @override
+  String get deliverTo => 'कहाँ पहुँचाएँ';
+
+  @override
+  String get pickupFrom => 'यहाँ से लें';
+
+  @override
+  String get addAddress => 'पता जोड़ें';
+
+  @override
+  String get noAddresses => 'आगे बढ़ने के लिए डिलीवरी पता जोड़ें';
+
+  @override
+  String get addressLine1 => 'मकान / फ्लैट, गली';
+
+  @override
+  String get addressLine2 => 'इलाका (वैकल्पिक)';
+
+  @override
+  String get landmarkLabel => 'लैंडमार्क (वैकल्पिक)';
+
+  @override
+  String get cityLabel => 'शहर';
+
+  @override
+  String get pincodeLabel => 'पिनकोड';
+
+  @override
+  String get invalidPincode => '6 अंकों का पिनकोड लिखें';
+
+  @override
+  String get addressHome => 'घर';
+
+  @override
+  String get addressWork => 'ऑफ़िस';
+
+  @override
+  String get addressOther => 'अन्य';
+
+  @override
+  String get paymentMethodTitle => 'भुगतान';
+
+  @override
+  String get noteLabel => 'दुकान के लिए नोट (वैकल्पिक)';
+
+  @override
+  String get ordersTitle => 'मेरे ऑर्डर';
+
+  @override
+  String get noOrders => 'अभी कोई ऑर्डर नहीं';
+
+  @override
+  String get orderPlacedTitle => 'ऑर्डर हो गया!';
+
+  @override
+  String get statusPlaced => 'ऑर्डर हुआ';
+
+  @override
+  String get statusConfirmed => 'स्वीकार हुआ';
+
+  @override
+  String get statusPacked => 'पैक हुआ';
+
+  @override
+  String get statusOutForDelivery => 'डिलीवरी के लिए निकला';
+
+  @override
+  String get statusReadyForPickup => 'लेने के लिए तैयार';
+
+  @override
+  String get statusDelivered => 'पहुँच गया';
+
+  @override
+  String get statusPickedUp => 'ले लिया';
+
+  @override
+  String get statusCancelled => 'रद्द हुआ';
+
+  @override
+  String get statusRejected => 'दुकान ने मना किया';
+
+  @override
+  String get cancelOrder => 'ऑर्डर रद्द करें';
+
+  @override
+  String get cancelOrderConfirm => 'यह ऑर्डर रद्द करें?';
+
+  @override
+  String get keepOrder => 'ऑर्डर रखें';
+
+  @override
+  String get utrPrompt =>
+      'भुगतान किया? दुकान पुष्टि कर सके, इसके लिए UPI ऐप से 12 अंकों का UTR लिखें.';
+
+  @override
+  String get utrLabel => 'UTR नंबर';
+
+  @override
+  String get submit => 'भेजें';
+
+  @override
+  String get utrInvalid => 'UTR 12 अंकों का होता है';
+
+  @override
+  String get paymentPending => 'भुगतान बाकी';
+
+  @override
+  String get paymentSubmitted => 'भुगतान की जाँच हो रही है';
+
+  @override
+  String get paymentPaid => 'भुगतान हो गया';
+
+  @override
+  String get paymentVoid => 'चार्ज नहीं हुआ';
+
+  @override
+  String get callShop => 'दुकान को कॉल करें';
+
+  @override
+  String get noUpiApp => 'इस फ़ोन में कोई UPI ऐप नहीं मिला';
+
+  @override
+  String get adminOrders => 'ऑर्डर';
+
+  @override
+  String get adminOrdersSubtitle => 'नए, चालू और पूरे हुए ऑर्डर';
+
+  @override
+  String get tabNew => 'नए';
+
+  @override
+  String get tabActive => 'चालू';
+
+  @override
+  String get tabDone => 'पूरे';
+
+  @override
+  String get noOrdersHere => 'यहाँ कोई ऑर्डर नहीं';
+
+  @override
+  String get callCustomer => 'ग्राहक को कॉल करें';
+
+  @override
+  String get markPaid => 'भुगतान हुआ मानें';
+
+  @override
+  String get rejectOrder => 'मना करें';
+
+  @override
+  String get rejectReason => 'कारण (ग्राहक को दिखेगा)';
+
+  @override
+  String get actionConfirm => 'ऑर्डर स्वीकार करें';
+
+  @override
+  String get actionPack => 'पैक हुआ';
+
+  @override
+  String get actionOutForDelivery => 'डिलीवरी के लिए भेजें';
+
+  @override
+  String get actionReadyForPickup => 'लेने के लिए तैयार';
+
+  @override
+  String get actionDelivered => 'पहुँचा दिया';
+
+  @override
+  String get actionPickedUp => 'ग्राहक ले गए';
+
+  @override
+  String get customerNote => 'ग्राहक का नोट';
+
+  @override
+  String get errorCartChanged => 'कुछ आइटम बदल गए हैं. कार्ट फिर से देखें.';
+
+  @override
+  String get errorOutOfStock => 'कुछ आइटम अभी खत्म हो गए.';
+
+  @override
+  String get errorBelowMinimum => 'आपका ऑर्डर न्यूनतम राशि से कम है.';
+
+  @override
+  String get errorOutsideArea => 'दुकान इस पते पर डिलीवरी नहीं करती.';
+
+  @override
+  String get errorAddressRequired => 'डिलीवरी पता चुनें.';
+
+  @override
+  String get errorOptionUnavailable => 'यह विकल्प इस दुकान में उपलब्ध नहीं है.';
+
+  @override
+  String get errorNotCancellable =>
+      'यह ऑर्डर अब रद्द नहीं हो सकता. दुकान को कॉल करें.';
+
+  @override
+  String get errorOrderChanged =>
+      'किसी और ने यह ऑर्डर बदला है. फिर से लोड किया.';
+
+  @override
+  String get errorPaymentClosed => 'यह भुगतान अब बदला नहीं जा सकता.';
+
+  @override
+  String get errorAddressLimit => 'बहुत सारे पते हैं. पहले एक हटाएँ.';
+
+  @override
+  String cartItems(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count आइटम',
+      one: '1 आइटम',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String youSave(String amount) {
+    return 'आप $amount बचा रहे हैं';
+  }
+
+  @override
+  String freeDeliveryGap(String amount) {
+    return 'मुफ़्त डिलीवरी के लिए $amount और जोड़ें';
+  }
+
+  @override
+  String minOrderGap(String amount, String minimum) {
+    return 'ऑर्डर के लिए $amount और जोड़ें (न्यूनतम $minimum)';
+  }
+
+  @override
+  String lineOnlyLeft(int count) {
+    return 'केवल $count बचे';
+  }
+
+  @override
+  String setQtyTo(int count) {
+    return '$count करें';
+  }
+
+  @override
+  String placeOrder(String amount) {
+    return 'ऑर्डर करें · $amount';
+  }
+
+  @override
+  String orderNumber(int number) {
+    return 'ऑर्डर #$number';
+  }
+
+  @override
+  String payWithUpi(String amount) {
+    return 'UPI से $amount चुकाएँ';
+  }
+
+  @override
+  String payOnDelivery(String amount) {
+    return 'डिलीवरी पर $amount नकद दें';
+  }
+
+  @override
+  String utrShown(String utr) {
+    return 'UTR $utr';
+  }
+
+  @override
+  String rejectedBecause(String reason) {
+    return 'कारण: $reason';
+  }
 }

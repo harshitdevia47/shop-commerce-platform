@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -11,10 +13,16 @@ import '../../features/auth/domain/auth_models.dart';
 import '../../features/auth/presentation/auth_controller.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/otp_screen.dart';
+import '../../features/admin_orders/presentation/admin_order_detail_screen.dart';
+import '../../features/admin_orders/presentation/admin_orders_screen.dart';
+import '../../features/cart/presentation/cart_screen.dart';
 import '../../features/catalog/presentation/category_screen.dart';
 import '../../features/catalog/presentation/product_detail_screen.dart';
 import '../../features/catalog/presentation/search_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
+import '../../features/orders/presentation/checkout_screen.dart';
+import '../../features/orders/presentation/my_orders_screen.dart';
+import '../../features/orders/presentation/order_detail_screen.dart';
 import '../../features/rider_deliveries/presentation/rider_home_screen.dart';
 import 'routes.dart';
 
@@ -24,7 +32,7 @@ import 'routes.dart';
 ///   - admin and rider areas are role-gated; staff/riders opening `/` go to their area
 String? authRedirect({required AppUser? user, required String location}) {
   final loggingIn = location == Routes.login || location.startsWith('${Routes.login}/');
-  final protected = [Routes.account, Routes.admin, Routes.rider];
+  final protected = [Routes.account, Routes.admin, Routes.rider, Routes.checkout, Routes.orders];
   bool under(String root) => location == root || location.startsWith('$root/');
 
   if (user == null) return protected.any(under) ? Routes.login : null;
@@ -36,6 +44,23 @@ String? authRedirect({required AppUser? user, required String location}) {
   if (location == Routes.home && home != Routes.home) return home;
   return null;
 }
+
+/// Customer page to open right after login (set by the OTP screen, used once by the router).
+class PendingReturnTo extends Notifier<String?> {
+  @override
+  String? build() => null;
+
+  void set(String? location) => state = location;
+
+  /// Returns the location and clears it. Only internal paths are accepted.
+  String? take() {
+    final location = state;
+    state = null;
+    return location != null && location.startsWith('/') && !location.startsWith('//') ? location : null;
+  }
+}
+
+final pendingReturnToProvider = NotifierProvider<PendingReturnTo, String?>(PendingReturnTo.new);
 
 final routerProvider = Provider<GoRouter>((ref) {
   // Re-run redirects whenever the signed-in user changes.
@@ -53,6 +78,21 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(path: Routes.home, builder: (context, state) => const HomeScreen()),
       GoRoute(path: Routes.search, builder: (context, state) => const SearchScreen()),
+      GoRoute(path: Routes.cart, builder: (context, state) => const CartScreen()),
+      GoRoute(path: Routes.checkout, builder: (context, state) => const CheckoutScreen()),
+      GoRoute(
+        path: Routes.orders,
+        builder: (context, state) => const MyOrdersScreen(),
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder: (context, state) => OrderDetailScreen(
+              orderId: state.pathParameters['id']!,
+              justPlaced: state.uri.queryParameters['placed'] == '1',
+            ),
+          ),
+        ],
+      ),
       GoRoute(
         path: '/c/:id',
         builder: (context, state) => CategoryScreen(categoryId: state.pathParameters['id']!),
@@ -63,7 +103,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: Routes.login,
-        builder: (context, state) => const LoginScreen(),
+        builder: (context, state) => LoginScreen(returnTo: state.uri.queryParameters['from']),
         routes: [
           GoRoute(
             path: 'otp',
@@ -93,6 +133,16 @@ final routerProvider = Provider<GoRouter>((ref) {
             ],
           ),
           GoRoute(path: 'categories', builder: (context, state) => const AdminCategoriesScreen()),
+          GoRoute(
+            path: 'orders',
+            builder: (context, state) => const AdminOrdersScreen(),
+            routes: [
+              GoRoute(
+                path: ':id',
+                builder: (context, state) => AdminOrderDetailScreen(orderId: state.pathParameters['id']!),
+              ),
+            ],
+          ),
         ],
       ),
       GoRoute(path: Routes.rider, builder: (context, state) => const RiderHomeScreen()),
@@ -108,6 +158,13 @@ final routerProvider = Provider<GoRouter>((ref) {
     if (before?.id == after?.id && before?.role == after?.role) return;
     if (before != null && after == null) {
       router.go(Routes.home); // logged out or session expired: back to browsing as a guest
+      return;
+    }
+    if (before == null && after != null) {
+      // Just logged in: land on the role's home, then resume e.g. checkout for customers.
+      final returnTo = ref.read(pendingReturnToProvider.notifier).take();
+      router.go(Routes.homeFor(after.role));
+      if (returnTo != null && after.role == UserRole.customer) unawaited(router.push(returnTo));
       return;
     }
     final location = router.routerDelegate.currentConfiguration.last.matchedLocation;

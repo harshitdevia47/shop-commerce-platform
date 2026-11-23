@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../core/l10n/l10n.dart';
+import '../../cart/presentation/widgets/cart_bar.dart';
 import 'catalog_providers.dart';
 import 'widgets/product_grid.dart';
 
@@ -42,6 +43,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final l10n = context.l10n;
     final ready = _query.length >= SearchScreen.minLength;
     return Scaffold(
+      bottomNavigationBar: const CartBar(),
       appBar: AppBar(
         titleSpacing: 0,
         title: TextField(

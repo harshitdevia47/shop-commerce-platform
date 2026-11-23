@@ -10,6 +10,10 @@ abstract final class Routes {
   static const admin = '/admin';
   static const rider = '/rider';
   static const search = '/search';
+  static const cart = '/cart';
+  static const checkout = '/checkout';
+  static const orders = '/orders';
+  static const adminOrders = '/admin/orders';
   static const adminProducts = '/admin/products';
   static const adminNewProduct = '/admin/products/new';
   static const adminCategories = '/admin/categories';
@@ -17,6 +21,8 @@ abstract final class Routes {
   static String product(String id) => '/p/$id';
   static String category(String id) => '/c/$id';
   static String adminProduct(String id) => '/admin/products/$id';
+  static String order(String id) => '/orders/$id';
+  static String adminOrder(String id) => '/admin/orders/$id';
 
   /// Landing page for a signed-in user.
   static String homeFor(UserRole role) => switch (role) {
@@ -28,8 +34,11 @@ abstract final class Routes {
 
 @immutable
 class OtpRouteArgs {
-  const OtpRouteArgs({required this.phone, required this.request});
+  const OtpRouteArgs({required this.phone, required this.request, this.returnTo});
 
   final String phone;
   final OtpRequestResult request;
+
+  /// Customer page to continue on after login (e.g. checkout), opened on top of home.
+  final String? returnTo;
 }
