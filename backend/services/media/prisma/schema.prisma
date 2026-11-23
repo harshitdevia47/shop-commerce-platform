@@ -1,0 +1,48 @@
+// Media service: uploaded files and their processed renditions.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  runtime             = "nodejs"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// What an upload is for. Decides visibility and which roles may upload it.
+enum MediaKind {
+  PRODUCT_IMAGE
+  CATEGORY_IMAGE
+}
+
+enum Visibility {
+  /// Served by nginx from /media without checks (catalog images).
+  PUBLIC
+  /// Served only through the media service after access checks (prescriptions, payment proofs; later phases).
+  PRIVATE
+}
+
+/// One uploaded image. Renditions are WebP files under <root>/<visibility>/<shopId>/...
+model MediaFile {
+  id         String     @id @default(uuid(7)) @db.Uuid
+  shopId     String     @map("shop_id") @db.Uuid
+  uploadedBy String     @map("uploaded_by") @db.Uuid
+  kind       MediaKind
+  visibility Visibility
+  /// Path of the large rendition relative to the visibility root, e.g. <shopId>/2026/11/<id>-1200.webp
+  path       String
+  /// Path of the thumbnail rendition.
+  thumbPath  String     @map("thumb_path")
+  width      Int
+  height     Int
+  /// Total bytes on disk across renditions.
+  bytes      Int
+  createdAt  DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  deletedAt  DateTime?  @map("deleted_at") @db.Timestamptz(3)
+
+  @@index([shopId, kind, createdAt])
+  @@map("media_files")
+}

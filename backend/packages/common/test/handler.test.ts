@@ -3,7 +3,7 @@ import pino from 'pino';
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
-import { Errors, errorHandler, handler, notFoundHandler } from '../src/index.js';
+import { Errors, Page, errorHandler, handler, notFoundHandler, toPage } from '../src/index.js';
 
 const app = express();
 app.use(express.json());
@@ -71,5 +71,15 @@ describe('handler', () => {
     const res = await request(app).get('/nope');
     expect(res.status).toBe(404);
     expect(res.body.error.code).toBe('ROUTE_NOT_FOUND');
+  });
+});
+
+describe('Page results', () => {
+  it('are sent as { data, nextCursor }', async () => {
+    const pages = express();
+    pages.get('/p', handler({}, () => toPage([1, 2, 3], 2, String)));
+    pages.get('/last', handler({}, () => new Page([1], null)));
+    expect((await request(pages).get('/p')).body).toEqual({ data: [1, 2], nextCursor: '2' });
+    expect((await request(pages).get('/last')).body).toEqual({ data: [1], nextCursor: null });
   });
 });

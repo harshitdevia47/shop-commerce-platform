@@ -2,7 +2,7 @@
 
 Multi-tenant quick-commerce ordering platform (Zepto/Blinkit-style architecture) for local shops in small Indian cities. One backend platform (microservices) and one Flutter codebase serve every client shop. Each client gets a separately branded APK built from the same code.
 
-> **Status:** Phase 0 (foundations) and Phase 1 (identity: OTP login, tokens, roles, app login flow) done 2026-11-23. Next: Phase 2 (catalog + media services, customer browsing, admin products).
+> **Status:** Phase 0 (foundations), Phase 1 (identity: OTP login, tokens, roles, app login flow) and Phase 2 (catalog + media services, customer browsing/search, admin products/categories/photos) done 2026-11-23. Next: Phase 3 (cart, order + payment services, checkout, staging deploy).
 
 ## 1. Repository layout
 
@@ -87,6 +87,7 @@ Single source per client: `clients/<slug>/client.json` + assets (`logo.png`, `ic
   - `cd backend && npm run client -- validate [slug]` / `npm run client -- sync <slug>` / `npm run client -- list`
   - `npm run users -- create-owner <slug> <phone> [name]` / `set-role <slug> <phone> <ROLE>` / `list <slug>` (needs tenant service running)
   - `node backend/scripts/placeholder-images.mjs <slug>` creates placeholder logo/icon
+  - `npm run seed:catalog -- <slug> <owner phone>` (dev only, from backend/) fills a shop with demo categories, products and generated photos through the gateway; skips shops that already have products
   - `cd app && dart run tool/gen_flavors.dart` writes `config/clients/<slug>.json` (flat build defines), flavor assets, launcher-icon configs, `android/app/flavors.gradle`
   - `flutter run --flavor <slug> --dart-define-from-file=config/clients/<slug>.json --dart-define-from-file=config/env.dev.json`
 
@@ -97,7 +98,12 @@ Single source per client: `clients/<slug>/client.json` + assets (`logo.png`, `ic
 - **Products always have ≥1 variant;** price, MRP, unit, stock live on the variant.
 - **Stock:** `stock_qty` null = untracked. Reservation on order placement (`UPDATE ... WHERE stock_qty >= qty`), released on cancel/reject.
 - **Snapshots:** orders copy item names, variant labels, prices, address, slot.
-- **Soft delete** catalog entities (`deleted_at`).
+- **Soft delete** catalog entities (`deleted_at`). Products left out of a `PUT` lose their variants by soft delete (orders keep snapshots).
+- **Catalog shape follows shop config:** `catalog.variantStyle` `single` (exactly one variant), `units` (label like "500 g" required), `options` (values only on `variantAxes`, unique combos, label defaults to "M / Red"). `customFields` values are validated against the shop's definitions (unknown keys rejected). Catalog reads them from tenant `GET /internal/shop/config` (cached 60 s).
+- **Child rows reference parents with `(shop_id, id)` composite foreign keys** (catalog: category parent, product category, variant/image product), so the database itself refuses cross-shop links. Parents carry `@@unique([shopId, id])`.
+- **Search:** `products.search_text` (lower-cased names in all languages, tags, text custom fields) with a hand-written trigram GIN index `(shop_id, search_text gin_trgm_ops)` (pg_trgm + btree_gin) in the catalog init migration. Prisma does not model it: when generating a new catalog migration, delete any `DROP INDEX "products_shop_id_search_text_trgm_idx"` Prisma adds. LIKE wildcards are stripped from queries.
+- **Images:** admin uploads `multipart/form-data` (`file`, `kind`) to `POST /api/v1/admin/media`; media detects the format from bytes, applies EXIF rotation, strips metadata, writes WebP `-full` (1200 px) and `-thumb` (400 px) under `MEDIA_ROOT/public/<shopId>/<yyyy>/<mm>/`, max 8 MB / 40 MP. APIs return server-relative URLs (`/media/...`); the app resolves them against `API_BASE_URL`. Production: nginx serves `/media`. Dev: gateway proxies `GET /media/*` to media when `MEDIA_STATIC_URL` is set. Catalog stores copies of URLs it got from media `POST /internal/media/resolve`, which only returns the current shop's files.
+- **Customers never see** stock counts, SKUs or `isActive`; they get `inStock` per variant and product.
 - **Shop content translations:** `name` + optional `name_i18n` JSONB; fallback to `name`.
 - **Order status:** `PLACED → CONFIRMED → PACKED → OUT_FOR_DELIVERY | READY_FOR_PICKUP → DELIVERED | PICKED_UP`; terminal `CANCELLED` (customer, before PACKED) and `REJECTED` (shop). Transition table in `order/src/modules/orders/status.ts`; every change written to history and emitted as `order.status_changed`.
 - **Delivery:** shop's own riders (RIDER role). Owner assigns (auto-assign later). Rider marks picked up → `OUT_FOR_DELIVERY`; delivery confirmed with a 4-digit OTP shown to the customer. Rider app sends location every ~10 s only while a delivery is active (Android foreground service); latest location kept in Redis with TTL, not in Postgres.
@@ -118,7 +124,8 @@ Single source per client: `clients/<slug>/client.json` + assets (`logo.png`, `ic
 - Controllers thin; logic in services; services use `db`, never `req`.
 - Routes use `handler({ params, query, body }, fn)` from `@qc/common`: it validates with Zod, collects all issues into `VALIDATION_FAILED`, and wraps the result in `{ data }`. Env validated with `loadEnv()` at startup; fail fast.
 - Errors: `AppError(code, status, message)` → `{ "error": { "code": "ORDER_NOT_CANCELLABLE", "message": "..." } }`. App maps `code` to localized text.
-- Responses `{ "data": ... }`; lists `{ "data": [...], "nextCursor": "..." }`.
+- Responses `{ "data": ... }`; lists `{ "data": [...], "nextCursor": "..." }`: return `toPage(rows, limit, cursorOf, map)` (fetch `limit + 1` rows) from a `handler`. Cursor = last row id; order by `[sortOrder, id]`.
+- Every service test suite asserts `findRawPrismaOffenders(srcDir)` from `@qc/common` is empty. Use `uuidv7()` from common when an id is needed before insert.
 - Logs are JSON (pino) with `requestId`, `shopId`, `service`. Every service exposes `/health` and `/ready`.
 - Shared code goes in `packages/`; services never import from each other.
 
@@ -127,6 +134,7 @@ Single source per client: `clients/<slug>/client.json` + assets (`logo.png`, `ic
 - Feature-first: `lib/features/<feature>/{data,domain,presentation}`; shared code in `lib/core/`.
 - Flutter ≥ 3.47: import `package:material_ui/material_ui.dart` (not `package:flutter/material.dart`, deprecated) and `cupertino_ui` for Cupertino; `flutter_localizations` only for `GlobalWidgetsLocalizations`.
 - Role areas: customer features, `admin_*` features (OWNER/STAFF), `rider_*` features (RIDER). Rules live in the pure `authRedirect()` (`core/router/app_router.dart`, unit-tested): guests may browse `/`; `/account`, `/admin`, `/rider` need login; staff/riders land on their area. go_router redirects do not unwind pages pushed with `context.push`, so auth changes also navigate explicitly (router listener: logout/expiry → guest home; OTP screen → `Routes.homeFor(role)`).
+- Catalog UI: `ProductGridSliver(ProductFilter(...))` (infinite grid, skeletons, load-more retry), `ServerImage` (cached image from a `/media` path), `PriceTag` (price, struck MRP, % off). Model is `ProductCategory` (Flutter exports its own `Category`). Admin forms adapt to `ShopSettings.catalog` (`VariantStyle`, axes, `CustomFieldDef`). Photo picking goes through `photoSourceProvider` (overridden in tests).
 - Quick-commerce UX standards: skeleton loaders, optimistic cart updates, sticky cart bar, debounced instant search, cached images, pull-to-refresh, graceful offline state.
 - No hard-coded strings: ARB files in `lib/l10n/` for en, gu, hi; add keys to all three in the same change. Access with `context.l10n`; map backend error codes in `core/l10n/l10n.dart#errorMessage`. Bundle Noto Sans fonts if Gujarati/Devanagari rendering is poor on target devices.
 - Providers live in `lib/core/providers.dart` (core) or the feature's `presentation/` folder. `clientConfigProvider`, `envConfigProvider`, `sharedPreferencesProvider` are overridden in `main()` and in tests. Repositories sit behind interfaces so widget tests override them.

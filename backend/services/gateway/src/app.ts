@@ -29,6 +29,8 @@ export interface GatewayDeps {
   rateLimit: { store: RateLimitStore; perMinute: number };
   internalSecret: string;
   trustProxyHops?: number;
+  /** Dev only: where to proxy public `/media/*` files (no shop key, no identity). */
+  mediaStaticTarget?: string;
 }
 
 interface GatewayLocals {
@@ -60,6 +62,16 @@ export function createGatewayApp(deps: GatewayDeps): Express {
   });
 
   app.use(sanitizeHeaders);
+
+  // Dev only: public catalog images. In production nginx serves /media before requests reach the gateway.
+  if (deps.mediaStaticTarget) {
+    const media = createProxyMiddleware<Request, ServerResponse>({
+      target: deps.mediaStaticTarget,
+      changeOrigin: true,
+      pathFilter: (path, req) => path.startsWith('/media/') && (req.method === 'GET' || req.method === 'HEAD'),
+    });
+    app.use(media);
+  }
 
   // 1. Route match (internal paths are never exposed).
   app.use((req, res, next) => {

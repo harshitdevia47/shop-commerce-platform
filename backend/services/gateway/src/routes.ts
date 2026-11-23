@@ -19,6 +19,8 @@ export interface RouteRule {
 export interface UpstreamUrls {
   tenant: string;
   identity: string;
+  catalog: string;
+  media: string;
 }
 
 /**
@@ -32,6 +34,9 @@ export function buildRoutes(upstreams: UpstreamUrls): RouteRule[] {
     { prefix: '/api/v1/auth', target: upstreams.identity, auth: 'public' },
     { prefix: '/api/v1/me', target: upstreams.identity, auth: 'required' },
     { prefix: '/api/v1/admin/settings', target: upstreams.tenant, auth: 'required', roles: ADMIN_ROLES },
+    { prefix: '/api/v1/catalog', target: upstreams.catalog, auth: 'public' },
+    { prefix: '/api/v1/admin/catalog', target: upstreams.catalog, auth: 'required', roles: ADMIN_ROLES },
+    { prefix: '/api/v1/admin/media', target: upstreams.media, auth: 'required', roles: ADMIN_ROLES },
   ];
   // Longest prefix first so specific rules win.
   return rules.sort((a, b) => b.prefix.length - a.prefix.length);

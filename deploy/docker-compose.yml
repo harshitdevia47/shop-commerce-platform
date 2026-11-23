@@ -66,6 +66,37 @@ services:
     deploy:
       resources: { limits: { memory: 256m } }
 
+  catalog:
+    <<: *service
+    build: { context: ../backend, dockerfile: Dockerfile, args: { SERVICE: catalog } }
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/qc_catalog
+      TENANT_URL: http://tenant:3000
+      MEDIA_URL: http://media:3000
+    depends_on:
+      postgres: { condition: service_healthy }
+    deploy:
+      resources: { limits: { memory: 256m } }
+
+  media:
+    <<: *service
+    build: { context: ../backend, dockerfile: Dockerfile, args: { SERVICE: media } }
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/qc_media
+      MEDIA_ROOT: /data
+      MEDIA_PUBLIC_PATH: /media
+      MEDIA_SERVE_STATIC: "false"
+    volumes:
+      - media:/data/public
+      - media_private:/data/private
+    depends_on:
+      postgres: { condition: service_healthy }
+    deploy:
+      # sharp needs headroom to decode phone photos
+      resources: { limits: { memory: 384m } }
+
   gateway:
     <<: *service
     build: { context: ../backend, dockerfile: Dockerfile, args: { SERVICE: gateway } }
@@ -74,6 +105,8 @@ services:
       REDIS_URL: redis://redis:6379
       TENANT_URL: http://tenant:3000
       IDENTITY_URL: http://identity:3000
+      CATALOG_URL: http://catalog:3000
+      MEDIA_URL: http://media:3000
       JWT_PUBLIC_KEY_FILE: /run/secrets/jwt_public_key
       TRUST_PROXY_HOPS: 1
     secrets: [jwt_public_key]
@@ -81,6 +114,8 @@ services:
       redis: { condition: service_healthy }
       tenant: { condition: service_started }
       identity: { condition: service_started }
+      catalog: { condition: service_started }
+      media: { condition: service_started }
     deploy:
       resources: { limits: { memory: 256m } }
 
@@ -103,8 +138,10 @@ networks:
 volumes:
   pgdata:
   redisdata:
-  # Shared with the media service (Phase 2). Public images only; private files live elsewhere.
+  # Public images: written by the media service, served read-only by nginx at /media.
   media:
+  # Private uploads (prescriptions, payment proofs): only the media service mounts this.
+  media_private:
 
 secrets:
   jwt_public_key:

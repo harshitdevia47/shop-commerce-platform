@@ -1,0 +1,115 @@
+// Catalog service: categories, products, variants, product images.
+// Every model is shop-scoped. Child rows reference their parent with (shop_id, id) composite
+// foreign keys, so the database itself refuses links across shops.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  runtime             = "nodejs"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Two levels: top-level categories and their sub-categories.
+model Category {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  shopId       String    @map("shop_id") @db.Uuid
+  parentId     String?   @map("parent_id") @db.Uuid
+  name         String
+  /// { gu?: string, hi?: string, en?: string }
+  nameI18n     Json?     @map("name_i18n")
+  imageMediaId String?   @map("image_media_id") @db.Uuid
+  imageUrl     String?   @map("image_url")
+  sortOrder    Int       @default(0) @map("sort_order")
+  isActive     Boolean   @default(true) @map("is_active")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt    DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  parent   Category?  @relation("CategoryTree", fields: [shopId, parentId], references: [shopId, id], onDelete: Restrict, onUpdate: Restrict)
+  children Category[] @relation("CategoryTree")
+  products Product[]
+
+  @@unique([shopId, id])
+  @@index([shopId, parentId, sortOrder])
+  @@map("categories")
+}
+
+model Product {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  shopId          String    @map("shop_id") @db.Uuid
+  categoryId      String?   @map("category_id") @db.Uuid
+  name            String
+  nameI18n        Json?     @map("name_i18n")
+  description     String?
+  descriptionI18n Json?     @map("description_i18n")
+  /// Values for the shop's configured custom fields (validated against tenant catalog config).
+  customFields    Json      @default("{}") @map("custom_fields")
+  tags            String[]  @default([])
+  /// Lower-cased name, translations, tags and text custom fields; trigram-indexed for search.
+  searchText      String    @map("search_text")
+  isActive        Boolean   @default(true) @map("is_active")
+  sortOrder       Int       @default(0) @map("sort_order")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  category Category?      @relation(fields: [shopId, categoryId], references: [shopId, id], onDelete: Restrict, onUpdate: Restrict)
+  variants Variant[]
+  images   ProductImage[]
+
+  @@unique([shopId, id])
+  @@index([shopId, categoryId, sortOrder])
+  @@index([shopId, isActive, sortOrder])
+  @@map("products")
+}
+
+/// What the customer actually buys: price, MRP, unit label and stock live here.
+model Variant {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  shopId      String    @map("shop_id") @db.Uuid
+  productId   String    @map("product_id") @db.Uuid
+  /// e.g. "500 g", "M / Red"
+  label       String
+  labelI18n   Json?     @map("label_i18n")
+  /// Axis values for "options" catalogs, e.g. { "size": "M", "color": "Red" }
+  options     Json      @default("{}")
+  sku         String?
+  pricePaise  Int       @map("price_paise")
+  mrpPaise    Int?      @map("mrp_paise")
+  /// null = stock not tracked
+  stockQty    Int?      @map("stock_qty")
+  /// Manual in/out of stock toggle
+  isAvailable Boolean   @default(true) @map("is_available")
+  sortOrder   Int       @default(0) @map("sort_order")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  product Product @relation(fields: [shopId, productId], references: [shopId, id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([shopId, id])
+  @@index([shopId, productId, sortOrder])
+  @@map("variants")
+}
+
+/// Ordered images of a product. URLs are copied from the media service when saved.
+model ProductImage {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  shopId    String   @map("shop_id") @db.Uuid
+  productId String   @map("product_id") @db.Uuid
+  mediaId   String   @map("media_id") @db.Uuid
+  url       String
+  thumbUrl  String   @map("thumb_url")
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  product Product @relation(fields: [shopId, productId], references: [shopId, id], onDelete: Cascade, onUpdate: Restrict)
+
+  @@index([shopId, productId, sortOrder])
+  @@map("product_images")
+}

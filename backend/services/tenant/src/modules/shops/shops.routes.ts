@@ -14,6 +14,13 @@ export function shopsRouter(shops: ShopsService): Router {
     handler({}, () => shops.getCurrentConfig()),
   );
 
+  // Internal: runtime config of the shop in the signed context (catalog validates custom fields with it).
+  router.get(
+    '/internal/shop/config',
+    requireShop,
+    handler({}, () => shops.getCurrentConfig()),
+  );
+
   // Internal: gateway resolves X-Shop-Key -> shop id.
   router.get(
     '/internal/shops/by-slug/:slug',

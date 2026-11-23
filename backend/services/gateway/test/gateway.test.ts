@@ -37,7 +37,8 @@ async function token(claims: Record<string, unknown>, expiresIn = '15m'): Promis
 function buildApp(perMinute = 1000, target = upstreamUrl) {
   return createGatewayApp({
     logger: createLogger('gateway-test', 'silent'),
-    routes: buildRoutes({ tenant: target, identity: target }),
+    routes: buildRoutes({ tenant: target, identity: target, catalog: target, media: target }),
+    mediaStaticTarget: target,
     shops: new ShopResolver(async (slug) => {
       lookups++;
       return SHOPS[slug] ?? null;
@@ -137,6 +138,27 @@ describe('gateway', () => {
     expect(res.body.identity).toMatchObject({ shopId: 'id-a' });
     expect(res.body.identity.role).toBeUndefined();
     expect(res.body.identity.userId).toBeUndefined();
+  });
+
+  it('dev media passthrough serves /media without shop key or identity headers', async () => {
+    const res = await request(app).get('/media/shop-id/2026/11/x-thumb.webp');
+    expect(res.status).toBe(401); // the echo upstream saw no gateway signature
+    expect(res.body.error.code).toBe('BAD_SIGNATURE');
+    const post = await request(app).post('/media/x');
+    expect(post.body.error.code).toBe('ROUTE_NOT_FOUND');
+  });
+
+  it('catalog browsing is public; catalog admin and uploads need an admin', async () => {
+    const browse = await request(app).get('/api/v1/catalog/products').set('x-shop-key', 'shop_a');
+    expect(browse.status).toBe(200);
+    expect(browse.body.identity.shopId).toBe('id-a');
+    for (const path of ['/api/v1/admin/catalog/products', '/api/v1/admin/media']) {
+      expect((await request(app).post(path).set('x-shop-key', 'shop_a')).status).toBe(401);
+      const customer = await token({ sub: 'u1', shopId: 'id-a', role: 'CUSTOMER' });
+      expect((await request(app).post(path).set('x-shop-key', 'shop_a').set('authorization', `Bearer ${customer}`)).status).toBe(403);
+      const staff = await token({ sub: 'u2', shopId: 'id-a', role: 'STAFF' });
+      expect((await request(app).post(path).set('x-shop-key', 'shop_a').set('authorization', `Bearer ${staff}`)).status).toBe(200);
+    }
   });
 
   it('never routes /internal paths', async () => {

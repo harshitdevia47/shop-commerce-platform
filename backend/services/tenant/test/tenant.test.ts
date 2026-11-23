@@ -65,6 +65,12 @@ describe('GET /api/v1/shop/config', () => {
     expect(res.body.data.slug).toBe('style_hub');
   });
 
+  it('is also served internally at /internal/shop/config', async () => {
+    const res = await request(app).get('/internal/shop/config').set(as(shopB.id));
+    expect(res.status).toBe(200);
+    expect(res.body.data).toMatchObject({ id: shopB.id, catalog: { variantStyle: 'options' } });
+  });
+
   it('rejects unsigned requests', async () => {
     const res = await request(app).get('/api/v1/shop/config').set('x-internal-shop-id', shopA.id);
     expect(res.status).toBe(401);

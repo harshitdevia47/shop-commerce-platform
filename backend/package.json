@@ -13,6 +13,7 @@
     "infra:up": "docker compose -f docker-compose.dev.yml up -d --wait",
     "infra:down": "docker compose -f docker-compose.dev.yml down",
     "keys:dev": "node scripts/gen-dev-keys.mjs",
+    "seed:catalog": "node scripts/seed-demo-catalog.mjs",
     "generate": "npm run generate --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",

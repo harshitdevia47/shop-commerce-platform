@@ -20,6 +20,8 @@ COPY --from=build --chown=node:node /app/node_modules ./node_modules
 COPY --from=build --chown=node:node /app/services/${SERVICE} ./services/${SERVICE}
 WORKDIR /app/services/${SERVICE}
 RUN rm -rf src test
+# Writable mount points for services that store files (media); named volumes inherit this ownership.
+RUN mkdir -p /data/public /data/private && chown -R node:node /data
 USER node
 EXPOSE 3000
 # Services with a Prisma schema apply pending migrations before starting.

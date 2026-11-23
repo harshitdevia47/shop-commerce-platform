@@ -32,6 +32,21 @@ function parse(schema: z.ZodType | undefined, value: unknown, location: string, 
   return undefined;
 }
 
+/** A page of a list. Sent as `{ data: items, nextCursor }` (nextCursor null on the last page). */
+export class Page<T> {
+  constructor(
+    readonly items: T[],
+    readonly nextCursor: string | null,
+  ) {}
+}
+
+/** Takes up to `limit` rows from a query that fetched `limit + 1`, and the cursor of the next page. */
+export function toPage<T, R = T>(rows: T[], limit: number, cursorOf: (row: T) => string, map?: (row: T) => R): Page<R> {
+  const items = rows.slice(0, limit);
+  const nextCursor = rows.length > limit && items.length > 0 ? cursorOf(items.at(-1)!) : null;
+  return new Page(map ? items.map(map) : (items as unknown as R[]), nextCursor);
+}
+
 /**
  * Wraps a route: validates body/query/params with Zod, calls `fn` with typed input,
  * and sends `{ data: result }` (status `successStatus`) unless `fn` already responded
@@ -51,6 +66,11 @@ export function handler<S extends Schemas>(
     } as HandlerInput<S>;
     if (issues.length > 0) throw new AppError('VALIDATION_FAILED', 400, 'Invalid request', issues);
     const result = await fn(input, req, res);
-    if (result !== undefined && !res.headersSent) res.status(successStatus).json({ data: result });
+    if (result === undefined || res.headersSent) return;
+    if (result instanceof Page) {
+      res.status(successStatus).json({ data: result.items, nextCursor: result.nextCursor });
+      return;
+    }
+    res.status(successStatus).json({ data: result });
   };
 }

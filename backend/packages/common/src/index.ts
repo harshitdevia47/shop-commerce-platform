@@ -9,3 +9,5 @@ export * from './logger.js';
 export * from './rate-limit.js';
 export * from './roles.js';
 export * from './tenant-prisma.js';
+export * from './uuid.js';
+export * from './prisma-guard.js';

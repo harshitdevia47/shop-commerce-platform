@@ -16,7 +16,13 @@ const tenant = createInternalClient({ baseUrl: env.TENANT_URL, secret: env.INTER
 
 const app = createGatewayApp({
   logger,
-  routes: buildRoutes({ tenant: env.TENANT_URL, identity: env.IDENTITY_URL }),
+  routes: buildRoutes({
+    tenant: env.TENANT_URL,
+    identity: env.IDENTITY_URL,
+    catalog: env.CATALOG_URL,
+    media: env.MEDIA_URL,
+  }),
+  mediaStaticTarget: env.MEDIA_STATIC_URL,
   shops: new ShopResolver(tenantShopLookup(tenant), env.SHOP_CACHE_TTL_SECONDS * 1000),
   verifyAccessToken: await createAccessTokenVerifier(env.JWT_PUBLIC_KEY, env.JWT_ISSUER),
   rateLimit: { store: new RedisRateLimitStore(redis), perMinute: env.RATE_LIMIT_PER_MINUTE },
