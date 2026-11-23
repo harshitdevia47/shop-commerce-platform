@@ -1,0 +1,38 @@
+name: qc_app
+description: White-label quick-commerce ordering app (one codebase, one flavor per client shop).
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.0
+  flutter: ">=3.32.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+  flutter_riverpod: ^3.0.0
+  go_router: ^18.0.0
+  dio: ^5.8.0
+  shared_preferences: ^2.5.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.0
+
+flutter:
+  uses-material-design: true
+  generate: true
+  assets:
+    # BEGIN GENERATED CLIENT ASSETS (tool/gen_flavors.dart; do not edit by hand)
+    - path: assets/clients/sharma_kirana/
+      flavors:
+        - sharma_kirana
+    - path: assets/clients/style_hub/
+      flavors:
+        - style_hub
+    # END GENERATED CLIENT ASSETS

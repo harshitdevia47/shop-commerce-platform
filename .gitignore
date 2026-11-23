@@ -1,0 +1,38 @@
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+
+# Node
+node_modules/
+dist/
+coverage/
+*.log
+
+# Secrets and env
+.env
+.env.*
+!.env.example
+backend/.keys/
+**/google-services.json
+**/GoogleService-Info.plist
+*.jks
+*.keystore
+key.properties
+
+# Generated
+**/src/generated/
+
+# Runtime data
+uploads/
+
+# Flutter
+app/.dart_tool/
+app/build/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/config/clients/
+app/assets/clients/
+app/android/app/flavors.gradle
+app/android/app/src/*/res/
+!app/android/app/src/main/res/

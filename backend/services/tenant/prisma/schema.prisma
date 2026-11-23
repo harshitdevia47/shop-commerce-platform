@@ -1,0 +1,72 @@
+// Tenant service: shops (the tenants themselves) and per-shop runtime settings.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  runtime             = "nodejs"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum BusinessType {
+  grocery
+  clothing
+  bakery
+  electronics
+  pharmacy
+  general
+}
+
+/// The tenant root. Not shop-scoped itself; looked up by id from request context.
+model Shop {
+  id           String       @id @default(uuid(7)) @db.Uuid
+  /// Also the Android flavor name and the X-Shop-Key header value.
+  slug         String       @unique
+  name         String
+  nameI18n     Json?        @map("name_i18n")
+  businessType BusinessType @map("business_type")
+  currency     String       @default("INR") @db.Char(3)
+  timezone     String       @default("Asia/Kolkata")
+  /// Validated by @qc/config-schema shopSchema.contact
+  contact      Json
+  /// Validated by @qc/config-schema deliverySchema
+  delivery     Json
+  /// Validated by @qc/config-schema paymentsSchema
+  payments     Json
+  /// Validated by @qc/config-schema featuresSchema
+  features     Json
+  /// Validated by @qc/config-schema catalogSchema
+  catalog      Json
+  isActive     Boolean      @default(true) @map("is_active")
+  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  deliverySlots DeliverySlot[]
+
+  @@map("shops")
+}
+
+/// Weekly recurring delivery window. Tenant-scoped.
+model DeliverySlot {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  shopId      String   @map("shop_id") @db.Uuid
+  /// 0 = Sunday ... 6 = Saturday (shop timezone)
+  dayOfWeek   Int      @map("day_of_week") @db.SmallInt
+  /// Minutes after midnight, e.g. 540 = 09:00
+  startMinute Int      @map("start_minute") @db.SmallInt
+  endMinute   Int      @map("end_minute") @db.SmallInt
+  /// Max orders in this window
+  capacity    Int
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  shop Shop @relation(fields: [shopId], references: [id], onDelete: Restrict)
+
+  @@index([shopId, dayOfWeek])
+  @@map("delivery_slots")
+}

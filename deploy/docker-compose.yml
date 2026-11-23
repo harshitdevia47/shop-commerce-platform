@@ -1,0 +1,93 @@
+# Production stack for a single VPS.
+#   cd deploy && cp .env.example .env  (fill in secrets)
+#   docker compose up -d --build
+# Only nginx is reachable from outside; services talk over the internal network.
+name: qc
+
+x-service: &service
+  restart: unless-stopped
+  env_file: .env
+  networks: [internal]
+  logging:
+    driver: json-file
+    options: { max-size: "10m", max-file: "5" }
+
+services:
+  postgres:
+    <<: *service
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql
+      - ./postgres/init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d postgres"]
+      interval: 5s
+      retries: 20
+
+  redis:
+    <<: *service
+    image: redis:8-alpine
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "256mb", "--maxmemory-policy", "noeviction"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 20
+
+  tenant:
+    <<: *service
+    build: { context: ../backend, dockerfile: Dockerfile, args: { SERVICE: tenant } }
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/qc_tenant
+    depends_on:
+      postgres: { condition: service_healthy }
+    deploy:
+      resources: { limits: { memory: 256m } }
+
+  gateway:
+    <<: *service
+    build: { context: ../backend, dockerfile: Dockerfile, args: { SERVICE: gateway } }
+    environment:
+      PORT: 3000
+      REDIS_URL: redis://redis:6379
+      TENANT_URL: http://tenant:3000
+      JWT_PUBLIC_KEY_FILE: /run/secrets/jwt_public_key
+      TRUST_PROXY_HOPS: 1
+    secrets: [jwt_public_key]
+    depends_on:
+      redis: { condition: service_healthy }
+      tenant: { condition: service_started }
+    deploy:
+      resources: { limits: { memory: 256m } }
+
+  nginx:
+    image: nginx:1.29-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+      - media:/srv/media:ro
+    networks: [internal]
+    depends_on: [gateway]
+
+networks:
+  internal:
+
+volumes:
+  pgdata:
+  redisdata:
+  # Shared with the media service (Phase 2). Public images only; private files live elsewhere.
+  media:
+
+secrets:
+  jwt_public_key:
+    file: ./secrets/jwt-public.pem

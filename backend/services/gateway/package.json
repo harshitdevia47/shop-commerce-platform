@@ -1,0 +1,27 @@
+{
+  "name": "@qc/gateway",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=.env src/main.ts",
+    "start": "node dist/main.js",
+    "build": "tsup",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@qc/common": "*",
+    "@qc/config-schema": "*",
+    "express": "^5.1.0",
+    "http-proxy-middleware": "3.0.10",
+    "ioredis": "^5.6.0",
+    "jose": "^6.0.0",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/supertest": "^6.0.3",
+    "supertest": "^7.1.0"
+  }
+}

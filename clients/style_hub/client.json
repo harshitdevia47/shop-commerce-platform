@@ -1,0 +1,33 @@
+{
+  "slug": "style_hub",
+  "build": {
+    "appName": "Style Hub",
+    "androidPackage": "in.qcommerce.stylehub",
+    "version": "1.0.0+1"
+  },
+  "branding": {
+    "logo": "logo.png",
+    "icon": "icon.png",
+    "colors": { "primary": "#6A1B9A", "secondary": "#F06292" }
+  },
+  "locale": { "default": "hi", "supported": ["en", "hi", "gu"] },
+  "shop": {
+    "name": "Style Hub",
+    "nameI18n": { "hi": "स्टाइल हब" },
+    "businessType": "clothing",
+    "contact": {
+      "phone": "+919812345678",
+      "address": "Main Bazaar, Mehsana, Gujarat 384001",
+      "lat": 23.588,
+      "lng": 72.3693
+    }
+  },
+  "payments": {
+    "cod": true,
+    "upi": { "enabled": false },
+    "razorpay": { "enabled": false }
+  },
+  "features": {
+    "deliverySlots": false
+  }
+}

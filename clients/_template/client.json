@@ -1,0 +1,29 @@
+{
+  "slug": "shop_slug",
+  "build": {
+    "appName": "Shop Name",
+    "androidPackage": "in.qcommerce.shopslug",
+    "version": "1.0.0+1"
+  },
+  "branding": {
+    "logo": "logo.png",
+    "icon": "icon.png",
+    "colors": { "primary": "#1565C0", "secondary": "#FFA000" }
+  },
+  "locale": { "default": "en", "supported": ["en", "gu", "hi"] },
+  "shop": {
+    "name": "Shop Name",
+    "businessType": "general",
+    "contact": {
+      "phone": "+919000000000",
+      "address": "Full shop address",
+      "lat": 22.3072,
+      "lng": 73.1812
+    }
+  },
+  "payments": {
+    "cod": true,
+    "upi": { "enabled": false },
+    "razorpay": { "enabled": false }
+  }
+}
