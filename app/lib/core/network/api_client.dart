@@ -6,8 +6,8 @@ import 'api_exception.dart';
 
 const shopKeyHeader = 'X-Shop-Key';
 
-/// Single Dio instance for the gateway. Every request carries the shop key;
-/// the auth interceptor (Phase 1) adds the bearer token and refresh handling.
+/// Base Dio for the gateway: shop key + error normalisation, no auth.
+/// `dioProvider` adds [AuthInterceptor] on top for authenticated calls.
 Dio createDio(EnvConfig env, ClientConfig client) {
   final dio = Dio(
     BaseOptions(
@@ -21,7 +21,8 @@ Dio createDio(EnvConfig env, ClientConfig client) {
     InterceptorsWrapper(
       onError: (error, handler) {
         // Normalise every failure to ApiException for repositories/UI.
-        handler.reject(error.copyWith(error: ApiException.fromDio(error)));
+        // `next` (not `reject`) so later interceptors (auth refresh) still see the error.
+        handler.next(error.error is ApiException ? error : error.copyWith(error: ApiException.fromDio(error)));
       },
     ),
   );

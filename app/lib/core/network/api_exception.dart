@@ -3,7 +3,7 @@ import 'package:dio/dio.dart';
 /// Error from the backend (`{ "error": { "code", "message" } }`) or the network.
 /// UI maps [code] to a localized message; never show [message] to customers directly.
 class ApiException implements Exception {
-  const ApiException(this.code, this.message, {this.statusCode});
+  const ApiException(this.code, this.message, {this.statusCode, this.details});
 
   factory ApiException.fromDio(DioException error) {
     final data = error.response?.data;
@@ -13,6 +13,7 @@ class ApiException implements Exception {
         body['code'] as String? ?? 'UNKNOWN',
         body['message'] as String? ?? 'Unknown error',
         statusCode: error.response?.statusCode,
+        details: body['details'],
       );
     }
     final isNetwork = switch (error.type) {
@@ -34,6 +35,15 @@ class ApiException implements Exception {
   final String code;
   final String message;
   final int? statusCode;
+
+  /// Optional structured details, e.g. `{ "attemptsLeft": 3 }`.
+  final Object? details;
+
+  /// Reads an int from [details] when it is a map, e.g. `detailInt('attemptsLeft')`.
+  int? detailInt(String key) {
+    final value = details;
+    return value is Map && value[key] is int ? value[key] as int : null;
+  }
 
   bool get isNetwork => code == networkError;
 

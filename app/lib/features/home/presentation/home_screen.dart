@@ -1,13 +1,17 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/config/shop_settings.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/providers.dart';
 import '../../../core/utils/money.dart';
+import '../../../core/router/routes.dart';
 import '../../../core/widgets/error_view.dart';
+import '../../../core/widgets/language_menu.dart';
 import '../../../core/widgets/splash_view.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../auth/presentation/auth_controller.dart';
 
 /// Phase 0 home: proves the config pipeline end to end (build-time branding +
 /// runtime shop settings + localization). Replaced by the catalog home in Phase 2.
@@ -38,6 +42,7 @@ class _HomeContent extends ConsumerWidget {
     final locale = ref.watch(localeProvider);
     final client = ref.watch(clientConfigProvider);
     final enabledFeatures = Feature.values.where(settings.isEnabled).toList();
+    final isSignedIn = ref.watch(authControllerProvider).value != null;
 
     return Scaffold(
       appBar: AppBar(
@@ -49,7 +54,15 @@ class _HomeContent extends ConsumerWidget {
           ),
         ),
         title: Text(settings.shop.localizedName(locale)),
-        actions: const [_LanguageMenu()],
+        actions: [
+          const LanguageMenu(),
+          IconButton(
+            key: const Key('accountButton'),
+            tooltip: isSignedIn ? l10n.account : l10n.login,
+            icon: Icon(isSignedIn ? Icons.account_circle_outlined : Icons.login),
+            onPressed: () => context.push(isSignedIn ? Routes.account : Routes.login),
+          ),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: () => ref.read(shopSettingsProvider.notifier).refresh(),
@@ -138,24 +151,6 @@ class _Line extends StatelessWidget {
           Expanded(child: Text(text)),
         ],
       ),
-    );
-  }
-}
-
-class _LanguageMenu extends ConsumerWidget {
-  const _LanguageMenu();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final client = ref.watch(clientConfigProvider);
-    return PopupMenuButton<Locale>(
-      icon: const Icon(Icons.translate),
-      tooltip: context.l10n.language,
-      onSelected: (locale) => ref.read(localeProvider.notifier).set(locale),
-      itemBuilder: (context) => [
-        for (final locale in client.supportedLocales)
-          PopupMenuItem(value: locale, child: Text(lookupAppLocalizations(locale).languageName)),
-      ],
     );
   }
 }

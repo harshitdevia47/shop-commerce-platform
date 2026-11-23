@@ -2,7 +2,7 @@
 
 Multi-tenant quick-commerce ordering platform (Zepto/Blinkit-style architecture) for local shops in small Indian cities. One backend platform (microservices) and one Flutter codebase serve every client shop. Each client gets a separately branded APK built from the same code.
 
-> **Status:** Phase 0 (foundations) done 2026-11-23: shared packages, gateway, tenant service, client config pipeline, Flutter skeleton. Next: Phase 1 (identity service + login).
+> **Status:** Phase 0 (foundations) and Phase 1 (identity: OTP login, tokens, roles, app login flow) done 2026-11-23. Next: Phase 2 (catalog + media services, customer browsing, admin products).
 
 ## 1. Repository layout
 
@@ -84,7 +84,8 @@ Single source per client: `clients/<slug>/client.json` + assets (`logo.png`, `ic
 - Business-type presets (`grocery`, `clothing`, `bakery`, `electronics`, `pharmacy`, `general`) give defaults; `client.json` overrides.
 - Slug format: `^[a-z][a-z0-9]*(_[a-z0-9]+)*$` (e.g. `sharma_kirana`). It is the folder name, `X-Shop-Key`, and Android flavor name.
 - Commands:
-  - `cd backend && npm run client -- validate [slug]` / `npm run client -- sync <slug>` / `npm run client -- list` (`create-owner` arrives with identity in Phase 1)
+  - `cd backend && npm run client -- validate [slug]` / `npm run client -- sync <slug>` / `npm run client -- list`
+  - `npm run users -- create-owner <slug> <phone> [name]` / `set-role <slug> <phone> <ROLE>` / `list <slug>` (needs tenant service running)
   - `node backend/scripts/placeholder-images.mjs <slug>` creates placeholder logo/icon
   - `cd app && dart run tool/gen_flavors.dart` writes `config/clients/<slug>.json` (flat build defines), flavor assets, launcher-icon configs, `android/app/flavors.gradle`
   - `flutter run --flavor <slug> --dart-define-from-file=config/clients/<slug>.json --dart-define-from-file=config/env.dev.json`
@@ -102,7 +103,10 @@ Single source per client: `clients/<slug>/client.json` + assets (`logo.png`, `ic
 - **Delivery:** shop's own riders (RIDER role). Owner assigns (auto-assign later). Rider marks picked up → `OUT_FOR_DELIVERY`; delivery confirmed with a 4-digit OTP shown to the customer. Rider app sends location every ~10 s only while a delivery is active (Android foreground service); latest location kept in Redis with TTL, not in Postgres.
 - **Payments:** COD; UPI intent link (not auto-verifiable — customer submits UTR, owner marks paid); Razorpay provider later behind the same interface.
 - **SMS:** `SmsProvider`; `SMS_PROVIDER=console` logs OTP in dev. Real providers need DLT-registered templates.
-- **Auth:** 6-digit OTP, hashed, 5-min expiry, 5 attempts, rate limited per phone + IP (Redis). Access JWT 15 min (RS256: `identity` signs, gateway verifies with public key). Refresh 30 days, hashed, rotated; reuse revokes the family.
+- **Auth:** 6-digit OTP stored as HMAC (`OTP_SECRET`), 5-min expiry, 5 attempts counted atomically before comparing, single use, only the newest code valid. Limits: 30 s resend cooldown, 5/hour per phone, 20/hour per client IP. Access JWT 15 min (RS256, claims `sub`, `shopId`, `role`, `typ: access`; `identity` signs, gateway verifies). Refresh token: opaque, hashed, 30 days, rotated on every use with a conditional update; presenting a rotated token revokes the whole family (session). Role changes and blocks take effect on the next refresh.
+- **Dev OTP:** `SMS_PROVIDER=console` logs codes; `OTP_DEV_ECHO=true` also returns `debugCode` (the app prefills it outside production). Both are refused when `NODE_ENV=production`.
+- **Client IP** reaches services only as the signed `x-internal-client-ip` header set by the gateway (`getContext().clientIp`). Never read `X-Forwarded-For` in services.
+- **App ↔ auth:** never send an access token to `/api/v1/auth/*` (the gateway would reject an expired one during refresh). `AuthInterceptor` (queued) refreshes once on `401 TOKEN_EXPIRED` and retries; parallel requests reuse the new token, because a second refresh with a rotated token would end the session.
 
 ## 8. Backend conventions
 
@@ -122,7 +126,7 @@ Single source per client: `clients/<slug>/client.json` + assets (`logo.png`, `ic
 
 - Feature-first: `lib/features/<feature>/{data,domain,presentation}`; shared code in `lib/core/`.
 - Flutter ≥ 3.47: import `package:material_ui/material_ui.dart` (not `package:flutter/material.dart`, deprecated) and `cupertino_ui` for Cupertino; `flutter_localizations` only for `GlobalWidgetsLocalizations`.
-- Role areas: customer features, `admin_*` features (OWNER/STAFF), `rider_*` features (RIDER). Router `redirect` gates by role.
+- Role areas: customer features, `admin_*` features (OWNER/STAFF), `rider_*` features (RIDER). Rules live in the pure `authRedirect()` (`core/router/app_router.dart`, unit-tested): guests may browse `/`; `/account`, `/admin`, `/rider` need login; staff/riders land on their area. go_router redirects do not unwind pages pushed with `context.push`, so auth changes also navigate explicitly (router listener: logout/expiry → guest home; OTP screen → `Routes.homeFor(role)`).
 - Quick-commerce UX standards: skeleton loaders, optimistic cart updates, sticky cart bar, debounced instant search, cached images, pull-to-refresh, graceful offline state.
 - No hard-coded strings: ARB files in `lib/l10n/` for en, gu, hi; add keys to all three in the same change. Access with `context.l10n`; map backend error codes in `core/l10n/l10n.dart#errorMessage`. Bundle Noto Sans fonts if Gujarati/Devanagari rendering is poor on target devices.
 - Providers live in `lib/core/providers.dart` (core) or the feature's `presentation/` folder. `clientConfigProvider`, `envConfigProvider`, `sharedPreferencesProvider` are overridden in `main()` and in tests. Repositories sit behind interfaces so widget tests override them.

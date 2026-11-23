@@ -1,23 +1,55 @@
 {
   "@@locale": "en",
   "languageName": "English",
-  "@languageName": { "description": "Name of this language, shown in the language picker" },
+  "@languageName": {
+    "description": "Name of this language, shown in the language picker"
+  },
   "language": "Language",
   "retry": "Retry",
   "errorGeneric": "Something went wrong. Please try again.",
   "errorNetwork": "No internet connection. Check your network and try again.",
   "errorShopInactive": "This shop is not taking orders right now.",
   "welcome": "Welcome to {shopName}",
-  "@welcome": { "placeholders": { "shopName": { "type": "String" } } },
+  "@welcome": {
+    "placeholders": {
+      "shopName": {
+        "type": "String"
+      }
+    }
+  },
   "deliveryTitle": "Delivery",
   "deliveryEta": "Delivery in about {minutes} min",
-  "@deliveryEta": { "placeholders": { "minutes": { "type": "int" } } },
+  "@deliveryEta": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "deliveryMinOrder": "Minimum order {amount}",
-  "@deliveryMinOrder": { "placeholders": { "amount": { "type": "String" } } },
+  "@deliveryMinOrder": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "deliveryFee": "Delivery fee {amount}",
-  "@deliveryFee": { "placeholders": { "amount": { "type": "String" } } },
+  "@deliveryFee": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "deliveryFreeAbove": "Free delivery above {amount}",
-  "@deliveryFreeAbove": { "placeholders": { "amount": { "type": "String" } } },
+  "@deliveryFreeAbove": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "deliveryUnavailable": "Delivery is not available. Pick up from the store.",
   "paymentTitle": "Payment options",
   "paymentCod": "Cash on delivery",
@@ -28,5 +60,75 @@
   "featureReturns": "Returns and exchange",
   "featurePrescriptionUpload": "Upload prescription",
   "featureOrderNotes": "Add notes to your order",
-  "featureHandwrittenListUpload": "Upload a photo of your shopping list"
+  "featureHandwrittenListUpload": "Upload a photo of your shopping list",
+  "login": "Log in",
+  "logout": "Log out",
+  "account": "Account",
+  "loginTitle": "Log in to continue",
+  "loginSubtitle": "We will send a 6-digit code to your mobile number.",
+  "phoneLabel": "Mobile number",
+  "sendOtp": "Send code",
+  "otpTitle": "Enter verification code",
+  "otpSubtitle": "Sent to {phone}",
+  "@otpSubtitle": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "verify": "Verify",
+  "resendIn": "Resend code in {seconds}s",
+  "@resendIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "resend": "Resend code",
+  "changeNumber": "Change number",
+  "devOtpHint": "Dev code: {code}",
+  "@devOtpHint": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "nameLabel": "Your name",
+  "save": "Save",
+  "saved": "Saved",
+  "roleOwner": "Owner",
+  "roleStaff": "Staff",
+  "roleRider": "Delivery partner",
+  "roleCustomer": "Customer",
+  "adminTitle": "Shop dashboard",
+  "adminWelcome": "Hello, {name}",
+  "@adminWelcome": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "adminComingSoon": "Orders, products and sales will appear here.",
+  "riderTitle": "Deliveries",
+  "riderComingSoon": "Deliveries assigned to you will appear here.",
+  "errorPhoneInvalid": "Enter a valid 10-digit mobile number.",
+  "errorOtpInvalid": "Incorrect code. {attempts} attempts left.",
+  "@errorOtpInvalid": {
+    "placeholders": {
+      "attempts": {
+        "type": "int"
+      }
+    }
+  },
+  "errorOtpExpired": "Code expired. Request a new one.",
+  "errorOtpTooManyAttempts": "Too many wrong attempts. Request a new code.",
+  "errorOtpTooSoon": "Please wait a moment before requesting another code.",
+  "errorOtpTooManyRequests": "Too many codes requested. Try again later.",
+  "errorUserBlocked": "This account is blocked. Please contact the shop.",
+  "errorSmsFailed": "Could not send the code. Please try again.",
+  "sessionExpired": "Your session expired. Please log in again."
 }

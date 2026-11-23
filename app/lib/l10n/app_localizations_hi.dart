@@ -88,4 +88,121 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get featureHandwrittenListUpload =>
       'अपनी खरीदारी की सूची की फ़ोटो अपलोड करें';
+
+  @override
+  String get login => 'लॉग इन';
+
+  @override
+  String get logout => 'लॉग आउट';
+
+  @override
+  String get account => 'खाता';
+
+  @override
+  String get loginTitle => 'आगे बढ़ने के लिए लॉग इन करें';
+
+  @override
+  String get loginSubtitle => 'हम आपके मोबाइल नंबर पर 6 अंकों का कोड भेजेंगे।';
+
+  @override
+  String get phoneLabel => 'मोबाइल नंबर';
+
+  @override
+  String get sendOtp => 'कोड भेजें';
+
+  @override
+  String get otpTitle => 'वेरिफ़िकेशन कोड डालें';
+
+  @override
+  String otpSubtitle(String phone) {
+    return '$phone पर भेजा गया';
+  }
+
+  @override
+  String get verify => 'सत्यापित करें';
+
+  @override
+  String resendIn(int seconds) {
+    return '$seconds सेकंड में फिर से भेजें';
+  }
+
+  @override
+  String get resend => 'कोड फिर से भेजें';
+
+  @override
+  String get changeNumber => 'नंबर बदलें';
+
+  @override
+  String devOtpHint(String code) {
+    return 'डेव कोड: $code';
+  }
+
+  @override
+  String get nameLabel => 'आपका नाम';
+
+  @override
+  String get save => 'सेव करें';
+
+  @override
+  String get saved => 'सेव हो गया';
+
+  @override
+  String get roleOwner => 'मालिक';
+
+  @override
+  String get roleStaff => 'स्टाफ़';
+
+  @override
+  String get roleRider => 'डिलीवरी पार्टनर';
+
+  @override
+  String get roleCustomer => 'ग्राहक';
+
+  @override
+  String get adminTitle => 'दुकान डैशबोर्ड';
+
+  @override
+  String adminWelcome(String name) {
+    return 'नमस्ते, $name';
+  }
+
+  @override
+  String get adminComingSoon => 'ऑर्डर, प्रोडक्ट और बिक्री यहां दिखेंगे।';
+
+  @override
+  String get riderTitle => 'डिलीवरी';
+
+  @override
+  String get riderComingSoon => 'आपको सौंपी गई डिलीवरी यहां दिखेंगी।';
+
+  @override
+  String get errorPhoneInvalid => 'मान्य 10 अंकों का मोबाइल नंबर डालें।';
+
+  @override
+  String errorOtpInvalid(int attempts) {
+    return 'गलत कोड। $attempts प्रयास बाकी।';
+  }
+
+  @override
+  String get errorOtpExpired => 'कोड की समय सीमा खत्म। नया कोड मंगाएं।';
+
+  @override
+  String get errorOtpTooManyAttempts => 'बहुत सारे गलत प्रयास। नया कोड मंगाएं।';
+
+  @override
+  String get errorOtpTooSoon => 'दूसरा कोड मंगाने से पहले थोड़ा रुकें।';
+
+  @override
+  String get errorOtpTooManyRequests =>
+      'बहुत सारे कोड मंगाए गए। थोड़ी देर बाद कोशिश करें।';
+
+  @override
+  String get errorUserBlocked =>
+      'यह खाता ब्लॉक है। कृपया दुकान से संपर्क करें।';
+
+  @override
+  String get errorSmsFailed => 'कोड नहीं भेजा जा सका। फिर से कोशिश करें।';
+
+  @override
+  String get sessionExpired => 'आपका सत्र खत्म हो गया। फिर से लॉग इन करें।';
 }

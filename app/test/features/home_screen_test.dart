@@ -2,29 +2,13 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:qc_app/app.dart';
-import 'package:qc_app/core/config/env_config.dart';
 import 'package:qc_app/core/config/shop_settings.dart';
-import 'package:qc_app/core/config/shop_settings_repository.dart';
 import 'package:qc_app/core/network/api_exception.dart';
 import 'package:qc_app/core/providers.dart';
+import 'package:qc_app/features/auth/data/session_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../fixtures.dart';
-
-class FakeRepository implements ShopSettingsRepository {
-  FakeRepository(this.result);
-
-  Object result;
-  int calls = 0;
-
-  @override
-  Future<ShopSettings> load() async {
-    calls++;
-    final value = result;
-    if (value is ShopSettings) return value;
-    throw value;
-  }
-}
 
 Future<void> pumpApp(WidgetTester tester, FakeRepository repository, {String? savedLocale}) async {
   SharedPreferences.setMockInitialValues({'locale': ?savedLocale});
@@ -33,9 +17,10 @@ Future<void> pumpApp(WidgetTester tester, FakeRepository repository, {String? sa
     ProviderScope(
       overrides: [
         clientConfigProvider.overrideWithValue(testClient),
-        envConfigProvider.overrideWithValue(const EnvConfig(env: 'test', apiBaseUrl: 'http://localhost')),
+        envConfigProvider.overrideWithValue(testEnv),
         sharedPreferencesProvider.overrideWithValue(prefs),
         shopSettingsRepositoryProvider.overrideWithValue(repository),
+        sessionStoreProvider.overrideWithValue(InMemorySessionStore()),
       ],
       child: const QcApp(),
     ),

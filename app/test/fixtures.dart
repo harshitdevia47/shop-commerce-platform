@@ -1,5 +1,10 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:qc_app/core/config/client_config.dart';
+import 'package:qc_app/core/config/env_config.dart';
+import 'package:qc_app/core/config/shop_settings.dart';
+import 'package:qc_app/core/config/shop_settings_repository.dart';
+
+const testEnv = EnvConfig(env: 'test', apiBaseUrl: 'http://localhost');
 
 const testClient = ClientConfig(
   shopKey: 'sharma_kirana',
@@ -54,3 +59,18 @@ Map<String, dynamic> shopConfigJson({bool deliveryEnabled = true, bool upi = tru
   },
   'catalog': {'variantStyle': 'units', 'variantAxes': <String>[], 'customFields': <Map<String, dynamic>>[]},
 };
+
+class FakeRepository implements ShopSettingsRepository {
+  FakeRepository(this.result);
+
+  Object result;
+  int calls = 0;
+
+  @override
+  Future<ShopSettings> load() async {
+    calls++;
+    final value = result;
+    if (value is ShopSettings) return value;
+    throw value;
+  }
+}

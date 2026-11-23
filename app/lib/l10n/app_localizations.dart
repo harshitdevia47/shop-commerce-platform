@@ -237,6 +237,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Upload a photo of your shopping list'**
   String get featureHandwrittenListUpload;
+
+  /// No description provided for @login.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in'**
+  String get login;
+
+  /// No description provided for @logout.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out'**
+  String get logout;
+
+  /// No description provided for @account.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get account;
+
+  /// No description provided for @loginTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in to continue'**
+  String get loginTitle;
+
+  /// No description provided for @loginSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We will send a 6-digit code to your mobile number.'**
+  String get loginSubtitle;
+
+  /// No description provided for @phoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile number'**
+  String get phoneLabel;
+
+  /// No description provided for @sendOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Send code'**
+  String get sendOtp;
+
+  /// No description provided for @otpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter verification code'**
+  String get otpTitle;
+
+  /// No description provided for @otpSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent to {phone}'**
+  String otpSubtitle(String phone);
+
+  /// No description provided for @verify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get verify;
+
+  /// No description provided for @resendIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend code in {seconds}s'**
+  String resendIn(int seconds);
+
+  /// No description provided for @resend.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend code'**
+  String get resend;
+
+  /// No description provided for @changeNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Change number'**
+  String get changeNumber;
+
+  /// No description provided for @devOtpHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Dev code: {code}'**
+  String devOtpHint(String code);
+
+  /// No description provided for @nameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your name'**
+  String get nameLabel;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get saved;
+
+  /// No description provided for @roleOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get roleOwner;
+
+  /// No description provided for @roleStaff.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff'**
+  String get roleStaff;
+
+  /// No description provided for @roleRider.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery partner'**
+  String get roleRider;
+
+  /// No description provided for @roleCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer'**
+  String get roleCustomer;
+
+  /// No description provided for @adminTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop dashboard'**
+  String get adminTitle;
+
+  /// No description provided for @adminWelcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello, {name}'**
+  String adminWelcome(String name);
+
+  /// No description provided for @adminComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders, products and sales will appear here.'**
+  String get adminComingSoon;
+
+  /// No description provided for @riderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliveries'**
+  String get riderTitle;
+
+  /// No description provided for @riderComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliveries assigned to you will appear here.'**
+  String get riderComingSoon;
+
+  /// No description provided for @errorPhoneInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid 10-digit mobile number.'**
+  String get errorPhoneInvalid;
+
+  /// No description provided for @errorOtpInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect code. {attempts} attempts left.'**
+  String errorOtpInvalid(int attempts);
+
+  /// No description provided for @errorOtpExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Code expired. Request a new one.'**
+  String get errorOtpExpired;
+
+  /// No description provided for @errorOtpTooManyAttempts.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many wrong attempts. Request a new code.'**
+  String get errorOtpTooManyAttempts;
+
+  /// No description provided for @errorOtpTooSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait a moment before requesting another code.'**
+  String get errorOtpTooSoon;
+
+  /// No description provided for @errorOtpTooManyRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many codes requested. Try again later.'**
+  String get errorOtpTooManyRequests;
+
+  /// No description provided for @errorUserBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'This account is blocked. Please contact the shop.'**
+  String get errorUserBlocked;
+
+  /// No description provided for @errorSmsFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not send the code. Please try again.'**
+  String get errorSmsFailed;
+
+  /// No description provided for @sessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session expired. Please log in again.'**
+  String get sessionExpired;
 }
 
 class _AppLocalizationsDelegate

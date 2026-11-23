@@ -7,7 +7,10 @@ import 'config/client_config.dart';
 import 'config/env_config.dart';
 import 'config/shop_settings.dart';
 import 'config/shop_settings_repository.dart';
+import '../features/auth/data/session_store.dart';
+import '../features/auth/presentation/auth_controller.dart';
 import 'network/api_client.dart';
+import 'network/auth_interceptor.dart';
 
 // ---- Overridden in main() / tests ----
 
@@ -17,10 +20,30 @@ final sharedPreferencesProvider = Provider<SharedPreferences>((ref) => throw Uni
 
 // ---- Infrastructure ----
 
-final dioProvider = Provider<Dio>((ref) => createDio(ref.watch(envConfigProvider), ref.watch(clientConfigProvider)));
+final sessionStoreProvider = Provider<SessionStore>((ref) => SecureSessionStore());
+
+/// No auth: shop config, /auth/* (including token refresh).
+final publicDioProvider = Provider<Dio>(
+  (ref) => createDio(ref.watch(envConfigProvider), ref.watch(clientConfigProvider)),
+);
+
+/// Authenticated calls: attaches the access token and refreshes it transparently.
+final Provider<Dio> dioProvider = Provider<Dio>((ref) {
+  final dio = createDio(ref.watch(envConfigProvider), ref.watch(clientConfigProvider));
+  dio.interceptors.add(
+    AuthInterceptor(
+      store: ref.watch(sessionStoreProvider),
+      refresh: (token) => ref.read(authApiProvider).refresh(token),
+      retryDio: ref.watch(publicDioProvider),
+      onSessionRefreshed: (session) => ref.read(authControllerProvider.notifier).sessionRefreshed(session),
+      onSessionExpired: () => ref.read(authControllerProvider.notifier).sessionExpired(),
+    ),
+  );
+  return dio;
+});
 
 final shopSettingsRepositoryProvider = Provider<ShopSettingsRepository>(
-  (ref) => HttpShopSettingsRepository(ref.watch(dioProvider), ref.watch(sharedPreferencesProvider)),
+  (ref) => HttpShopSettingsRepository(ref.watch(publicDioProvider), ref.watch(sharedPreferencesProvider)),
 );
 
 // ---- Runtime shop settings ----
