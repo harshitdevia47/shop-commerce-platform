@@ -2229,6 +2229,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Online payment is not available right now. Try UPI or cash.'**
   String get errorOnlineUnavailable;
+
+  /// No description provided for @otpSubtitleWhatsApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent on WhatsApp to {phone}'**
+  String otpSubtitleWhatsApp(String phone);
 }
 
 class _AppLocalizationsDelegate

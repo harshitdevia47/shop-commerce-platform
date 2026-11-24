@@ -6,7 +6,7 @@ const booleanString = z
   .default('false')
   .transform((v) => v === 'true' || v === '1');
 
-export const SMS_PROVIDERS = ['console', 'msg91'] as const;
+export const SMS_PROVIDERS = ['console', 'msg91', 'whatsapp'] as const;
 
 const envSchema = z
   .object({
@@ -23,6 +23,10 @@ const envSchema = z
     MSG91_AUTH_KEY: z.string().optional(),
     MSG91_OTP_TEMPLATE_ID: z.string().optional(),
     MSG91_OTP_VARIABLE: z.string().regex(/^[A-Za-z0-9_]+$/).default('otp'),
+    WHATSAPP_PHONE_NUMBER_ID: z.string().regex(/^\d+$/).optional(),
+    WHATSAPP_ACCESS_TOKEN: z.string().optional(),
+    WHATSAPP_OTP_TEMPLATE: z.string().regex(/^[a-z0-9_]+$/).default('login_code'),
+    WHATSAPP_API_VERSION: z.string().regex(/^v\d+\.\d+$/).default('v21.0'),
     /** Dev only: include the OTP in the API response so emulators can log in without SMS. */
     OTP_DEV_ECHO: booleanString,
     /** Used by scripts/users.ts to resolve shop slugs. */
@@ -31,6 +35,13 @@ const envSchema = z
   .superRefine((env, ctx) => {
     if (env.SMS_PROVIDER === 'msg91' && (!env.MSG91_AUTH_KEY || !env.MSG91_OTP_TEMPLATE_ID)) {
       ctx.addIssue({ code: 'custom', path: ['MSG91_AUTH_KEY'], message: 'SMS_PROVIDER=msg91 needs MSG91_AUTH_KEY(_FILE) and MSG91_OTP_TEMPLATE_ID' });
+    }
+    if (env.SMS_PROVIDER === 'whatsapp' && (!env.WHATSAPP_PHONE_NUMBER_ID || !env.WHATSAPP_ACCESS_TOKEN)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['WHATSAPP_ACCESS_TOKEN'],
+        message: 'SMS_PROVIDER=whatsapp needs WHATSAPP_PHONE_NUMBER_ID and WHATSAPP_ACCESS_TOKEN(_FILE)',
+      });
     }
     if (env.NODE_ENV !== 'production') return;
     if (env.SMS_PROVIDER === 'console') {
@@ -48,5 +59,6 @@ export function loadIdentityEnv(source: Record<string, string | undefined> = pro
     ...source,
     JWT_PRIVATE_KEY: readSecret(source, 'JWT_PRIVATE_KEY'),
     MSG91_AUTH_KEY: readSecret(source, 'MSG91_AUTH_KEY'),
+    WHATSAPP_ACCESS_TOKEN: readSecret(source, 'WHATSAPP_ACCESS_TOKEN'),
   });
 }

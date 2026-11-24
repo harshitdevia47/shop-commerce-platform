@@ -26,6 +26,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   Timer? _timer;
   late int _resendIn;
   String? _debugCode;
+  late bool _viaWhatsApp = widget.args.request.viaWhatsApp;
   bool _busy = false;
   String? _error;
 
@@ -88,6 +89,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
       final result = await ref.read(authControllerProvider.notifier).requestOtp(widget.args.phone);
       _code.clear();
       _applyDebugCode(result.debugCode);
+      setState(() => _viaWhatsApp = result.viaWhatsApp);
       _startCooldown(result.resendAfterSeconds);
     } on Object catch (error) {
       if (mounted) setState(() => _error = errorMessage(context.l10n, error));
@@ -106,7 +108,11 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
         child: ListView(
           padding: const EdgeInsets.all(24),
           children: [
-            Text(l10n.otpSubtitle(widget.args.phone), style: theme.textTheme.bodyLarge),
+            Text(
+              _viaWhatsApp ? l10n.otpSubtitleWhatsApp(widget.args.phone) : l10n.otpSubtitle(widget.args.phone),
+              key: const Key('otpSubtitle'),
+              style: theme.textTheme.bodyLarge,
+            ),
             const SizedBox(height: 24),
             TextField(
               key: const Key('otpField'),

@@ -354,5 +354,6 @@
   "payOnline": "{amount} ऑनलाइन चुकाएँ",
   "onlinePaymentNotDone": "भुगतान पूरा नहीं हुआ। आप फिर से कोशिश कर सकते हैं।",
   "errorPaymentVerify": "इस भुगतान की पुष्टि नहीं हो सकी। अगर पैसे कटे हैं तो जल्द पुष्टि हो जाएगी।",
-  "errorOnlineUnavailable": "ऑनलाइन भुगतान अभी उपलब्ध नहीं है। UPI या नकद आज़माएँ।"
+  "errorOnlineUnavailable": "ऑनलाइन भुगतान अभी उपलब्ध नहीं है। UPI या नकद आज़माएँ।",
+  "otpSubtitleWhatsApp": "{phone} पर WhatsApp पर भेजा गया"
 }

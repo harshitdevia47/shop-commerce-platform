@@ -100,12 +100,13 @@ class AuthSession {
 
 @immutable
 class OtpRequestResult {
-  const OtpRequestResult({required this.expiresInSeconds, required this.resendAfterSeconds, this.debugCode});
+  const OtpRequestResult({required this.expiresInSeconds, required this.resendAfterSeconds, this.debugCode, this.viaWhatsApp = false});
 
   factory OtpRequestResult.fromJson(Map<String, dynamic> json) => OtpRequestResult(
     expiresInSeconds: json['expiresInSeconds'] as int,
     resendAfterSeconds: json['resendAfterSeconds'] as int,
     debugCode: json['debugCode'] as String?,
+    viaWhatsApp: json['channel'] == 'whatsapp',
   );
 
   final int expiresInSeconds;
@@ -113,4 +114,7 @@ class OtpRequestResult {
 
   /// Only from a dev backend with OTP_DEV_ECHO on.
   final String? debugCode;
+
+  /// The code went to WhatsApp (not SMS): the code screen says where to look.
+  final bool viaWhatsApp;
 }

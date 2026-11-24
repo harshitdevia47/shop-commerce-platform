@@ -24,6 +24,8 @@ export interface OtpServiceOptions {
 export interface OtpRequestResult {
   expiresInSeconds: number;
   resendAfterSeconds: number;
+  /** Where the code was sent. */
+  channel: 'sms' | 'whatsapp';
   /** Present only when OTP_DEV_ECHO is on (never in production). */
   debugCode?: string;
 }
@@ -62,7 +64,7 @@ export function createOtpService(options: OtpServiceOptions) {
   }
 
   return {
-    async request(phone: string): Promise<OtpRequestResult> {
+    async request(phone: string, locale?: string): Promise<OtpRequestResult> {
       const shopId = requireShopId();
       await enforceRequestLimits(shopId, phone);
 
@@ -85,7 +87,7 @@ export function createOtpService(options: OtpServiceOptions) {
       });
 
       try {
-        await sms.sendOtp({ phone, code });
+        await sms.sendOtp({ phone, code, ...(locale ? { locale } : {}) });
       } catch (err) {
         await db.otpChallenge.update({ where: { id: challenge.id }, data: { expiresAt: issuedAt } });
         logger.error({ err, provider: sms.name }, 'OTP SMS failed');
@@ -95,6 +97,7 @@ export function createOtpService(options: OtpServiceOptions) {
       return {
         expiresInSeconds: OTP_TTL_SECONDS,
         resendAfterSeconds: OTP_RESEND_COOLDOWN_SECONDS,
+        channel: sms.channel,
         ...(options.devEcho ? { debugCode: code } : {}),
       };
     },

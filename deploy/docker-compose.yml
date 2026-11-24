@@ -63,8 +63,10 @@ services:
       REDIS_URL: redis://redis:6379
       JWT_PRIVATE_KEY_FILE: /run/secrets/jwt_private_key
       TENANT_URL: http://tenant:3000
-      # SMS_PROVIDER, MSG91_OTP_TEMPLATE_ID come from .env; the MSG91 key from a file (docs/deploy.md).
+      # SMS_PROVIDER (whatsapp | msg91), WHATSAPP_PHONE_NUMBER_ID / MSG91_OTP_TEMPLATE_ID come from .env;
+      # tokens from files in secrets/sms (docs/deploy.md, "Login codes").
       MSG91_AUTH_KEY_FILE: ${MSG91_AUTH_KEY_FILE:-}
+      WHATSAPP_ACCESS_TOKEN_FILE: ${WHATSAPP_ACCESS_TOKEN_FILE:-}
     volumes:
       - ./secrets/sms:/run/sms:ro
     secrets: [jwt_private_key]

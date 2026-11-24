@@ -1,4 +1,5 @@
 import { handler, requireShop } from '@qc/common';
+import { LOCALES } from '@qc/config-schema';
 import { Router } from 'express';
 import { z } from 'zod';
 import { toPublicUser, type UsersService } from '../users/users.service.js';
@@ -15,7 +16,9 @@ export function authRouter(otp: OtpService, tokens: TokenService, users: UsersSe
 
   router.post(
     '/api/v1/auth/otp/request',
-    handler({ body: z.object({ phone: phoneSchema }) }, ({ body }) => otp.request(body.phone)),
+    handler({ body: z.object({ phone: phoneSchema, locale: z.enum(LOCALES).optional() }) }, ({ body }) =>
+      otp.request(body.phone, body.locale),
+    ),
   );
 
   router.post(

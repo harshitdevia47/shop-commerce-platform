@@ -18,7 +18,11 @@ const { rawPrisma, db } = createDb(process.env.DATABASE_URL!);
 
 class CapturingSms implements SmsProvider {
   readonly name = 'capture';
+  readonly channel = 'whatsapp' as const;
   sent: OtpMessage[] = [];
+  lastLocale(): string | undefined {
+    return this.sent.at(-1)?.locale;
+  }
   fail = false;
   async sendOtp(message: OtpMessage): Promise<void> {
     if (this.fail) throw new Error('provider down');
@@ -144,7 +148,7 @@ describe('OTP login', () => {
 
   it('never stores the code in plain text and never echoes it by default', async () => {
     const res = await request(app).post('/api/v1/auth/otp/request').set(as(SHOP_A)).send({ phone: PHONE });
-    expect(res.body.data).toEqual({ expiresInSeconds: 300, resendAfterSeconds: 30 });
+    expect(res.body.data).toEqual({ expiresInSeconds: 300, resendAfterSeconds: 30, channel: 'whatsapp' });
     const row = await rawPrisma.otpChallenge.findFirstOrThrow();
     expect(row.codeHash).not.toContain(sms.last());
     expect(row.codeHash).toHaveLength(64);
@@ -430,6 +434,14 @@ describe('/api/v1/me/addresses', () => {
     // Not across shops.
     const foreign = await request(app).get(`/internal/users/${session.user.id}/checkout`).set(as(SHOP_B));
     expect(foreign.status).toBe(404);
+  });
+});
+
+describe('OTP language', () => {
+  it("passes the app language to the sender (WhatsApp templates per language)", async () => {
+    await request(app).post('/api/v1/auth/otp/request').set(as(SHOP_A)).send({ phone: PHONE, locale: 'gu' }).expect(200);
+    expect(sms.lastLocale()).toBe('gu');
+    expect((await request(app).post('/api/v1/auth/otp/request').set(as(SHOP_A)).send({ phone: '+919800000003', locale: 'fr' })).status).toBe(400);
   });
 });
 

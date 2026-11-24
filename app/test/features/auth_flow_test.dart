@@ -41,7 +41,7 @@ Future<void> loginWithPhone(WidgetTester tester, {String code = '123456'}) async
   await tester.pump();
   await tester.tap(find.byKey(const Key('sendOtpButton')));
   await tester.pumpAndSettle();
-  expect(find.text('Sent to +919876543210'), findsOneWidget);
+  expect(find.text('Sent on WhatsApp to +919876543210'), findsOneWidget);
 
   await tester.enterText(find.byKey(const Key('otpField')), code);
   await tester.pumpAndSettle();
@@ -59,6 +59,7 @@ void main() {
     await loginWithPhone(tester);
 
     expect(api.lastPhone, '+919876543210');
+    expect(api.lastLocale, 'en'); // the message is written in the app language
     expect(find.text('Welcome to Sharma Kirana'), findsOneWidget);
     expect(find.byIcon(Icons.account_circle_outlined), findsOneWidget);
   });

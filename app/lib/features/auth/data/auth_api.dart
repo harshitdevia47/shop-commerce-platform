@@ -4,7 +4,8 @@ import '../../../core/network/api_client.dart';
 import '../domain/auth_models.dart';
 
 abstract interface class AuthApi {
-  Future<OtpRequestResult> requestOtp(String phone);
+  /// [locale]: language of the WhatsApp/SMS message.
+  Future<OtpRequestResult> requestOtp(String phone, {String? locale});
   Future<AuthSession> verifyOtp(String phone, String code);
   Future<AuthSession> refresh(String refreshToken);
   /// [deviceToken]: stop push notifications to this phone for the account.
@@ -31,8 +32,10 @@ class HttpAuthApi implements AuthApi {
   final Dio _authed;
 
   @override
-  Future<OtpRequestResult> requestOtp(String phone) async => OtpRequestResult.fromJson(
-    await unwrap<Map<String, dynamic>>(_public.post<dynamic>('/api/v1/auth/otp/request', data: {'phone': phone})),
+  Future<OtpRequestResult> requestOtp(String phone, {String? locale}) async => OtpRequestResult.fromJson(
+    await unwrap<Map<String, dynamic>>(
+      _public.post<dynamic>('/api/v1/auth/otp/request', data: {'phone': phone, 'locale': ?locale}),
+    ),
   );
 
   @override

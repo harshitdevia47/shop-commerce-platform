@@ -27,7 +27,8 @@ class AuthController extends AsyncNotifier<AppUser?> {
 
   AppUser? get user => state.value;
 
-  Future<OtpRequestResult> requestOtp(String phone) => ref.read(authApiProvider).requestOtp(phone);
+  Future<OtpRequestResult> requestOtp(String phone) =>
+      ref.read(authApiProvider).requestOtp(phone, locale: ref.read(localeProvider).languageCode);
 
   /// Throws [ApiException] on a wrong/expired code; state is unchanged then.
   Future<AppUser> verifyOtp(String phone, String code) async {

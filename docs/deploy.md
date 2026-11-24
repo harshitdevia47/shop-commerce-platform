@@ -116,17 +116,33 @@ and open http://localhost:3001. Add monitors (it runs inside the Docker network)
 Point notifications at Telegram or email. Also watch the dead-letter stream (section 10) and disk space
 (`df -h`, Docker images: `docker system df`; prune old images after updates with `docker image prune`).
 
-## 6b. SMS (OTP) for production
+## 6b. Login codes (OTP) for production
 
-India requires DLT registration for business SMS:
+**WhatsApp (chosen; no DLT).** Uses Meta's WhatsApp Business Cloud API directly (no reseller).
 
-1. Register the business (entity) and a 6-letter sender ID on a DLT portal (Jio / Vodafone Idea / Airtel),
-   then an OTP content template such as `{#var#} is your login code for {#var#}. Valid for 5 minutes.`
-2. In MSG91: add the DLT entity and sender ID, create a Flow template using the DLT template id, with the
-   code variable named `otp` (`##otp##`).
-3. On the server: put the MSG91 auth key in `secrets/sms/msg91-auth-key` (`chmod 600`) and set in `.env`:
-   `SMS_PROVIDER=msg91`, `MSG91_OTP_TEMPLATE_ID=<flow id>`, `MSG91_AUTH_KEY_FILE=/run/sms/msg91-auth-key`.
-   `docker compose up -d identity`. With `NODE_ENV=production`, console SMS and OTP echo are refused.
+1. business.facebook.com: create a Meta Business account and complete **business verification**
+   (business name, address, a document such as GST / Udyam / shop licence; a few days).
+2. developers.facebook.com → create an app (type Business) → add **WhatsApp**. Add a phone number that is
+   **not** used in the WhatsApp app (a new SIM or landline), verify it, and get the display name approved
+   (e.g. your platform's name).
+3. WhatsApp Manager → Message templates → create template `login_code`, category **Authentication**,
+   with a **Copy code** button, in English, Gujarati and Hindi (same name, three languages). Meta writes the
+   text ("123456 is your verification code."); approval is usually quick.
+4. Business settings → System users → add an admin system user, give it the app with
+   `whatsapp_business_messaging`, generate a **permanent token**.
+5. Add a payment method in WhatsApp Manager (authentication messages are charged per message; see Meta's
+   current India rate card).
+6. On the server: token in `secrets/sms/whatsapp-token` (`chmod 600`); in `.env`:
+   `SMS_PROVIDER=whatsapp`, `WHATSAPP_PHONE_NUMBER_ID=<id>`, `WHATSAPP_OTP_TEMPLATE=login_code`,
+   `WHATSAPP_ACCESS_TOKEN_FILE=/run/sms/whatsapp-token`; `docker compose up -d identity`.
+
+The app shows "Sent on WhatsApp to +91…" and asks for the code in the app's language. Customers without
+WhatsApp cannot receive it: an SMS fallback (a provider's shared OTP route, or MSG91 after DLT) can be added
+behind the same switch.
+
+**SMS via MSG91 (needs DLT).** Register the business and a sender ID on a DLT portal, an OTP template, then a
+Flow template in MSG91 with variable `otp`; key in `secrets/sms/msg91-auth-key`; `.env`: `SMS_PROVIDER=msg91`,
+`MSG91_OTP_TEMPLATE_ID=<flow id>`, `MSG91_AUTH_KEY_FILE=/run/sms/msg91-auth-key`.
 
 ## 6c. Online payments (Razorpay)
 

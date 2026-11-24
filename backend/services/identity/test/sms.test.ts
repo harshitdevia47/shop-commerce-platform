@@ -1,7 +1,7 @@
 import { createLogger } from '@qc/common';
 import { describe, expect, it } from 'vitest';
 import { loadIdentityEnv } from '../src/env.js';
-import { Msg91SmsProvider } from '../src/sms/sms-provider.js';
+import { Msg91SmsProvider, WhatsAppOtpProvider } from '../src/sms/sms-provider.js';
 
 const logger = createLogger('sms-test', 'silent');
 
@@ -37,6 +37,39 @@ describe('MSG91', () => {
   });
 });
 
+describe('WhatsApp OTP', () => {
+  const options = { phoneNumberId: '1234567890', accessToken: 'token-abc', templateName: 'login_code' };
+
+  it('sends the authentication template in the app language, with the code in body and copy button', async () => {
+    const http = fakeFetch(200, { messages: [{ id: 'wamid.x' }] });
+    const provider = new WhatsAppOtpProvider(options, logger, http.impl);
+    await provider.sendOtp({ phone: '+919876543210', code: '482913', locale: 'gu' });
+    await provider.sendOtp({ phone: '+919876543210', code: '111111', locale: 'xx' });
+    expect(http.calls[0]!.url).toBe('https://graph.facebook.com/v21.0/1234567890/messages');
+    expect((http.calls[0]!.init.headers as Record<string, string>).authorization).toBe('Bearer token-abc');
+    expect(JSON.parse(String(http.calls[0]!.init.body))).toEqual({
+      messaging_product: 'whatsapp',
+      recipient_type: 'individual',
+      to: '919876543210',
+      type: 'template',
+      template: {
+        name: 'login_code',
+        language: { code: 'gu' },
+        components: [
+          { type: 'body', parameters: [{ type: 'text', text: '482913' }] },
+          { type: 'button', sub_type: 'url', index: '0', parameters: [{ type: 'text', text: '482913' }] },
+        ],
+      },
+    });
+    expect(JSON.parse(String(http.calls[1]!.init.body)).template.language.code).toBe('en'); // unknown language: English
+  });
+
+  it('fails on API errors so the user can retry', async () => {
+    const http = fakeFetch(400, { error: { code: 132001, message: 'Template name does not exist' } });
+    await expect(new WhatsAppOtpProvider(options, logger, http.impl).sendOtp({ phone: '+919876543210', code: '1' })).rejects.toThrow('400');
+  });
+});
+
 describe('SMS settings', () => {
   const base = {
     DATABASE_URL: 'postgresql://x/y',
@@ -48,6 +81,10 @@ describe('SMS settings', () => {
 
   it('msg91 needs its key and template; production refuses console SMS', () => {
     expect(() => loadIdentityEnv({ ...base, SMS_PROVIDER: 'msg91' })).toThrow(/MSG91_AUTH_KEY/);
+    expect(() => loadIdentityEnv({ ...base, SMS_PROVIDER: 'whatsapp' })).toThrow(/WHATSAPP_ACCESS_TOKEN/);
+    expect(
+      loadIdentityEnv({ ...base, NODE_ENV: 'production', SMS_PROVIDER: 'whatsapp', WHATSAPP_PHONE_NUMBER_ID: '123', WHATSAPP_ACCESS_TOKEN: 't' }).WHATSAPP_OTP_TEMPLATE,
+    ).toBe('login_code');
     expect(loadIdentityEnv({ ...base, SMS_PROVIDER: 'msg91', MSG91_AUTH_KEY: 'k', MSG91_OTP_TEMPLATE_ID: 't' }).MSG91_OTP_VARIABLE).toBe('otp');
     expect(() => loadIdentityEnv({ ...base, NODE_ENV: 'production' })).toThrow(/console SMS provider/);
     expect(loadIdentityEnv({ ...base, NODE_ENV: 'production', SMS_PROVIDER: 'msg91', MSG91_AUTH_KEY: 'k', MSG91_OTP_TEMPLATE_ID: 't' }).SMS_PROVIDER).toBe('msg91');

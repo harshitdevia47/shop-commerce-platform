@@ -1179,4 +1179,9 @@ class AppLocalizationsGu extends AppLocalizations {
   @override
   String get errorOnlineUnavailable =>
       'ઓનલાઇન ચુકવણી હમણાં ઉપલબ્ધ નથી. UPI અથવા રોકડ અજમાવો.';
+
+  @override
+  String otpSubtitleWhatsApp(String phone) {
+    return '$phone પર WhatsApp પર મોકલ્યો';
+  }
 }

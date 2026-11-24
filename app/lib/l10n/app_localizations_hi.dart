@@ -1184,4 +1184,9 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get errorOnlineUnavailable =>
       'ऑनलाइन भुगतान अभी उपलब्ध नहीं है। UPI या नकद आज़माएँ।';
+
+  @override
+  String otpSubtitleWhatsApp(String phone) {
+    return '$phone पर WhatsApp पर भेजा गया';
+  }
 }

@@ -21,7 +21,15 @@ const app = await createIdentityApp({
   sms: createSmsProvider(
     env.SMS_PROVIDER === 'msg91'
       ? { name: 'msg91', authKey: env.MSG91_AUTH_KEY!, templateId: env.MSG91_OTP_TEMPLATE_ID!, otpVariable: env.MSG91_OTP_VARIABLE }
-      : { name: 'console' },
+      : env.SMS_PROVIDER === 'whatsapp'
+        ? {
+            name: 'whatsapp',
+            phoneNumberId: env.WHATSAPP_PHONE_NUMBER_ID!,
+            accessToken: env.WHATSAPP_ACCESS_TOKEN!,
+            templateName: env.WHATSAPP_OTP_TEMPLATE,
+            apiVersion: env.WHATSAPP_API_VERSION,
+          }
+        : { name: 'console' },
     logger,
   ),
   limits: new RedisRateLimitStore(redis),

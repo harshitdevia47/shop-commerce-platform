@@ -1191,4 +1191,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errorOnlineUnavailable =>
       'Online payment is not available right now. Try UPI or cash.';
+
+  @override
+  String otpSubtitleWhatsApp(String phone) {
+    return 'Sent on WhatsApp to $phone';
+  }
 }

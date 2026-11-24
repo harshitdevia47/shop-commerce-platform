@@ -214,10 +214,13 @@ class FakeAuthApi implements AuthApi {
     );
   }
 
+  String? lastLocale;
+
   @override
-  Future<OtpRequestResult> requestOtp(String phone) async {
+  Future<OtpRequestResult> requestOtp(String phone, {String? locale}) async {
     lastPhone = phone;
-    return const OtpRequestResult(expiresInSeconds: 300, resendAfterSeconds: 30, debugCode: '123456');
+    lastLocale = locale;
+    return const OtpRequestResult(expiresInSeconds: 300, resendAfterSeconds: 30, debugCode: '123456', viaWhatsApp: true);
   }
 
   @override
