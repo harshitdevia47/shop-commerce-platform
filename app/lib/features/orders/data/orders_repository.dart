@@ -15,6 +15,9 @@ abstract interface class OrdersRepository {
   Future<Payment> payment(String orderId);
   Future<Payment> submitUtr(String orderId, String utr);
 
+  /// After Razorpay Checkout: the server verifies the signature and marks the payment paid.
+  Future<Payment> confirmOnlinePayment(String orderId, {required String razorpayOrderId, required String paymentId, required String signature});
+
   /// Delivery windows (empty when the shop does not use slots).
   Future<List<DeliverySlot>> slots();
 
@@ -74,6 +77,17 @@ class HttpOrdersRepository implements OrdersRepository {
   Future<Payment> submitUtr(String orderId, String utr) async => Payment.fromJson(
     await unwrap<Map<String, dynamic>>(_dio.post<dynamic>('/api/v1/payments/orders/$orderId/utr', data: {'utr': utr})),
   );
+
+  @override
+  Future<Payment> confirmOnlinePayment(String orderId, {required String razorpayOrderId, required String paymentId, required String signature}) async =>
+      Payment.fromJson(
+        await unwrap<Map<String, dynamic>>(
+          _dio.post<dynamic>(
+            '/api/v1/payments/orders/$orderId/razorpay',
+            data: {'razorpayOrderId': razorpayOrderId, 'razorpayPaymentId': paymentId, 'razorpaySignature': signature},
+          ),
+        ),
+      );
 
   @override
   Future<List<DeliverySlot>> slots() async {

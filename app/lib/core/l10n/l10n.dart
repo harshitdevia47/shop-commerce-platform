@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:material_ui/material_ui.dart' show BuildContext, IconData, Icons;
 
 import '../../features/auth/domain/auth_models.dart';
 import '../../features/orders/domain/order_models.dart';
@@ -54,6 +54,20 @@ extension OrderStatusLabel on OrderStatus {
     OrderStatus.rejected => l10n.rejectOrder,
     OrderStatus.cancelled => l10n.cancelOrder,
     OrderStatus.placed => l10n.statusPlaced,
+  };
+}
+
+extension PaymentMethodLabel on PaymentMethod {
+  String label(AppLocalizations l10n) => switch (this) {
+    PaymentMethod.cod => l10n.paymentCod,
+    PaymentMethod.upi => l10n.paymentUpi,
+    PaymentMethod.razorpay => l10n.paymentOnlineShort,
+  };
+
+  IconData get icon => switch (this) {
+    PaymentMethod.cod => Icons.payments_outlined,
+    PaymentMethod.upi => Icons.qr_code_2,
+    PaymentMethod.razorpay => Icons.credit_card,
   };
 }
 
@@ -114,6 +128,8 @@ String errorMessage(AppLocalizations l10n, Object error) {
     'ORDER_STATUS_CHANGED' || 'ORDER_STATUS_INVALID' => l10n.errorOrderChanged,
     'PAYMENT_CLOSED' => l10n.errorPaymentClosed,
     'ADDRESS_LIMIT' => l10n.errorAddressLimit,
+    'PAYMENT_SIGNATURE_INVALID' => l10n.errorPaymentVerify,
+    'PAYMENT_PROVIDER_UNAVAILABLE' => l10n.errorOnlineUnavailable,
     'ORDER_NOT_PACKED' => l10n.errorOrderNotPacked,
     'DELIVERY_OTP_INVALID' => l10n.errorDeliveryOtp(error.detailInt('attemptsLeft') ?? 0),
     'OTP_ATTEMPTS_EXCEEDED' => l10n.errorDeliveryOtpLocked,

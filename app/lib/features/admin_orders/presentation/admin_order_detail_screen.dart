@@ -185,9 +185,9 @@ class _AdminOrderDetailScreenState extends ConsumerState<AdminOrderDetailScreen>
           Card(child: OrderTimeline(order: order)),
           Card(
             child: ListTile(
-              leading: Icon(order.paymentMethod == PaymentMethod.cod ? Icons.payments_outlined : Icons.qr_code_2),
+              leading: Icon(order.paymentMethod.icon),
               title: Text(
-                '${order.paymentMethod == PaymentMethod.cod ? l10n.paymentCod : l10n.paymentUpi} · ${formatPaise(order.totalPaise)}',
+                '${order.paymentMethod.label(l10n)} · ${formatPaise(order.totalPaise)}',
               ),
               subtitle: payment == null
                   ? null

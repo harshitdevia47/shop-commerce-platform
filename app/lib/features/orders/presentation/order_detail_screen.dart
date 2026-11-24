@@ -7,6 +7,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../core/config/shop_settings.dart';
 import '../../../core/l10n/l10n.dart';
+import '../../../core/payments/online_checkout.dart';
 import '../../../core/providers.dart';
 import '../../../core/realtime/realtime_providers.dart';
 import '../../../core/router/routes.dart';
@@ -136,7 +137,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
               OrderSlotTile(order: value),
               Card(child: OrderTimeline(order: value)),
               const SizedBox(height: 8),
-              if (!value.needsPricing) ...[_PaymentCard(order: value), const SizedBox(height: 8)],
+              if (!value.needsPricing) ...[_PaymentCard(order: value, startOnlinePayment: widget.justPlaced), const SizedBox(height: 8)],
               OrderPhotosCard(photos: value.attachments, title: l10n.yourPhotos),
               OrderItemsCard(order: value),
               const SizedBox(height: 8),
@@ -180,9 +181,12 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
 
 /// How to pay: cash note, or the UPI button and UTR form, plus the payment status.
 class _PaymentCard extends ConsumerStatefulWidget {
-  const _PaymentCard({required this.order});
+  const _PaymentCard({required this.order, this.startOnlinePayment = false});
 
   final Order order;
+
+  /// Right after placing an online-paid order: open the payment sheet once by itself.
+  final bool startOnlinePayment;
 
   @override
   ConsumerState<_PaymentCard> createState() => _PaymentCardState();
@@ -202,6 +206,56 @@ class _PaymentCardState extends ConsumerState<_PaymentCard> {
     final opened = await ref.read(externalLauncherProvider)(Uri.parse(uri));
     if (!opened && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.noUpiApp)));
+    }
+  }
+
+  bool _startedOnline = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.startOnlinePayment) return;
+    ref.listenManual(paymentProvider(widget.order.id), (_, next) {
+      final payment = next.value;
+      final info = payment?.razorpay;
+      if (_startedOnline || info == null || payment!.status != PaymentStatus.pending) return;
+      _startedOnline = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _payOnline(info);
+      });
+    }, fireImmediately: true);
+  }
+
+  Future<void> _payOnline(RazorpayCheckoutInfo info) async {
+    _startedOnline = true;
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final settings = ref.read(shopSettingsProvider).value;
+    final result = await ref.read(onlineCheckoutProvider).pay(
+      keyId: info.keyId,
+      orderId: info.orderId,
+      amountPaise: info.amountPaise,
+      shopName: settings?.shop.localizedName(ref.read(localeProvider)) ?? '',
+      phone: widget.order.customerPhone,
+    );
+    if (result == null) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.onlinePaymentNotDone)));
+      return;
+    }
+    if (mounted) setState(() => _sending = true);
+    try {
+      await ref.read(ordersRepositoryProvider).confirmOnlinePayment(
+        widget.order.id,
+        razorpayOrderId: result.orderId,
+        paymentId: result.paymentId,
+        signature: result.signature,
+      );
+    } on Object catch (error) {
+      // The Razorpay webhook still confirms it if money was taken.
+      messenger.showSnackBar(SnackBar(content: Text(errorMessage(l10n, error))));
+    } finally {
+      ref.invalidate(paymentProvider(widget.order.id));
+      if (mounted) setState(() => _sending = false);
     }
   }
 
@@ -228,6 +282,7 @@ class _PaymentCardState extends ConsumerState<_PaymentCard> {
     final order = widget.order;
     final payment = ref.watch(paymentProvider(order.id)).value;
     final amount = formatPaise(order.totalPaise);
+
     final open =
         payment != null && (payment.status == PaymentStatus.pending || payment.status == PaymentStatus.submitted);
 
@@ -240,7 +295,7 @@ class _PaymentCardState extends ConsumerState<_PaymentCard> {
           children: [
             Row(
               children: [
-                Icon(order.paymentMethod == PaymentMethod.cod ? Icons.payments_outlined : Icons.qr_code_2),
+                Icon(order.paymentMethod.icon),
                 const SizedBox(width: 12),
                 // Status under the method, not beside it: long Gujarati/Hindi labels need the width.
                 Expanded(
@@ -248,7 +303,7 @@ class _PaymentCardState extends ConsumerState<_PaymentCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        order.paymentMethod == PaymentMethod.cod ? l10n.paymentCod : l10n.paymentUpi,
+                        order.paymentMethod.label(l10n),
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
                       if (payment != null)
@@ -274,6 +329,13 @@ class _PaymentCardState extends ConsumerState<_PaymentCard> {
                 onPressed: () => _payWithUpi(uri),
                 icon: const Icon(Icons.open_in_new),
                 label: Text(l10n.payWithUpi(amount)),
+              ),
+            if (payment?.razorpay case final info? when !order.status.isFailed && payment!.status == PaymentStatus.pending)
+              FilledButton.icon(
+                key: const Key('payOnlineButton'),
+                onPressed: _sending ? null : () => _payOnline(info),
+                icon: const Icon(Icons.credit_card),
+                label: Text(l10n.payOnline(amount)),
               ),
             if (order.paymentMethod == PaymentMethod.upi && open && !order.status.isFailed) ...[
               if (payment.utr case final utr?) Text(l10n.utrShown(utr)),

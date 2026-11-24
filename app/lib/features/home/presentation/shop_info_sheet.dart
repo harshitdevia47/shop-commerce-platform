@@ -41,6 +41,7 @@ class ShopInfoPanel extends ConsumerWidget {
           children: [
             if (settings.payments.cod) _Line(icon: Icons.payments_outlined, text: l10n.paymentCod),
             if (settings.payments.upiEnabled) _Line(icon: Icons.qr_code_2, text: l10n.paymentUpi),
+            if (settings.payments.razorpayEnabled) _Line(icon: Icons.credit_card, text: l10n.paymentOnline),
           ],
         ),
         if (enabledFeatures.isNotEmpty) ...[

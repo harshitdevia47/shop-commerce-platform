@@ -114,7 +114,7 @@ class DeliveryRules {
 
 @immutable
 class PaymentOptions {
-  const PaymentOptions({required this.cod, required this.upiEnabled, this.upiVpa, this.upiPayeeName});
+  const PaymentOptions({required this.cod, required this.upiEnabled, this.upiVpa, this.upiPayeeName, this.razorpayEnabled = false});
 
   factory PaymentOptions.fromJson(Map<String, dynamic> json) {
     final upi = json['upi'] as Map<String, dynamic>;
@@ -123,6 +123,7 @@ class PaymentOptions {
       upiEnabled: upi['enabled'] as bool,
       upiVpa: upi['vpa'] as String?,
       upiPayeeName: upi['payeeName'] as String?,
+      razorpayEnabled: (json['razorpay'] as Map<String, dynamic>?)?['enabled'] == true,
     );
   }
 
@@ -130,6 +131,9 @@ class PaymentOptions {
   final bool upiEnabled;
   final String? upiVpa;
   final String? upiPayeeName;
+
+  /// Online payments through the shop's Razorpay account.
+  final bool razorpayEnabled;
 }
 
 @immutable

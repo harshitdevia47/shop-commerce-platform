@@ -17,6 +17,8 @@ class SalesSummary {
     required this.codPaise,
     required this.upiOrders,
     required this.upiPaise,
+    this.onlineOrders = 0,
+    this.onlinePaise = 0,
     required this.delivery,
     required this.pickup,
     required this.customers,
@@ -27,6 +29,7 @@ class SalesSummary {
   factory SalesSummary.fromJson(Map<String, dynamic> json) {
     final cod = json['cod'] as Map<String, dynamic>;
     final upi = json['upi'] as Map<String, dynamic>;
+    final online = json['online'] as Map<String, dynamic>? ?? const {};
     return SalesSummary(
       orders: json['orders'] as int,
       cancelled: json['cancelled'] as int,
@@ -39,6 +42,8 @@ class SalesSummary {
       codPaise: cod['paise'] as int,
       upiOrders: upi['orders'] as int,
       upiPaise: upi['paise'] as int,
+      onlineOrders: online['orders'] as int? ?? 0,
+      onlinePaise: online['paise'] as int? ?? 0,
       delivery: json['delivery'] as int,
       pickup: json['pickup'] as int,
       customers: json['customers'] as int,
@@ -58,6 +63,8 @@ class SalesSummary {
   final int codPaise;
   final int upiOrders;
   final int upiPaise;
+  final int onlineOrders;
+  final int onlinePaise;
   final int delivery;
   final int pickup;
   final int customers;

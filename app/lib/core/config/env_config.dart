@@ -11,6 +11,11 @@ class EnvConfig {
       throw StateError('Missing API_BASE_URL. Build with --dart-define-from-file=config/env.dev.json');
     }
     const realtimeUrl = String.fromEnvironment('REALTIME_URL');
+    const env = String.fromEnvironment('ENV', defaultValue: 'dev');
+    // Dart's HTTP client ignores Android's cleartext policy, so production enforces HTTPS here.
+    if (env == 'prod' && (!apiBaseUrl.startsWith('https://') || (realtimeUrl.isNotEmpty && !realtimeUrl.startsWith('https://')))) {
+      throw StateError('Production builds need https:// API_BASE_URL and REALTIME_URL');
+    }
     return const EnvConfig(
       env: String.fromEnvironment('ENV', defaultValue: 'dev'),
       apiBaseUrl: apiBaseUrl,

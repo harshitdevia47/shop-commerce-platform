@@ -1161,4 +1161,27 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get salesNote =>
       'बिक्री = इस अवधि के ऑर्डर जो रद्द या अस्वीकार नहीं हुए।';
+
+  @override
+  String get paymentOnline => 'ऑनलाइन भुगतान (UPI, कार्ड, नेटबैंकिंग)';
+
+  @override
+  String get paymentOnlineShort => 'ऑनलाइन';
+
+  @override
+  String payOnline(String amount) {
+    return '$amount ऑनलाइन चुकाएँ';
+  }
+
+  @override
+  String get onlinePaymentNotDone =>
+      'भुगतान पूरा नहीं हुआ। आप फिर से कोशिश कर सकते हैं।';
+
+  @override
+  String get errorPaymentVerify =>
+      'इस भुगतान की पुष्टि नहीं हो सकी। अगर पैसे कटे हैं तो जल्द पुष्टि हो जाएगी।';
+
+  @override
+  String get errorOnlineUnavailable =>
+      'ऑनलाइन भुगतान अभी उपलब्ध नहीं है। UPI या नकद आज़माएँ।';
 }

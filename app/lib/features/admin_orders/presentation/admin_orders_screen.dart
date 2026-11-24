@@ -127,7 +127,7 @@ class _OrderCard extends StatelessWidget {
               Text(
                 [
                   if (order.needsPricing) l10n.listOrderBadge else '${l10n.cartItems(order.itemCount)} · ${formatPaise(order.totalPaise)}',
-                  order.paymentMethod == PaymentMethod.cod ? l10n.paymentCod : l10n.paymentUpi,
+                  order.paymentMethod.label(l10n),
                 ].join(' · '),
                 style: TextStyle(color: theme.colorScheme.outline),
               ),

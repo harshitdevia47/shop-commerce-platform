@@ -1168,4 +1168,27 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get salesNote =>
       'Sales = orders placed in the period that were not cancelled or rejected.';
+
+  @override
+  String get paymentOnline => 'Pay online (UPI, card, netbanking)';
+
+  @override
+  String get paymentOnlineShort => 'Online';
+
+  @override
+  String payOnline(String amount) {
+    return 'Pay $amount online';
+  }
+
+  @override
+  String get onlinePaymentNotDone =>
+      'Payment was not completed. You can try again.';
+
+  @override
+  String get errorPaymentVerify =>
+      'We could not confirm this payment. If money was taken, it will be confirmed shortly.';
+
+  @override
+  String get errorOnlineUnavailable =>
+      'Online payment is not available right now. Try UPI or cash.';
 }

@@ -139,6 +139,9 @@ class FakeOrders implements OrdersRepository, AdminOrdersRepository {
       status: PaymentStatus.pending,
       amountPaise: order.totalPaise,
       upiUri: request.paymentMethod == PaymentMethod.upi ? 'upi://pay?pa=shop@okaxis&am=120.00' : null,
+      razorpay: request.paymentMethod == PaymentMethod.razorpay
+          ? RazorpayCheckoutInfo(keyId: 'rzp_test_x', orderId: 'order_$id', amountPaise: order.totalPaise)
+          : null,
     );
     return (order, payments[id]);
   }
@@ -212,6 +215,15 @@ class FakeOrders implements OrdersRepository, AdminOrdersRepository {
 
   @override
   Future<void> deleteAddress(String id) async => addressList.removeWhere((a) => a.id == id);
+
+  final List<(String, String, String)> onlineConfirmations = [];
+
+  @override
+  Future<Payment> confirmOnlinePayment(String orderId, {required String razorpayOrderId, required String paymentId, required String signature}) async {
+    onlineConfirmations.add((razorpayOrderId, paymentId, signature));
+    final p = payments[orderId]!;
+    return payments[orderId] = Payment(orderId: orderId, method: p.method, status: PaymentStatus.paid, amountPaise: p.amountPaise);
+  }
 
   // ---- Slots and returns ----
   List<DeliverySlot> slotList = [];
@@ -470,6 +482,7 @@ Future<Harness> pumpShop(
   void Function(FakeOrders orders)? setup,
   List<Override> extraOverrides = const [],
   Map<String, bool> features = const {},
+  bool razorpay = false,
 }) async {
   usePhoneScreen(tester);
   quoteDebounce = Duration.zero;
@@ -484,7 +497,7 @@ Future<Harness> pumpShop(
         clientConfigProvider.overrideWithValue(testClient),
         envConfigProvider.overrideWithValue(testEnv),
         sharedPreferencesProvider.overrideWithValue(prefs),
-        shopSettingsRepositoryProvider.overrideWithValue(FakeRepository(ShopSettings.fromJson(shopConfigJson(features: features)))),
+        shopSettingsRepositoryProvider.overrideWithValue(FakeRepository(ShopSettings.fromJson(shopConfigJson(features: features, razorpay: razorpay)))),
         catalogRepositoryProvider.overrideWithValue(FakeCatalogRepository()),
         ordersRepositoryProvider.overrideWithValue(orders),
         adminOrdersRepositoryProvider.overrideWithValue(orders),

@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:qc_app/core/payments/online_checkout.dart';
 import 'package:qc_app/features/admin_catalog/presentation/photo_picker.dart';
 import 'package:qc_app/features/auth/domain/auth_models.dart';
 import 'package:qc_app/features/orders/domain/order_models.dart';
@@ -28,6 +29,25 @@ class FakePrivateMedia implements PrivateMediaRepository {
 
   @override
   Future<Uint8List> bytes(String id, {bool thumb = true}) async => _png;
+}
+
+class FakeCheckout implements OnlineCheckout {
+  FakeCheckout({this.succeed = true});
+
+  bool succeed;
+  final List<(String, String, int)> opened = [];
+
+  @override
+  Future<OnlinePaymentResult?> pay({
+    required String keyId,
+    required String orderId,
+    required int amountPaise,
+    required String shopName,
+    String? phone,
+  }) async {
+    opened.add((keyId, orderId, amountPaise));
+    return succeed ? OnlinePaymentResult(orderId: orderId, paymentId: 'pay_1', signature: 'sig') : null;
+  }
 }
 
 void main() {
@@ -238,5 +258,39 @@ void main() {
     await tester.pumpAndSettle();
     expect(h.orders.returnStatusCalls, [('r1', ReturnStatus.approved, 'Bring it tomorrow')]);
     expect(find.byKey(const Key('completeReturnButton')), findsOneWidget);
+  });
+
+  testWidgets('paying online opens the payment sheet after placing; a cancelled sheet can be retried', (tester) async {
+    final checkout = FakeCheckout(succeed: false);
+    final h = await pumpShop(
+      tester,
+      session: sessionFor(UserRole.customer),
+      razorpay: true,
+      prefsValues: {
+        'cart_v1': '[{"variantId":"p1-v1","productId":"p1","name":"Basmati Rice","label":"1 kg","pricePaise":12000,"qty":1}]',
+      },
+      setup: (o) => o.addressList.add(const Address(id: 'a1', line1: 'Station Rd', city: 'Bhavnagar', pincode: '364001', isDefault: true)),
+      extraOverrides: [...overrides(), onlineCheckoutProvider.overrideWithValue(checkout)],
+    );
+    await tester.tap(find.byKey(const Key('cartBar')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('proceedButton')));
+    await tester.pumpAndSettle();
+    expect(find.text('Pay online (UPI, card, netbanking)'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('method-RAZORPAY')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('placeOrderButton')));
+    await tester.pumpAndSettle();
+
+    expect(h.orders.placed.single.paymentMethod, PaymentMethod.razorpay);
+    expect(checkout.opened, [('rzp_test_x', 'order_o1', h.orders.store['o1']!.totalPaise)]);
+    expect(find.text('Payment was not completed. You can try again.'), findsOneWidget);
+    expect(h.orders.onlineConfirmations, isEmpty);
+
+    checkout.succeed = true;
+    await tester.tap(find.byKey(const Key('payOnlineButton')));
+    await tester.pumpAndSettle();
+    expect(h.orders.onlineConfirmations, [('order_o1', 'pay_1', 'sig')]);
+    expect(find.byKey(const Key('payOnlineButton')), findsNothing);
   });
 }

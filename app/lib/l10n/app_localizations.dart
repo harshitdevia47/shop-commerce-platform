@@ -2193,6 +2193,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sales = orders placed in the period that were not cancelled or rejected.'**
   String get salesNote;
+
+  /// No description provided for @paymentOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay online (UPI, card, netbanking)'**
+  String get paymentOnline;
+
+  /// No description provided for @paymentOnlineShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get paymentOnlineShort;
+
+  /// No description provided for @payOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay {amount} online'**
+  String payOnline(String amount);
+
+  /// No description provided for @onlinePaymentNotDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment was not completed. You can try again.'**
+  String get onlinePaymentNotDone;
+
+  /// No description provided for @errorPaymentVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not confirm this payment. If money was taken, it will be confirmed shortly.'**
+  String get errorPaymentVerify;
+
+  /// No description provided for @errorOnlineUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Online payment is not available right now. Try UPI or cash.'**
+  String get errorOnlineUnavailable;
 }
 
 class _AppLocalizationsDelegate

@@ -117,6 +117,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final methods = [
       if (settings?.payments.cod ?? true) PaymentMethod.cod,
       if (settings?.payments.upiEnabled ?? false) PaymentMethod.upi,
+      if (settings?.payments.razorpayEnabled ?? false) PaymentMethod.razorpay,
     ];
     final method = _method ?? methods.firstOrNull;
     final addressList = addresses?.value ?? const <Address>[];
@@ -245,8 +246,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     RadioListTile<PaymentMethod>(
                       key: ValueKey('method-${m.wire}'),
                       value: m,
-                      secondary: Icon(m == PaymentMethod.cod ? Icons.payments_outlined : Icons.qr_code_2),
-                      title: Text(m == PaymentMethod.cod ? l10n.paymentCod : l10n.paymentUpi),
+                      secondary: Icon(m.icon),
+                      title: Text(m == PaymentMethod.razorpay ? l10n.paymentOnline : m.label(l10n)),
                     ),
                 ],
               ),

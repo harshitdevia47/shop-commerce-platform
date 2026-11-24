@@ -35,7 +35,8 @@ enum Fulfillment {
 
 enum PaymentMethod {
   cod('COD'),
-  upi('UPI');
+  upi('UPI'),
+  razorpay('RAZORPAY');
 
   const PaymentMethod(this.wire);
   final String wire;
@@ -353,6 +354,7 @@ class Payment {
     required this.amountPaise,
     this.utr,
     this.upiUri,
+    this.razorpay,
   });
 
   factory Payment.fromJson(Map<String, dynamic> json) => Payment(
@@ -362,6 +364,7 @@ class Payment {
     amountPaise: json['amountPaise'] as int,
     utr: json['utr'] as String?,
     upiUri: json['upiUri'] as String?,
+    razorpay: json['razorpay'] == null ? null : RazorpayCheckoutInfo.fromJson(json['razorpay'] as Map<String, dynamic>),
   );
 
   final String orderId;
@@ -370,6 +373,24 @@ class Payment {
   final int amountPaise;
   final String? utr;
   final String? upiUri;
+
+  /// Online payment not done yet: what Razorpay Checkout needs.
+  final RazorpayCheckoutInfo? razorpay;
+}
+
+@immutable
+class RazorpayCheckoutInfo {
+  const RazorpayCheckoutInfo({required this.keyId, required this.orderId, required this.amountPaise});
+
+  factory RazorpayCheckoutInfo.fromJson(Map<String, dynamic> json) => RazorpayCheckoutInfo(
+    keyId: json['keyId'] as String,
+    orderId: json['orderId'] as String,
+    amountPaise: json['amountPaise'] as int,
+  );
+
+  final String keyId;
+  final String orderId;
+  final int amountPaise;
 }
 
 /// The order flow's request; [idempotencyKey] stays the same across retries of one checkout.

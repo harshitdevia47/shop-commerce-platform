@@ -1156,4 +1156,27 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get salesNote => 'વેચાણ = આ સમયગાળાના ઓર્ડર જે રદ કે નામંજૂર થયા નથી.';
+
+  @override
+  String get paymentOnline => 'ઓનલાઇન ચૂકવો (UPI, કાર્ડ, નેટબેંકિંગ)';
+
+  @override
+  String get paymentOnlineShort => 'ઓનલાઇન';
+
+  @override
+  String payOnline(String amount) {
+    return '$amount ઓનલાઇન ચૂકવો';
+  }
+
+  @override
+  String get onlinePaymentNotDone =>
+      'ચુકવણી પૂર્ણ થઈ નથી. ફરી પ્રયાસ કરી શકો છો.';
+
+  @override
+  String get errorPaymentVerify =>
+      'આ ચુકવણીની પુષ્ટિ થઈ શકી નથી. જો પૈસા કપાયા હોય તો થોડી વારમાં પુષ્ટિ થશે.';
+
+  @override
+  String get errorOnlineUnavailable =>
+      'ઓનલાઇન ચુકવણી હમણાં ઉપલબ્ધ નથી. UPI અથવા રોકડ અજમાવો.';
 }

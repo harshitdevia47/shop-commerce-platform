@@ -177,6 +177,8 @@ class _Body extends StatelessWidget {
               ListTile(title: Text(l10n.paymentsTitle, style: theme.textTheme.titleSmall)),
               _SplitRow(label: l10n.paymentCod, count: summary.codOrders, paise: summary.codPaise),
               _SplitRow(label: l10n.paymentUpi, count: summary.upiOrders, paise: summary.upiPaise),
+              if (summary.onlineOrders > 0)
+                _SplitRow(label: l10n.paymentOnlineShort, count: summary.onlineOrders, paise: summary.onlinePaise),
               ListTile(dense: true, title: Text(l10n.markedPaidTotal(formatPaise(summary.paidPaise)))),
             ],
           ),

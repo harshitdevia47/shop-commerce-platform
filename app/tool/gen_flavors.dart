@@ -111,6 +111,10 @@ Map<String, String> firebaseDefines(Client client) {
   };
 }
 
+/// `build.version` in client.json is `1.2.0+7`: name before '+', Play version code after it.
+String _versionName(Client client) => (client.build['version'] as String? ?? '1.0.0+1').split('+').first;
+int _versionCode(Client client) => int.tryParse((client.build['version'] as String? ?? '1.0.0+1').split('+').last) ?? 1;
+
 void copyAssets(Directory appDir, Client client) {
   final logo = File('${client.dir.path}/${client.logoFile}');
   if (!logo.existsSync()) fail('${client.slug}: ${client.logoFile} missing');
@@ -165,6 +169,8 @@ void writeAndroidFlavors(Directory appDir, List<Client> clients) {
       ..writeln('            dimension "client"')
       ..writeln('            applicationId ${_groovyString(client.build['androidPackage'] as String)}')
       ..writeln('            resValue "string", "app_name", ${_groovyString(client.build['appName'] as String)}')
+      ..writeln('            versionName ${_groovyString(_versionName(client))}')
+      ..writeln('            versionCode ${_versionCode(client)}')
       ..writeln('        }');
 
   }

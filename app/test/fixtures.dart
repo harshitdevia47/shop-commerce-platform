@@ -31,7 +31,12 @@ const testClient = ClientConfig(
 
 /// Shape returned by GET /api/v1/shop/config (captured from the tenant service).
 /// Phase 6 features (slots, list photos, prescriptions, returns) are off unless a test turns them on.
-Map<String, dynamic> shopConfigJson({bool deliveryEnabled = true, bool upi = true, Map<String, bool> features = const {}}) => {
+Map<String, dynamic> shopConfigJson({
+  bool deliveryEnabled = true,
+  bool upi = true,
+  bool razorpay = false,
+  Map<String, bool> features = const {},
+}) => {
   'id': '01a206e8-75c7-71d8-b22b-d3223bce1039',
   'slug': 'sharma_kirana',
   'shop': {
@@ -60,7 +65,7 @@ Map<String, dynamic> shopConfigJson({bool deliveryEnabled = true, bool upi = tru
   'payments': {
     'cod': true,
     'upi': {'enabled': upi, 'vpa': 'sharmakirana@okaxis', 'payeeName': 'Sharma Kirana'},
-    'razorpay': {'enabled': false},
+    'razorpay': {'enabled': razorpay},
   },
   'features': {
     'deliverySlots': false,
