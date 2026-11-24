@@ -7,6 +7,8 @@ const envSchema = z.object({
   REDIS_URL: z.string().url(),
   TENANT_URL: z.string().url(),
   ORDER_URL: z.string().url(),
+  /** Folder with one Razorpay credentials file per shop (<slug>.json). Unset = no online payments. */
+  RAZORPAY_ACCOUNTS_DIR: z.string().optional(),
   SHOP_CONFIG_CACHE_SECONDS: z.coerce.number().int().nonnegative().default(60),
 });
 

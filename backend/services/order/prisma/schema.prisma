@@ -33,6 +33,7 @@ enum Fulfillment {
 enum PaymentMethod {
   COD
   UPI
+  RAZORPAY
 }
 
 model Order {

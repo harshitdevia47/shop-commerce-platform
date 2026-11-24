@@ -1,4 +1,4 @@
-import { handler, requireAdmin, requireShop, requireUser } from '@qc/common';
+import { handler, requireAdmin, requireShop, requireUser, type RawBodyRequest } from '@qc/common';
 import { Router } from 'express';
 import { z } from 'zod';
 import type { PaymentsService } from './payments.service.js';
@@ -17,6 +17,34 @@ export function paymentsRouter(payments: PaymentsService): Router {
     handler(
       { params: orderParams, body: z.object({ utr: z.string().regex(/^\d{12}$/, 'UTR is the 12-digit UPI reference number') }).strict() },
       ({ params, body }) => payments.submitUtr(params.orderId, body.utr),
+    ),
+  );
+
+  router.post(
+    '/api/v1/payments/orders/:orderId/razorpay',
+    requireUser,
+    requireShop,
+    handler(
+      {
+        params: orderParams,
+        body: z
+          .object({
+            razorpayOrderId: z.string().min(1).max(64),
+            razorpayPaymentId: z.string().min(1).max(64),
+            razorpaySignature: z.string().regex(/^[a-f0-9]{64}$/),
+          })
+          .strict(),
+      },
+      ({ params, body }) => payments.confirmOnline(params.orderId, body),
+    ),
+  );
+
+  // Razorpay webhook. The gateway takes the shop from the URL (/api/v1/webhooks/razorpay/<slug>).
+  router.post(
+    '/api/v1/webhooks/razorpay/:slug',
+    requireShop,
+    handler({}, async (_input, req) =>
+      payments.razorpayWebhook((req as RawBodyRequest).rawBody, req.header('x-razorpay-signature') ?? undefined),
     ),
   );
 
@@ -46,7 +74,7 @@ export function paymentsRouter(payments: PaymentsService): Router {
             orderId: z.uuid(),
             orderNumber: z.number().int().positive(),
             customerId: z.uuid(),
-            method: z.enum(['COD', 'UPI']),
+            method: z.enum(['COD', 'UPI', 'RAZORPAY']),
             amountPaise: z.number().int().positive(),
           })
           .strict(),

@@ -10,6 +10,7 @@ type Catalog = {
   newOrder: Text;
   delivery: string;
   pickup: string;
+  online: string;
   items: string;
   cancelledByCustomer: Text;
   utrSubmitted: Text;
@@ -31,6 +32,7 @@ const MESSAGES: Record<Locale, Catalog> = {
     newOrder: { title: 'New order #{n}', body: '{amount} · {items} · {fulfillment} · {payment}' },
     delivery: 'Delivery',
     pickup: 'Pickup',
+    online: 'Online',
     items: '{count} items',
     cancelledByCustomer: { title: 'Order #{n} cancelled', body: 'The customer cancelled this order.' },
     utrSubmitted: { title: 'UPI payment for #{n}', body: 'Customer sent {amount}. Check your UPI app, then mark it paid.' },
@@ -60,6 +62,7 @@ const MESSAGES: Record<Locale, Catalog> = {
     newOrder: { title: 'નવો ઓર્ડર #{n}', body: '{amount} · {items} · {fulfillment} · {payment}' },
     delivery: 'ડિલિવરી',
     pickup: 'પિકઅપ',
+    online: 'ઓનલાઇન',
     items: '{count} વસ્તુ',
     cancelledByCustomer: { title: 'ઓર્ડર #{n} રદ', body: 'ગ્રાહકે આ ઓર્ડર રદ કર્યો.' },
     utrSubmitted: { title: '#{n} માટે UPI ચુકવણી', body: 'ગ્રાહકે {amount} મોકલ્યા. UPI એપમાં તપાસીને ચૂકવેલ કરો.' },
@@ -89,6 +92,7 @@ const MESSAGES: Record<Locale, Catalog> = {
     newOrder: { title: 'नया ऑर्डर #{n}', body: '{amount} · {items} · {fulfillment} · {payment}' },
     delivery: 'डिलीवरी',
     pickup: 'पिकअप',
+    online: 'ऑनलाइन',
     items: '{count} आइटम',
     cancelledByCustomer: { title: 'ऑर्डर #{n} रद्द', body: 'ग्राहक ने यह ऑर्डर रद्द कर दिया।' },
     utrSubmitted: { title: '#{n} के लिए UPI भुगतान', body: 'ग्राहक ने {amount} भेजे। UPI ऐप में जाँचकर भुगतान हुआ करें।' },

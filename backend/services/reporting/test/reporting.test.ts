@@ -120,6 +120,7 @@ describe('sales summary', () => {
       paidPaise: 27_000,
       cod: { orders: 1, paise: 33_000 },
       upi: { orders: 1, paise: 27_000 },
+      online: { orders: 0, paise: 0 },
       delivery: 2,
       pickup: 0,
       customers: 2,

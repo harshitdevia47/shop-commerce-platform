@@ -37,7 +37,7 @@ export const EVENTS = {
       /** 0 for a list order (photo of a list / prescription; the shop prices it when accepting). */
       itemCount: z.number().int().nonnegative(),
       fulfillment: z.enum(['DELIVERY', 'PICKUP']),
-      paymentMethod: z.enum(['COD', 'UPI']),
+      paymentMethod: z.enum(['COD', 'UPI', 'RAZORPAY']),
       needsPricing: z.boolean().optional(),
       /** Chosen delivery window start (ISO), when slots are on. */
       slotStart: z.iso.datetime().nullable().optional(),

@@ -63,6 +63,10 @@ services:
       REDIS_URL: redis://redis:6379
       JWT_PRIVATE_KEY_FILE: /run/secrets/jwt_private_key
       TENANT_URL: http://tenant:3000
+      # SMS_PROVIDER, MSG91_OTP_TEMPLATE_ID come from .env; the MSG91 key from a file (docs/deploy.md).
+      MSG91_AUTH_KEY_FILE: ${MSG91_AUTH_KEY_FILE:-}
+    volumes:
+      - ./secrets/sms:/run/sms:ro
     secrets: [jwt_private_key]
     depends_on:
       postgres: { condition: service_healthy }
@@ -114,6 +118,10 @@ services:
       REDIS_URL: redis://redis:6379
       TENANT_URL: http://tenant:3000
       ORDER_URL: http://order:3000
+      # One Razorpay credentials file per shop: secrets/razorpay/<slug>.json (docs/deploy.md).
+      RAZORPAY_ACCOUNTS_DIR: /run/razorpay
+    volumes:
+      - ./secrets/razorpay:/run/razorpay:ro
     depends_on:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
@@ -234,6 +242,18 @@ services:
     deploy:
       resources: { limits: { memory: 256m } }
 
+  # Monitoring (optional): `docker compose --profile monitoring up -d uptime-kuma`, then open it
+  # through an SSH tunnel: ssh -L 3001:localhost:3001 deploy@server  ->  http://localhost:3001
+  uptime-kuma:
+    image: louislam/uptime-kuma:1.23.16-alpine
+    profiles: [monitoring]
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3001:3001"
+    volumes:
+      - uptimekuma:/app/data
+    networks: [internal]
+
   nginx:
     image: nginx:1.29-alpine
     restart: unless-stopped
@@ -243,6 +263,7 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/certs:/etc/nginx/certs:ro
+      - certbot-webroot:/var/www/certbot:ro
       - media:/srv/media:ro
     networks: [internal]
     depends_on: [gateway, realtime]
@@ -252,6 +273,9 @@ networks:
 
 volumes:
   pgdata:
+  uptimekuma:
+  # HTTP-01 challenge files written by certbot (see docs/deploy.md, TLS).
+  certbot-webroot:
   redisdata:
   # Public images: written by the media service, served read-only by nginx at /media.
   media:

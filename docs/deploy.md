@@ -32,6 +32,7 @@ chmod 600 secrets/*.pem .env
 | `POSTGRES_PASSWORD`, `INTERNAL_HMAC_SECRET`, `OTP_SECRET` | `openssl rand -hex 32` each | new values, never reuse staging ones |
 | `SMS_PROVIDER` | `console` (OTP printed in `docker compose logs identity`) | a real DLT-registered provider (Phase 8); `console` is refused |
 | `OTP_DEV_ECHO` | `true` only for internal testers | must be `false` (refused otherwise) |
+| `COMPOSE_PARALLEL_LIMIT` | `2` | `2` (image builds on 8 GB) |
 | `PUSH_PROVIDER` | `console` (pushes printed in `docker compose logs notification`) until Firebase is set up (section 7) | `fcm` |
 
 ## 2. Start
@@ -56,32 +57,91 @@ docker compose exec identity node dist/users.js create-owner sharma_kirana 98765
 
 ## 4. TLS (Let's Encrypt)
 
-1. Point the domain's A record at the server.
-2. `docker compose stop nginx && sudo apt install -y certbot && sudo certbot certonly --standalone -d api.example.in`
-3. Copy `fullchain.pem` and `privkey.pem` to `deploy/nginx/certs/` (gitignored), add a `listen 443 ssl`
-   server block to `deploy/nginx/nginx.conf` (copy the `/media/`, `/socket.io/` and `/` locations into it),
-   make port 80 redirect to https, `docker compose up -d nginx`. Renew monthly with cron.
-4. Build the app with a `config/env.prod.json` (`API_BASE_URL=https://api.example.in`, `ENV=prod`).
+1. Point the domain's A record (e.g. `api.example.in`) at the server; the stack is running with the plain
+   HTTP config (it already serves `/.well-known/acme-challenge/` from the `certbot-webroot` volume).
+2. Get the certificate (no downtime):
+
+   ```bash
+   docker run --rm -v qc_certbot-webroot:/var/www/certbot -v "$PWD/nginx/certs:/etc/letsencrypt" \
+     certbot/certbot:v4.1.1 certonly --webroot -w /var/www/certbot -d api.example.in \
+     --email you@example.in --agree-tos -n
+   ```
+3. `cp nginx/nginx.tls.conf nginx/nginx.conf`, replace `api.example.in` with your domain,
+   `docker compose up -d nginx`. Port 80 now redirects to HTTPS (HSTS on).
+4. Renewal (cron as `deploy`, daily; certbot only renews within 30 days of expiry):
+
+   ```
+   30 3 * * * cd ~/qc/deploy && docker run --rm -v qc_certbot-webroot:/var/www/certbot -v "$PWD/nginx/certs:/etc/letsencrypt" certbot/certbot:v4.1.1 renew -q && docker compose exec -T nginx nginx -s reload
+   ```
+5. Build the apps with `config/env.prod.json` = `{"ENV": "prod", "API_BASE_URL": "https://api.example.in"}`.
+   Production builds refuse any `http://` address (Flutter's HTTP client ignores Android's cleartext policy).
 
 ## 5. Update
 
 ```bash
-git pull && docker compose up -d --build
+git pull
+COMPOSE_PARALLEL_LIMIT=2 docker compose build   # 8 GB servers: building all images at once runs out of memory
+docker compose up -d
 ```
 
-## 6. Backups
+Each service applies its own pending migrations on start.
 
-Daily database dump copied off the server (cron as `deploy`):
+## 6. Backups and restore check
 
-```bash
-docker compose exec -T postgres pg_dumpall -U qc | gzip > ~/backups/qc-$(date +%F).sql.gz
+`scripts/backup.sh` dumps every database, both photo volumes (public and private) and Redis (undelivered
+events), checks the dump is not empty, writes checksums, keeps `BACKUP_KEEP_DAYS` (14) days locally and,
+when `RCLONE_REMOTE` is set in `.env` (e.g. Backblaze B2 / S3 via `rclone config`), copies each run off
+the server. `scripts/restore-check.sh` restores the latest dump into a throwaway Postgres and counts
+shops/users/orders: a backup is only proven once it has been restored.
+
+```
+15 2 * * *  cd ~/qc/deploy && ./scripts/backup.sh >> ~/backups/backup.log 2>&1
+45 2 * * 0  cd ~/qc/deploy && ./scripts/restore-check.sh >> ~/backups/backup.log 2>&1
 ```
 
-Uploaded images live in the `qc_media` and `qc_media_private` volumes:
+Full restore on a new server: install as in section 1, `docker compose up -d postgres redis`,
+`gunzip -c postgres.sql.gz | docker compose exec -T postgres psql -U qc -d postgres`, untar the photo
+archives into the `qc_media` / `qc_media_private` volumes, then `docker compose up -d`.
 
-```bash
-docker run --rm -v qc_media:/data -v ~/backups:/out alpine tar czf /out/media-$(date +%F).tgz -C /data .
-```
+## 6a. Monitoring
+
+`docker compose --profile monitoring up -d uptime-kuma`, then `ssh -L 3001:localhost:3001 deploy@server`
+and open http://localhost:3001. Add monitors (it runs inside the Docker network):
+
+- HTTPS `https://api.example.in/health` (public, every 60 s; certificate expiry alert on)
+- HTTP `http://<service>:3000/ready` for tenant, identity, catalog, media, order, payment, delivery,
+  notification, reporting (database reachability)
+- TCP `postgres:5432`, `redis:6379`
+
+Point notifications at Telegram or email. Also watch the dead-letter stream (section 10) and disk space
+(`df -h`, Docker images: `docker system df`; prune old images after updates with `docker image prune`).
+
+## 6b. SMS (OTP) for production
+
+India requires DLT registration for business SMS:
+
+1. Register the business (entity) and a 6-letter sender ID on a DLT portal (Jio / Vodafone Idea / Airtel),
+   then an OTP content template such as `{#var#} is your login code for {#var#}. Valid for 5 minutes.`
+2. In MSG91: add the DLT entity and sender ID, create a Flow template using the DLT template id, with the
+   code variable named `otp` (`##otp##`).
+3. On the server: put the MSG91 auth key in `secrets/sms/msg91-auth-key` (`chmod 600`) and set in `.env`:
+   `SMS_PROVIDER=msg91`, `MSG91_OTP_TEMPLATE_ID=<flow id>`, `MSG91_AUTH_KEY_FILE=/run/sms/msg91-auth-key`.
+   `docker compose up -d identity`. With `NODE_ENV=production`, console SMS and OTP echo are refused.
+
+## 6c. Online payments (Razorpay)
+
+Each shop uses its own Razorpay account (money goes to the shop).
+
+1. Shop completes Razorpay KYC; in the Razorpay dashboard create API keys and a webhook:
+   URL `https://api.example.in/api/v1/webhooks/razorpay/<slug>`, events `payment.captured` and `order.paid`,
+   with a webhook secret.
+2. On the server: `secrets/razorpay/<slug>.json` (`chmod 600`):
+   `{"keyId": "rzp_live_...", "keySecret": "...", "webhookSecret": "..."}`; `docker compose up -d payment`.
+3. In `clients/<slug>/client.json` set `"payments": { ..., "razorpay": { "enabled": true } }` and sync.
+
+The app opens Razorpay Checkout right after the order is placed; the payment is marked paid only after the
+server verifies Razorpay's signature (or the signed webhook arrives if the app was closed). Refunds for
+cancelled paid orders are done in the Razorpay dashboard. Test first with `rzp_test_` keys.
 
 ## 7. Push notifications (Firebase Cloud Messaging)
 
@@ -144,3 +204,14 @@ docker compose -p qc-smoke up -d --build
 ```
 
 Nginx binds port 80; use an override file with `ports: !override ["8088:80"]` if 80 is taken.
+
+## Security notes
+
+- Only nginx is published (80/443); Postgres, Redis and every service stay on the internal network.
+  Uptime Kuma binds to localhost only.
+- Secrets live in `deploy/.env` and `deploy/secrets/` (gitignored, `chmod 600`): JWT keys, FCM service
+  account, MSG91 key, Razorpay keys. Rotate the internal HMAC secret and JWT keys if a server is compromised
+  (all users log in again).
+- `npm audit --omit=dev` (2026-11-24): one high-severity ReDoS in `effect`, used only by the Prisma CLI to
+  read our own config files (no user input reaches it); clears with the next Prisma release. Dev-only tools
+  (vitest/esbuild) are not in the images.

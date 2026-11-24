@@ -37,7 +37,7 @@ export interface CheckoutProfile {
 export interface PaymentView {
   id: string;
   orderId: string;
-  method: 'COD' | 'UPI';
+  method: 'COD' | 'UPI' | 'RAZORPAY';
   status: 'PENDING' | 'SUBMITTED' | 'PAID' | 'VOID';
   amountPaise: number;
   upiUri?: string;
@@ -62,7 +62,7 @@ export interface IdentityPort {
 }
 
 export interface PaymentPort {
-  create(input: { orderId: string; orderNumber: number; customerId: string; method: 'COD' | 'UPI'; amountPaise: number }): Promise<PaymentView>;
+  create(input: { orderId: string; orderNumber: number; customerId: string; method: 'COD' | 'UPI' | 'RAZORPAY'; amountPaise: number }): Promise<PaymentView>;
   void(orderId: string): Promise<void>;
 }
 

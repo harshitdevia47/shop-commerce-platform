@@ -14,6 +14,8 @@ export interface RouteRule {
   auth: AuthMode;
   /** Coarse role gate; services still enforce their own rules. */
   roles?: readonly Role[];
+  /** Callers that cannot send X-Shop-Key (payment webhooks): the shop slug is the next path segment. */
+  shopKeyFromPath?: boolean;
 }
 
 export interface UpstreamUrls {
@@ -57,6 +59,8 @@ export function buildRoutes(upstreams: UpstreamUrls): RouteRule[] {
     { prefix: '/api/v1/admin/deliveries', target: upstreams.delivery, auth: 'required', roles: ADMIN_ROLES },
     { prefix: '/api/v1/rider', target: upstreams.delivery, auth: 'required', roles: ['RIDER'] },
     { prefix: '/api/v1/deliveries', target: upstreams.delivery, auth: 'required' },
+    // Razorpay webhooks: /api/v1/webhooks/razorpay/<slug>; the payment service checks the signature.
+    { prefix: '/api/v1/webhooks/razorpay', target: upstreams.payment, auth: 'public', shopKeyFromPath: true },
     // Sales figures: owner only.
     { prefix: '/api/v1/admin/reports', target: upstreams.reporting, auth: 'required', roles: ['OWNER'] },
   ];

@@ -79,7 +79,7 @@ function planFor(event: Exclude<AnyEvent, { type: 'delivery.status_changed' }>):
             return fill(m.newListOrder, {
               n: p.number,
               fulfillment: p.fulfillment === 'DELIVERY' ? m.delivery : m.pickup,
-              payment: p.paymentMethod,
+              payment: p.paymentMethod === 'RAZORPAY' ? m.online : p.paymentMethod,
             });
           }
           return fill(m.newOrder, {
@@ -87,7 +87,7 @@ function planFor(event: Exclude<AnyEvent, { type: 'delivery.status_changed' }>):
             amount: formatRupees(p.totalPaise),
             items: m.items.replace('{count}', String(p.itemCount)),
             fulfillment: p.fulfillment === 'DELIVERY' ? m.delivery : m.pickup,
-            payment: p.paymentMethod,
+            payment: p.paymentMethod === 'RAZORPAY' ? m.online : p.paymentMethod,
           });
         },
       };

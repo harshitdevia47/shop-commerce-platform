@@ -5,6 +5,8 @@ import type { Payment, PaymentMethod } from '../generated/prisma/client.js';
 export interface PaymentInstructions {
   /** `upi://pay?...` intent opening any UPI app with amount and note filled in. */
   upiUri?: string;
+  /** What the app needs to open Razorpay Checkout (the key id is public). */
+  razorpay?: { keyId: string; orderId: string; amountPaise: number };
 }
 
 /**
@@ -47,4 +49,11 @@ export const upiProvider: PaymentProvider = {
   },
 };
 
-export const PROVIDERS: Record<PaymentMethod, PaymentProvider> = { COD: codProvider, UPI: upiProvider };
+/** Razorpay: instructions need the shop's key id, so the payments service fills them in. */
+export const razorpayProvider: PaymentProvider = {
+  method: 'RAZORPAY',
+  isEnabled: (config) => config.razorpay.enabled,
+  instructions: () => ({}),
+};
+
+export const PROVIDERS: Record<PaymentMethod, PaymentProvider> = { COD: codProvider, UPI: upiProvider, RAZORPAY: razorpayProvider };

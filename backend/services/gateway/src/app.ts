@@ -86,7 +86,8 @@ export function createGatewayApp(deps: GatewayDeps): Express {
 
   // 2. Shop resolution from X-Shop-Key.
   app.use(async (req, res, next) => {
-    const key = req.header(SHOP_KEY_HEADER);
+    const { route } = locals(res);
+    const key = route.shopKeyFromPath ? req.path.slice(route.prefix.length + 1).split('/')[0] : req.header(SHOP_KEY_HEADER);
     if (!key) throw Errors.badRequest('SHOP_KEY_REQUIRED', 'X-Shop-Key header is required');
     if (!SLUG_PATTERN.test(key)) throw Errors.notFound('SHOP_NOT_FOUND', 'Shop not found');
     const shop = await deps.shops.resolve(key);

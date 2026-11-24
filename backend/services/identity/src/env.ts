@@ -6,7 +6,7 @@ const booleanString = z
   .default('false')
   .transform((v) => v === 'true' || v === '1');
 
-export const SMS_PROVIDERS = ['console'] as const;
+export const SMS_PROVIDERS = ['console', 'msg91'] as const;
 
 const envSchema = z
   .object({
@@ -20,12 +20,18 @@ const envSchema = z
     /** Pepper for OTP hashes. */
     OTP_SECRET: z.string().min(32, 'OTP_SECRET must be at least 32 characters'),
     SMS_PROVIDER: z.enum(SMS_PROVIDERS).default('console'),
+    MSG91_AUTH_KEY: z.string().optional(),
+    MSG91_OTP_TEMPLATE_ID: z.string().optional(),
+    MSG91_OTP_VARIABLE: z.string().regex(/^[A-Za-z0-9_]+$/).default('otp'),
     /** Dev only: include the OTP in the API response so emulators can log in without SMS. */
     OTP_DEV_ECHO: booleanString,
     /** Used by scripts/users.ts to resolve shop slugs. */
     TENANT_URL: z.string().url().optional(),
   })
   .superRefine((env, ctx) => {
+    if (env.SMS_PROVIDER === 'msg91' && (!env.MSG91_AUTH_KEY || !env.MSG91_OTP_TEMPLATE_ID)) {
+      ctx.addIssue({ code: 'custom', path: ['MSG91_AUTH_KEY'], message: 'SMS_PROVIDER=msg91 needs MSG91_AUTH_KEY(_FILE) and MSG91_OTP_TEMPLATE_ID' });
+    }
     if (env.NODE_ENV !== 'production') return;
     if (env.SMS_PROVIDER === 'console') {
       ctx.addIssue({ code: 'custom', path: ['SMS_PROVIDER'], message: 'console SMS provider is not allowed in production' });
@@ -38,5 +44,9 @@ const envSchema = z
 export type IdentityEnv = z.infer<typeof envSchema>;
 
 export function loadIdentityEnv(source: Record<string, string | undefined> = process.env): IdentityEnv {
-  return loadEnv(envSchema, { ...source, JWT_PRIVATE_KEY: readSecret(source, 'JWT_PRIVATE_KEY') });
+  return loadEnv(envSchema, {
+    ...source,
+    JWT_PRIVATE_KEY: readSecret(source, 'JWT_PRIVATE_KEY'),
+    MSG91_AUTH_KEY: readSecret(source, 'MSG91_AUTH_KEY'),
+  });
 }

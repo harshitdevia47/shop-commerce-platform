@@ -76,6 +76,7 @@ export function createReportsService(db: Db) {
         paidPaise,
         cod: { orders: method('COD')?._count._all ?? 0, paise: method('COD')?._sum.totalPaise ?? 0 },
         upi: { orders: method('UPI')?._count._all ?? 0, paise: method('UPI')?._sum.totalPaise ?? 0 },
+        online: { orders: method('RAZORPAY')?._count._all ?? 0, paise: method('RAZORPAY')?._sum.totalPaise ?? 0 },
         delivery: byFulfillment.find((f) => f.fulfillment === 'DELIVERY')?._count._all ?? 0,
         pickup: byFulfillment.find((f) => f.fulfillment === 'PICKUP')?._count._all ?? 0,
         customers: customers.length,

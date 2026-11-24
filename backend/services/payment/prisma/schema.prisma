@@ -15,6 +15,8 @@ datasource db {
 enum PaymentMethod {
   COD
   UPI
+  /// Online through Razorpay (UPI, cards, netbanking), confirmed by signature / webhook
+  RAZORPAY
 }
 
 enum PaymentStatus {
@@ -47,10 +49,14 @@ model Payment {
   /// Set once the order is known to exist (order.placed or the sweeper's check).
   /// Unconfirmed payments older than a few minutes belong to a failed checkout and are voided.
   orderConfirmedAt DateTime? @map("order_confirmed_at") @db.Timestamptz(3)
+  /// Razorpay: their order id (created with the payment) and the payment id once paid
+  providerOrderId   String?   @map("provider_order_id")
+  providerPaymentId String?   @map("provider_payment_id")
   createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt    DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   @@unique([shopId, orderId])
+  @@unique([shopId, providerOrderId])
   @@index([shopId, status, createdAt])
   @@map("payments")
 }

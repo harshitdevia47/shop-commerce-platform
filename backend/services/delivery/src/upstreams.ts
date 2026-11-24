@@ -22,7 +22,7 @@ export interface OrderSnapshot {
   fulfillment: 'DELIVERY' | 'PICKUP';
   address: OrderAddress | null;
   note: string | null;
-  paymentMethod: 'COD' | 'UPI';
+  paymentMethod: 'COD' | 'UPI' | 'RAZORPAY';
   customer: { id: string; phone: string; name: string | null };
   itemCount: number;
   totalPaise: number;

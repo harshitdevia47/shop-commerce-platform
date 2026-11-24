@@ -5,6 +5,11 @@ import { pinoHttp } from 'pino-http';
 import { errorHandler, notFoundHandler } from './errors.js';
 import { INTERNAL_HEADERS } from './internal-auth.js';
 
+/** Request with the unparsed JSON body (set by the JSON parser of `createServiceApp`). */
+export interface RawBodyRequest extends express.Request {
+  rawBody?: Buffer;
+}
+
 export interface ServiceAppOptions {
   service: string;
   logger: Logger;
@@ -41,7 +46,15 @@ export function createServiceApp({ service, logger, ready, jsonLimit = '1mb' }: 
       },
     }),
   );
-  app.use(express.json({ limit: jsonLimit }));
+  // Keep the exact bytes too: webhook signatures (Razorpay) are computed over the raw body.
+  app.use(
+    express.json({
+      limit: jsonLimit,
+      verify: (req, _res, buf) => {
+        (req as RawBodyRequest).rawBody = buf;
+      },
+    }),
+  );
   return app;
 }
 

@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { createHmac, randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { createLogger, findRawPrismaOffenders, getContext, signInternalHeaders, type Role } from '@qc/common';
 import type { PaymentsConfig } from '@qc/config-schema';
@@ -23,11 +23,14 @@ const STRANGER = randomUUID();
 const OWNER = randomUUID();
 
 const payments: Record<string, PaymentsConfig> = {
-  [SHOP_A]: { cod: true, upi: { enabled: true, vpa: 'sharma@okaxis', payeeName: 'Sharma Kirana' }, razorpay: { enabled: false } },
+  [SHOP_A]: { cod: true, upi: { enabled: true, vpa: 'sharma@okaxis', payeeName: 'Sharma Kirana' }, razorpay: { enabled: true } },
   [SHOP_B]: { cod: true, upi: { enabled: false }, razorpay: { enabled: false } },
 };
 
 let app: Express;
+const RZP = { keyId: 'rzp_test_abc123', keySecret: 'key-secret-123', webhookSecret: 'webhook-secret-123' };
+let razorpayOrders: { keyId: string; amountPaise: number; receipt: string; notes: Record<string, string> }[] = [];
+let razorpayDown = false;
 const sign = (shopId: string, userId?: string, role?: Role) =>
   signInternalHeaders({ requestId: randomUUID(), shopId, userId, role }, SECRET);
 const svc = (shopId: string = SHOP_A) => sign(shopId);
@@ -48,7 +51,17 @@ beforeAll(() => {
     db,
     logger: createLogger('payment-test', 'silent'),
     internalSecret: SECRET,
-    shopConfig: { get: async () => ({ payments: payments[getContext()!.shopId!]! }) },
+    shopConfig: { get: async () => ({ slug: getContext()!.shopId === SHOP_A ? 'shop_a' : 'shop_b', payments: payments[getContext()!.shopId!]! }) },
+    razorpay: {
+      accounts: { get: (slug) => (slug === 'shop_a' ? RZP : null) },
+      api: {
+        async createOrder(credentials, input) {
+          if (razorpayDown) throw new Error('down');
+          razorpayOrders.push({ keyId: credentials.keyId, ...input });
+          return { id: `order_${razorpayOrders.length}` };
+        },
+      },
+    },
   });
 });
 async function clean() {
@@ -250,6 +263,61 @@ describe('events', () => {
     expect((await statusOf(orphan.orderId)).status).toBe('VOID');
     expect((await statusOf(real.orderId)).status).toBe('PENDING');
     expect((await statusOf(real.orderId)).orderConfirmedAt).not.toBeNull();
+  });
+});
+
+describe('Razorpay', () => {
+  const sign = (secret: string, payload: string) => createHmac('sha256', secret).update(payload).digest('hex');
+  beforeEach(() => {
+    razorpayOrders = [];
+    razorpayDown = false;
+  });
+
+  it('creates a Razorpay order with the payment and gives the app what Checkout needs', async () => {
+    const { orderId, res } = await createPayment('RAZORPAY' as 'UPI');
+    expect(res.status, JSON.stringify(res.body)).toBe(201);
+    expect(razorpayOrders).toEqual([{ keyId: 'rzp_test_abc123', amountPaise: 12050, receipt: 'Order #42', notes: { orderId, shopId: SHOP_A } }]);
+    expect(res.body.data).toMatchObject({ method: 'RAZORPAY', status: 'PENDING', razorpay: { keyId: 'rzp_test_abc123', orderId: 'order_1', amountPaise: 12050 } });
+    expect(JSON.stringify(res.body)).not.toContain('key-secret');
+  });
+
+  it('marks paid only with a valid checkout signature from the order owner', async () => {
+    const { orderId } = await createPayment('RAZORPAY' as 'UPI');
+    const confirm = (signature: string, headers = customer()) =>
+      request(app)
+        .post(`/api/v1/payments/orders/${orderId}/razorpay`)
+        .set(headers)
+        .send({ razorpayOrderId: 'order_1', razorpayPaymentId: 'pay_9', razorpaySignature: signature });
+    expect((await confirm(sign('wrong-secret', 'order_1|pay_9'))).body.error.code).toBe('PAYMENT_SIGNATURE_INVALID');
+    expect((await confirm(sign(RZP.keySecret, 'order_1|pay_9'), customer(SHOP_A, STRANGER))).status).toBe(404);
+    const ok = await confirm(sign(RZP.keySecret, 'order_1|pay_9'));
+    expect(ok.body.data).toMatchObject({ status: 'PAID' });
+    expect(ok.body.data.razorpay).toBeUndefined();
+    const events = await rawPrisma.outboxEvent.findMany({ where: { shopId: SHOP_A, type: 'payment.marked_paid' } });
+    expect(events).toHaveLength(1);
+  });
+
+  it('the webhook confirms a payment the app never reported, once, and rejects bad signatures', async () => {
+    const { orderId } = await createPayment('RAZORPAY' as 'UPI');
+    const body = JSON.stringify({ event: 'payment.captured', payload: { payment: { entity: { id: 'pay_7', order_id: 'order_1', status: 'captured' } } } });
+    const hook = (signature: string) =>
+      request(app)
+        .post('/api/v1/webhooks/razorpay/shop_a')
+        .set(svc())
+        .set('content-type', 'application/json')
+        .set('x-razorpay-signature', signature)
+        .send(body);
+    expect((await hook(sign('nope-nope-nope', body))).body.error.code).toBe('WEBHOOK_SIGNATURE_INVALID');
+    expect((await hook(sign(RZP.webhookSecret, body))).body.data).toEqual({ handled: true });
+    expect((await hook(sign(RZP.webhookSecret, body))).body.data).toEqual({ handled: false });
+    const payment = await rawPrisma.payment.findFirstOrThrow({ where: { orderId } });
+    expect(payment).toMatchObject({ status: 'PAID', providerPaymentId: 'pay_7' });
+  });
+
+  it('is refused when the shop has no account or Razorpay is down', async () => {
+    expect((await createPayment('RAZORPAY' as 'UPI', SHOP_B)).res.body.error.code).toBe('PAYMENT_METHOD_UNAVAILABLE');
+    razorpayDown = true;
+    expect((await createPayment('RAZORPAY' as 'UPI')).res.body.error.code).toBe('PAYMENT_PROVIDER_UNAVAILABLE');
   });
 });
 

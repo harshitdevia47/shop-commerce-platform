@@ -18,7 +18,12 @@ const app = await createIdentityApp({
   db,
   logger,
   internalSecret: env.INTERNAL_HMAC_SECRET,
-  sms: createSmsProvider(env.SMS_PROVIDER, logger),
+  sms: createSmsProvider(
+    env.SMS_PROVIDER === 'msg91'
+      ? { name: 'msg91', authKey: env.MSG91_AUTH_KEY!, templateId: env.MSG91_OTP_TEMPLATE_ID!, otpVariable: env.MSG91_OTP_VARIABLE }
+      : { name: 'console' },
+    logger,
+  ),
   limits: new RedisRateLimitStore(redis),
   otpSecret: env.OTP_SECRET,
   otpDevEcho: env.OTP_DEV_ECHO,

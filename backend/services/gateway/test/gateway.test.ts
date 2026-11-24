@@ -113,6 +113,14 @@ describe('gateway', () => {
     expect(res.headers['x-request-id']).toBe(res.body.identity.requestId);
   });
 
+  it('payment webhooks name their shop in the path (no X-Shop-Key) and need no login', async () => {
+    const res = await request(app).post('/api/v1/webhooks/razorpay/shop_a').send({ event: 'payment.captured' });
+    expect(res.status).toBe(200);
+    expect(res.body.identity.shopId).toBe('id-a');
+    expect((await request(app).post('/api/v1/webhooks/razorpay/nope').send({})).status).toBe(404);
+    expect((await request(app).post('/api/v1/webhooks/razorpay/Bad-Slug').send({})).status).toBe(404);
+  });
+
   it('forwards the client IP inside the signed identity', async () => {
     const res = await request(app).get('/api/v1/shop/config').set('x-shop-key', 'shop_a').set('x-internal-client-ip', '6.6.6.6');
     expect(res.body.identity.clientIp).toBeDefined();

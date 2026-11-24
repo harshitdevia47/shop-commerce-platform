@@ -51,7 +51,7 @@ export function ordersRouter(orders: OrdersService): Router {
             items,
             fulfillment,
             addressId: z.uuid().optional(),
-            paymentMethod: z.enum(['COD', 'UPI']),
+            paymentMethod: z.enum(['COD', 'UPI', 'RAZORPAY']),
             note: z.string().trim().min(1).max(500).optional(),
             idempotencyKey: z.uuid(),
             expectedTotalPaise: z.number().int().nonnegative().optional(),
