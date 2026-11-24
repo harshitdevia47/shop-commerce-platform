@@ -570,5 +570,64 @@
   "errorReturnExists": "A request for this order was already sent.",
   "errorReturnItems": "Choose the items to return.",
   "errorReturnNotAllowed": "Returns are possible after delivery.",
-  "errorReasonRequired": "Please write a short reason."
+  "errorReasonRequired": "Please write a short reason.",
+  "adminSales": "Sales",
+  "adminSalesSubtitle": "Sales, best sellers and customers",
+  "periodYesterday": "Yesterday",
+  "period7": "7 days",
+  "period30": "30 days",
+  "periodMonth": "This month",
+  "statSales": "Sales",
+  "statOrders": "Orders",
+  "statAverage": "Average order",
+  "statCancelled": "Cancelled",
+  "dailySalesTitle": "Sales by day",
+  "dayByDay": "Day by day",
+  "tapBarHint": "Tap a bar to see that day.",
+  "paymentsTitle": "How customers paid",
+  "markedPaidTotal": "Marked paid: {amount}",
+  "@markedPaidTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "fulfillmentTitle": "Delivery and pickup",
+  "customersTitle": "Customers",
+  "newCustomers": "{count} new",
+  "@newCustomers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "returningCustomers": "{count} returning",
+  "@returningCustomers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "topProductsTitle": "Best sellers",
+  "noTopProducts": "No item sales in this period yet.",
+  "ordersCount": "{count} orders",
+  "@ordersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "soldQty": "{count} sold",
+  "@soldQty": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "salesNote": "Sales = orders placed in the period that were not cancelled or rejected."
 }

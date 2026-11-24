@@ -2049,6 +2049,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please write a short reason.'**
   String get errorReasonRequired;
+
+  /// No description provided for @adminSales.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales'**
+  String get adminSales;
+
+  /// No description provided for @adminSalesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales, best sellers and customers'**
+  String get adminSalesSubtitle;
+
+  /// No description provided for @periodYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get periodYesterday;
+
+  /// No description provided for @period7.
+  ///
+  /// In en, this message translates to:
+  /// **'7 days'**
+  String get period7;
+
+  /// No description provided for @period30.
+  ///
+  /// In en, this message translates to:
+  /// **'30 days'**
+  String get period30;
+
+  /// No description provided for @periodMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get periodMonth;
+
+  /// No description provided for @statSales.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales'**
+  String get statSales;
+
+  /// No description provided for @statOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders'**
+  String get statOrders;
+
+  /// No description provided for @statAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Average order'**
+  String get statAverage;
+
+  /// No description provided for @statCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get statCancelled;
+
+  /// No description provided for @dailySalesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales by day'**
+  String get dailySalesTitle;
+
+  /// No description provided for @dayByDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day by day'**
+  String get dayByDay;
+
+  /// No description provided for @tapBarHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a bar to see that day.'**
+  String get tapBarHint;
+
+  /// No description provided for @paymentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How customers paid'**
+  String get paymentsTitle;
+
+  /// No description provided for @markedPaidTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Marked paid: {amount}'**
+  String markedPaidTotal(String amount);
+
+  /// No description provided for @fulfillmentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery and pickup'**
+  String get fulfillmentTitle;
+
+  /// No description provided for @customersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Customers'**
+  String get customersTitle;
+
+  /// No description provided for @newCustomers.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} new'**
+  String newCustomers(int count);
+
+  /// No description provided for @returningCustomers.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} returning'**
+  String returningCustomers(int count);
+
+  /// No description provided for @topProductsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Best sellers'**
+  String get topProductsTitle;
+
+  /// No description provided for @noTopProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'No item sales in this period yet.'**
+  String get noTopProducts;
+
+  /// No description provided for @ordersCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} orders'**
+  String ordersCount(int count);
+
+  /// No description provided for @soldQty.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} sold'**
+  String soldQty(int count);
+
+  /// No description provided for @salesNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales = orders placed in the period that were not cancelled or rejected.'**
+  String get salesNote;
 }
 
 class _AppLocalizationsDelegate

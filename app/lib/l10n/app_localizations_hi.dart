@@ -1077,4 +1077,88 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get errorReasonRequired => 'कृपया छोटा कारण लिखें।';
+
+  @override
+  String get adminSales => 'बिक्री';
+
+  @override
+  String get adminSalesSubtitle =>
+      'बिक्री, सबसे ज़्यादा बिकने वाले सामान और ग्राहक';
+
+  @override
+  String get periodYesterday => 'बीता कल';
+
+  @override
+  String get period7 => '7 दिन';
+
+  @override
+  String get period30 => '30 दिन';
+
+  @override
+  String get periodMonth => 'इस महीने';
+
+  @override
+  String get statSales => 'बिक्री';
+
+  @override
+  String get statOrders => 'ऑर्डर';
+
+  @override
+  String get statAverage => 'औसत ऑर्डर';
+
+  @override
+  String get statCancelled => 'रद्द';
+
+  @override
+  String get dailySalesTitle => 'दिन के हिसाब से बिक्री';
+
+  @override
+  String get dayByDay => 'रोज़ का';
+
+  @override
+  String get tapBarHint => 'उस दिन को देखने के लिए बार पर टैप करें।';
+
+  @override
+  String get paymentsTitle => 'ग्राहकों ने कैसे भुगतान किया';
+
+  @override
+  String markedPaidTotal(String amount) {
+    return 'भुगतान दर्ज: $amount';
+  }
+
+  @override
+  String get fulfillmentTitle => 'डिलीवरी और पिकअप';
+
+  @override
+  String get customersTitle => 'ग्राहक';
+
+  @override
+  String newCustomers(int count) {
+    return '$count नए';
+  }
+
+  @override
+  String returningCustomers(int count) {
+    return '$count दोबारा आए';
+  }
+
+  @override
+  String get topProductsTitle => 'सबसे ज़्यादा बिके';
+
+  @override
+  String get noTopProducts => 'इस अवधि में अभी कोई बिक्री नहीं।';
+
+  @override
+  String ordersCount(int count) {
+    return '$count ऑर्डर';
+  }
+
+  @override
+  String soldQty(int count) {
+    return '$count बिके';
+  }
+
+  @override
+  String get salesNote =>
+      'बिक्री = इस अवधि के ऑर्डर जो रद्द या अस्वीकार नहीं हुए।';
 }

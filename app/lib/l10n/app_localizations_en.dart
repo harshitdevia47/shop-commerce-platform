@@ -1085,4 +1085,87 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorReasonRequired => 'Please write a short reason.';
+
+  @override
+  String get adminSales => 'Sales';
+
+  @override
+  String get adminSalesSubtitle => 'Sales, best sellers and customers';
+
+  @override
+  String get periodYesterday => 'Yesterday';
+
+  @override
+  String get period7 => '7 days';
+
+  @override
+  String get period30 => '30 days';
+
+  @override
+  String get periodMonth => 'This month';
+
+  @override
+  String get statSales => 'Sales';
+
+  @override
+  String get statOrders => 'Orders';
+
+  @override
+  String get statAverage => 'Average order';
+
+  @override
+  String get statCancelled => 'Cancelled';
+
+  @override
+  String get dailySalesTitle => 'Sales by day';
+
+  @override
+  String get dayByDay => 'Day by day';
+
+  @override
+  String get tapBarHint => 'Tap a bar to see that day.';
+
+  @override
+  String get paymentsTitle => 'How customers paid';
+
+  @override
+  String markedPaidTotal(String amount) {
+    return 'Marked paid: $amount';
+  }
+
+  @override
+  String get fulfillmentTitle => 'Delivery and pickup';
+
+  @override
+  String get customersTitle => 'Customers';
+
+  @override
+  String newCustomers(int count) {
+    return '$count new';
+  }
+
+  @override
+  String returningCustomers(int count) {
+    return '$count returning';
+  }
+
+  @override
+  String get topProductsTitle => 'Best sellers';
+
+  @override
+  String get noTopProducts => 'No item sales in this period yet.';
+
+  @override
+  String ordersCount(int count) {
+    return '$count orders';
+  }
+
+  @override
+  String soldQty(int count) {
+    return '$count sold';
+  }
+
+  @override
+  String get salesNote =>
+      'Sales = orders placed in the period that were not cancelled or rejected.';
 }
