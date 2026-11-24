@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../core/config/shop_settings.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/providers.dart';
 import '../../../core/router/routes.dart';
@@ -67,6 +68,19 @@ class AdminHomeScreen extends ConsumerWidget {
               onTap: () => context.push(Routes.adminCategories),
             ),
           ),
+          if (ref.watch(featureProvider(Feature.returns))) ...[
+            const SizedBox(height: 8),
+            Card(
+              child: ListTile(
+                key: const Key('adminReturnsTile'),
+                leading: const Icon(Icons.assignment_return_outlined),
+                title: Text(l10n.adminReturns),
+                subtitle: Text(l10n.adminReturnsSubtitle),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push(Routes.adminReturns),
+              ),
+            ),
+          ],
           if (user?.role == UserRole.owner) ...[
             const SizedBox(height: 8),
             Card(

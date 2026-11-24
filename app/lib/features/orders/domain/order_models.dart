@@ -206,9 +206,11 @@ class OrderItem {
     this.productNameI18n,
     this.variantLabelI18n,
     this.thumbUrl,
+    this.variantId,
   });
 
   factory OrderItem.fromJson(Map<String, dynamic> json) => OrderItem(
+    variantId: json['variantId'] as String?,
     productName: json['productName'] as String,
     productNameI18n: readI18n(json['productNameI18n']),
     variantLabel: json['variantLabel'] as String,
@@ -219,6 +221,7 @@ class OrderItem {
     lineTotalPaise: json['lineTotalPaise'] as int,
   );
 
+  final String? variantId;
   final String productName;
   final Map<String, String>? productNameI18n;
   final String variantLabel;
@@ -268,6 +271,10 @@ class Order {
     this.cancelReason,
     this.history = const [],
     this.nextStatuses = const [],
+    this.slot,
+    this.attachments = const [],
+    this.needsPricing = false,
+    this.returnRequest,
   });
 
   factory Order.fromJson(Map<String, dynamic> json) {
@@ -292,8 +299,26 @@ class Order {
       placedAt: DateTime.parse(json['placedAt'] as String).toLocal(),
       history: [for (final h in json['history'] as List<dynamic>? ?? const []) StatusChange.fromJson(h as Map<String, dynamic>)],
       nextStatuses: [for (final s in json['nextStatuses'] as List<dynamic>? ?? const []) OrderStatus.fromWire(s as String)],
+      slot: json['slot'] == null ? null : TimeWindow.fromJson(json['slot'] as Map<String, dynamic>),
+      attachments: [for (final a in json['attachments'] as List<dynamic>? ?? const []) Attachment.fromJson(a as Map<String, dynamic>)],
+      needsPricing: json['needsPricing'] as bool? ?? false,
+      returnRequest: json['returnRequest'] == null ? null : ReturnRequest.fromJson(json['returnRequest'] as Map<String, dynamic>),
     );
   }
+
+  /// Delivery window chosen at checkout (shops with delivery slots).
+  final TimeWindow? slot;
+
+  /// Private photos: prescription / handwritten list.
+  final List<Attachment> attachments;
+
+  /// List order: the shop sets the amount when accepting it.
+  final bool needsPricing;
+
+  final ReturnRequest? returnRequest;
+
+  /// When the customer got it (delivered or picked up), for the return window.
+  DateTime? get handedOverAt => history.where((h) => h.status == OrderStatus.delivered || h.status == OrderStatus.pickedUp).lastOrNull?.at;
 
   final String id;
   final int number;
@@ -358,8 +383,12 @@ class PlaceOrderRequest {
     this.addressId,
     this.note,
     this.expectedTotalPaise,
+    this.slotStart,
+    this.attachmentIds = const [],
   });
 
+  final DateTime? slotStart;
+  final List<String> attachmentIds;
   final List<Map<String, dynamic>> items;
   final Fulfillment fulfillment;
   final PaymentMethod paymentMethod;
@@ -376,5 +405,132 @@ class PlaceOrderRequest {
     'addressId': ?addressId,
     if (note != null && note!.isNotEmpty) 'note': note,
     'expectedTotalPaise': ?expectedTotalPaise,
+    if (slotStart != null) 'slotStart': slotStart!.toUtc().toIso8601String(),
+    if (attachmentIds.isNotEmpty) 'attachmentIds': attachmentIds,
   };
+}
+
+@immutable
+class TimeWindow {
+  const TimeWindow({required this.start, required this.end});
+
+  factory TimeWindow.fromJson(Map<String, dynamic> json) =>
+      TimeWindow(start: DateTime.parse(json['start'] as String).toLocal(), end: DateTime.parse(json['end'] as String).toLocal());
+
+  final DateTime start;
+  final DateTime end;
+}
+
+/// A delivery window offered at checkout.
+@immutable
+class DeliverySlot extends TimeWindow {
+  const DeliverySlot({required super.start, required super.end, required this.available});
+
+  factory DeliverySlot.fromJson(Map<String, dynamic> json) => DeliverySlot(
+    start: DateTime.parse(json['start'] as String).toLocal(),
+    end: DateTime.parse(json['end'] as String).toLocal(),
+    available: json['available'] as bool,
+  );
+
+  final bool available;
+}
+
+/// Private photo kinds (wire names match the media service).
+enum AttachmentKind {
+  prescription('PRESCRIPTION'),
+  handwrittenList('HANDWRITTEN_LIST'),
+  returnPhoto('RETURN_PHOTO');
+
+  const AttachmentKind(this.wire);
+  final String wire;
+
+  static AttachmentKind fromWire(String value) => values.firstWhere((k) => k.wire == value, orElse: () => handwrittenList);
+}
+
+@immutable
+class Attachment {
+  const Attachment({required this.id, required this.kind});
+
+  factory Attachment.fromJson(Map<String, dynamic> json) =>
+      Attachment(id: json['id'] as String, kind: AttachmentKind.fromWire(json['kind'] as String));
+
+  final String id;
+  final AttachmentKind kind;
+}
+
+enum ReturnKind {
+  returnItems('RETURN'),
+  exchange('EXCHANGE');
+
+  const ReturnKind(this.wire);
+  final String wire;
+}
+
+enum ReturnStatus {
+  requested('REQUESTED'),
+  approved('APPROVED'),
+  rejected('REJECTED'),
+  completed('COMPLETED');
+
+  const ReturnStatus(this.wire);
+  final String wire;
+
+  static ReturnStatus fromWire(String value) => values.firstWhere((s) => s.wire == value, orElse: () => requested);
+}
+
+@immutable
+class ReturnLine {
+  const ReturnLine({required this.variantId, required this.productName, required this.variantLabel, required this.qty});
+
+  factory ReturnLine.fromJson(Map<String, dynamic> json) => ReturnLine(
+    variantId: json['variantId'] as String,
+    productName: json['productName'] as String,
+    variantLabel: json['variantLabel'] as String,
+    qty: json['qty'] as int,
+  );
+
+  final String variantId;
+  final String productName;
+  final String variantLabel;
+  final int qty;
+}
+
+@immutable
+class ReturnRequest {
+  const ReturnRequest({
+    required this.id,
+    required this.orderId,
+    required this.orderNumber,
+    required this.type,
+    required this.status,
+    required this.reason,
+    required this.items,
+    required this.createdAt,
+    this.photos = const [],
+    this.shopNote,
+  });
+
+  factory ReturnRequest.fromJson(Map<String, dynamic> json) => ReturnRequest(
+    id: json['id'] as String,
+    orderId: json['orderId'] as String,
+    orderNumber: json['orderNumber'] as int,
+    type: json['type'] == 'EXCHANGE' ? ReturnKind.exchange : ReturnKind.returnItems,
+    status: ReturnStatus.fromWire(json['status'] as String),
+    reason: json['reason'] as String,
+    items: [for (final i in json['items'] as List<dynamic>) ReturnLine.fromJson(i as Map<String, dynamic>)],
+    photos: [for (final p in json['photos'] as List<dynamic>? ?? const []) Attachment.fromJson(p as Map<String, dynamic>)],
+    shopNote: json['shopNote'] as String?,
+    createdAt: DateTime.parse(json['createdAt'] as String).toLocal(),
+  );
+
+  final String id;
+  final String orderId;
+  final int orderNumber;
+  final ReturnKind type;
+  final ReturnStatus status;
+  final String reason;
+  final List<ReturnLine> items;
+  final List<Attachment> photos;
+  final String? shopNote;
+  final DateTime createdAt;
 }

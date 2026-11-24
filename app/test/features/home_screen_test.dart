@@ -50,7 +50,7 @@ void main() {
   });
 
   testWidgets('shop info sheet lists delivery and payment options', (tester) async {
-    await pumpApp(tester, FakeRepository(ShopSettings.fromJson(shopConfigJson())));
+    await pumpApp(tester, FakeRepository(ShopSettings.fromJson(shopConfigJson(features: {'deliverySlots': true}))));
     await tester.tap(find.byKey(const Key('shopInfoButton')));
     await tester.pumpAndSettle();
 

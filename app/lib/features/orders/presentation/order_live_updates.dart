@@ -32,7 +32,8 @@ final orderLiveUpdatesProvider = Provider<void>((ref) {
       ..invalidate(adminOrderProvider(orderId))
       ..invalidate(adminPaymentProvider(orderId))
       ..invalidate(myOrdersProvider)
-      ..invalidate(adminOrdersProvider);
+      ..invalidate(adminOrdersProvider)
+      ..invalidate(adminReturnsProvider);
   }
 
   void onEvent(RealtimeEvent event) {
@@ -62,7 +63,9 @@ final orderLiveUpdatesProvider = Provider<void>((ref) {
       ..invalidate(customerDeliveryProvider)
       ..invalidate(adminDeliveryProvider)
       ..invalidate(riderDeliveriesProvider)
-      ..invalidate(riderDeliveryProvider);
+      ..invalidate(riderDeliveryProvider)
+      ..invalidate(adminReturnsProvider)
+      ..invalidate(deliverySlotsProvider);
   }
 
   final subscriptions = <StreamSubscription<Object?>>[

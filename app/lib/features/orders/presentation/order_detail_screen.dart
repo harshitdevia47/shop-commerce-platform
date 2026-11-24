@@ -2,11 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../core/config/shop_settings.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/providers.dart';
 import '../../../core/realtime/realtime_providers.dart';
+import '../../../core/router/routes.dart';
 import '../../../core/utils/launcher.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/widgets/error_view.dart';
@@ -16,6 +19,7 @@ import '../../delivery/presentation/delivery_widgets.dart';
 import '../domain/order_models.dart';
 import 'orders_providers.dart';
 import 'widgets/bill_summary.dart';
+import 'widgets/order_extras.dart';
 import 'widgets/order_widgets.dart';
 
 /// Customer's view of one order: progress, payment, items, cancel.
@@ -48,6 +52,16 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
   void dispose() {
     _timer?.cancel();
     super.dispose();
+  }
+
+  /// Returns are on, the order was handed over within the shop's window, nothing asked yet.
+  bool _canAskReturn(Order order) {
+    final settings = ref.read(shopSettingsProvider).value;
+    final handedOver = order.handedOverAt;
+    if (settings == null || !settings.isEnabled(Feature.returns) || order.returnRequest != null || handedOver == null) {
+      return false;
+    }
+    return DateTime.now().difference(handedOver) <= Duration(days: settings.returns.windowDays);
   }
 
   void _refresh() {
@@ -117,18 +131,22 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                   ),
                 ),
               CustomerDeliveryCard(order: value),
+              AwaitingPricingCard(order: value),
+              if (value.returnRequest case final request?) ReturnRequestCard(request: request),
+              OrderSlotTile(order: value),
               Card(child: OrderTimeline(order: value)),
               const SizedBox(height: 8),
-              _PaymentCard(order: value),
-              const SizedBox(height: 8),
+              if (!value.needsPricing) ...[_PaymentCard(order: value), const SizedBox(height: 8)],
+              OrderPhotosCard(photos: value.attachments, title: l10n.yourPhotos),
               OrderItemsCard(order: value),
               const SizedBox(height: 8),
-              BillSummary(
-                subtotalPaise: value.subtotalPaise,
-                deliveryFeePaise: value.deliveryFeePaise,
-                totalPaise: value.totalPaise,
-                showDelivery: value.fulfillment == Fulfillment.delivery,
-              ),
+              if (!value.needsPricing)
+                BillSummary(
+                  subtotalPaise: value.subtotalPaise,
+                  deliveryFeePaise: value.deliveryFeePaise,
+                  totalPaise: value.totalPaise,
+                  showDelivery: value.fulfillment == Fulfillment.delivery,
+                ),
               if (value.address case final address?)
                 Card(
                   child: ListTile(
@@ -137,6 +155,15 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                     subtitle: Text(address.summary),
                   ),
                 ),
+              if (_canAskReturn(value)) ...[
+                const SizedBox(height: 16),
+                OutlinedButton.icon(
+                  key: const Key('requestReturnButton'),
+                  icon: const Icon(Icons.assignment_return_outlined),
+                  label: Text(l10n.requestReturn),
+                  onPressed: () => context.push('${Routes.order(value.id)}/return'),
+                ),
+              ],
               if (value.canCancel) ...[
                 const SizedBox(height: 16),
                 OutlinedButton(key: const Key('cancelOrderButton'), onPressed: _cancel, child: Text(l10n.cancelOrder)),
@@ -201,7 +228,8 @@ class _PaymentCardState extends ConsumerState<_PaymentCard> {
     final order = widget.order;
     final payment = ref.watch(paymentProvider(order.id)).value;
     final amount = formatPaise(order.totalPaise);
-    final open = payment != null && (payment.status == PaymentStatus.pending || payment.status == PaymentStatus.submitted);
+    final open =
+        payment != null && (payment.status == PaymentStatus.pending || payment.status == PaymentStatus.submitted);
 
     return Card(
       child: Padding(
@@ -238,7 +266,8 @@ class _PaymentCardState extends ConsumerState<_PaymentCard> {
                 ),
               ],
             ),
-            if (order.paymentMethod == PaymentMethod.cod && open && !order.status.isFailed) Text(l10n.payOnDelivery(amount)),
+            if (order.paymentMethod == PaymentMethod.cod && open && !order.status.isFailed)
+              Text(l10n.payOnDelivery(amount)),
             if (payment?.upiUri case final uri? when !order.status.isFailed && payment!.status == PaymentStatus.pending)
               FilledButton.icon(
                 key: const Key('payUpiButton'),
@@ -258,7 +287,11 @@ class _PaymentCardState extends ConsumerState<_PaymentCard> {
                       controller: _utr,
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(12)],
-                      decoration: InputDecoration(labelText: l10n.utrLabel, border: const OutlineInputBorder(), isDense: true),
+                      decoration: InputDecoration(
+                        labelText: l10n.utrLabel,
+                        border: const OutlineInputBorder(),
+                        isDense: true,
+                      ),
                     ),
                   ),
                   FilledButton.tonal(

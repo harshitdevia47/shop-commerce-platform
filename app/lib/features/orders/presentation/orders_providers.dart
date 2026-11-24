@@ -35,3 +35,11 @@ final adminOrderProvider = FutureProvider.autoDispose.family<Order, String>(
 final adminPaymentProvider = FutureProvider.autoDispose.family<Payment, String>(
   (ref, orderId) => ref.watch(adminOrdersRepositoryProvider).payment(orderId),
 );
+
+/// Delivery windows offered at checkout (empty when the shop does not use slots).
+final deliverySlotsProvider = FutureProvider.autoDispose<List<DeliverySlot>>((ref) => ref.watch(ordersRepositoryProvider).slots());
+
+/// Shop: return requests (`null` = all).
+final adminReturnsProvider = FutureProvider.autoDispose.family<List<ReturnRequest>, ReturnStatus?>(
+  (ref, status) => ref.watch(adminOrdersRepositoryProvider).returns(status: status),
+);

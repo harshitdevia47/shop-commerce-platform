@@ -504,5 +504,71 @@
   "errorDeliveryNotAssignable": "Assign a rider after accepting the order and before it leaves the shop.",
   "errorDeliveryStarted": "The rider has already picked this order up.",
   "errorDeliveryClosed": "This delivery is no longer active.",
-  "errorOwnerLocked": "The owner's role can't be changed."
+  "errorOwnerLocked": "The owner's role can't be changed.",
+  "listOrderTitle": "Order with a list photo",
+  "listOrderHint": "The shop reads your list, packs it and tells you the amount before you pay.",
+  "listPhotoLabel": "Photo of your list",
+  "prescriptionLabel": "Doctor's prescription",
+  "deliveryTimeTitle": "Delivery time",
+  "sendListOrder": "Send order",
+  "today": "Today",
+  "tomorrow": "Tomorrow",
+  "noSlots": "No delivery times left. Try store pickup or order later.",
+  "slotFull": "Full",
+  "deliverySlotLine": "Delivery: {day}, {time}",
+  "@deliverySlotLine": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "yourPhotos": "Your photos",
+  "customerPhotos": "Customer photos",
+  "awaitingPricing": "The shop is checking your list. The amount will appear here.",
+  "listOrderBadge": "List order",
+  "listOrderCta": "Send a photo of your list",
+  "listOrderCtaSub": "Write it on paper; the shop packs it and tells you the amount.",
+  "requestReturn": "Return or exchange",
+  "returnTypeReturn": "Return",
+  "returnTypeExchange": "Exchange",
+  "returnReasonLabel": "What went wrong?",
+  "returnItemsTitle": "Items",
+  "returnPhotosLabel": "Photos (optional)",
+  "sendRequest": "Send request",
+  "returnSent": "Request sent. The shop will reply soon.",
+  "returnRequested": "Waiting for the shop",
+  "returnApproved": "Approved",
+  "returnRejected": "Declined",
+  "returnCompleted": "Completed",
+  "returnShopNote": "Shop: {note}",
+  "@returnShopNote": {
+    "placeholders": {
+      "note": {
+        "type": "String"
+      }
+    }
+  },
+  "adminReturns": "Returns",
+  "adminReturnsSubtitle": "Return and exchange requests",
+  "approve": "Approve",
+  "decline": "Decline",
+  "markCompleted": "Mark completed",
+  "returnNoteLabel": "Message for the customer",
+  "noReturns": "No requests.",
+  "returnsOpen": "Open",
+  "returnsAll": "All",
+  "setAmountTitle": "Amount for this list",
+  "amountLabel": "Amount in ₹ (with delivery)",
+  "errorSlot": "That delivery time is no longer available. Pick another.",
+  "errorListEmpty": "Add a photo of your list.",
+  "errorPriceRequired": "Enter the amount for this list.",
+  "errorReturnWindow": "The time to return this order is over.",
+  "errorReturnExists": "A request for this order was already sent.",
+  "errorReturnItems": "Choose the items to return.",
+  "errorReturnNotAllowed": "Returns are possible after delivery.",
+  "errorReasonRequired": "Please write a short reason."
 }

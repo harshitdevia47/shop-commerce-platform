@@ -30,7 +30,8 @@ const testClient = ClientConfig(
 );
 
 /// Shape returned by GET /api/v1/shop/config (captured from the tenant service).
-Map<String, dynamic> shopConfigJson({bool deliveryEnabled = true, bool upi = true}) => {
+/// Phase 6 features (slots, list photos, prescriptions, returns) are off unless a test turns them on.
+Map<String, dynamic> shopConfigJson({bool deliveryEnabled = true, bool upi = true, Map<String, bool> features = const {}}) => {
   'id': '01a206e8-75c7-71d8-b22b-d3223bce1039',
   'slug': 'sharma_kirana',
   'shop': {
@@ -62,14 +63,16 @@ Map<String, dynamic> shopConfigJson({bool deliveryEnabled = true, bool upi = tru
     'razorpay': {'enabled': false},
   },
   'features': {
-    'deliverySlots': true,
+    'deliverySlots': false,
     'storePickup': true,
     'returns': false,
     'prescriptionUpload': false,
     'orderNotes': true,
-    'handwrittenListUpload': true,
+    'handwrittenListUpload': false,
     'someFutureFlag': true,
+    ...features,
   },
+  'returns': {'windowDays': 7, 'allowExchange': true},
   'catalog': {
     'variantStyle': 'units',
     'variantAxes': <String>[],

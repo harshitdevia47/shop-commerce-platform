@@ -15,6 +15,7 @@ import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/otp_screen.dart';
 import '../../features/admin_orders/presentation/admin_order_detail_screen.dart';
 import '../../features/admin_orders/presentation/admin_orders_screen.dart';
+import '../../features/admin_orders/presentation/admin_returns_screen.dart';
 import '../../features/cart/presentation/cart_screen.dart';
 import '../../features/catalog/presentation/category_screen.dart';
 import '../../features/catalog/presentation/product_detail_screen.dart';
@@ -23,6 +24,7 @@ import '../../features/home/presentation/home_screen.dart';
 import '../../features/orders/presentation/checkout_screen.dart';
 import '../../features/orders/presentation/my_orders_screen.dart';
 import '../../features/orders/presentation/order_detail_screen.dart';
+import '../../features/orders/presentation/return_request_screen.dart';
 import '../../features/admin_team/presentation/admin_team_screen.dart';
 import '../../features/rider_deliveries/presentation/rider_delivery_screen.dart';
 import '../../features/rider_deliveries/presentation/rider_home_screen.dart';
@@ -82,7 +84,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: Routes.home, builder: (context, state) => const HomeScreen()),
       GoRoute(path: Routes.search, builder: (context, state) => const SearchScreen()),
       GoRoute(path: Routes.cart, builder: (context, state) => const CartScreen()),
-      GoRoute(path: Routes.checkout, builder: (context, state) => const CheckoutScreen()),
+      GoRoute(
+        path: Routes.checkout,
+        builder: (context, state) => CheckoutScreen(listMode: state.uri.queryParameters['list'] == '1'),
+      ),
       GoRoute(
         path: Routes.orders,
         builder: (context, state) => const MyOrdersScreen(),
@@ -93,6 +98,9 @@ final routerProvider = Provider<GoRouter>((ref) {
               orderId: state.pathParameters['id']!,
               justPlaced: state.uri.queryParameters['placed'] == '1',
             ),
+            routes: [
+              GoRoute(path: 'return', builder: (context, state) => ReturnRequestScreen(orderId: state.pathParameters['id']!)),
+            ],
           ),
         ],
       ),
@@ -136,6 +144,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             ],
           ),
           GoRoute(path: 'categories', builder: (context, state) => const AdminCategoriesScreen()),
+          GoRoute(path: 'returns', builder: (context, state) => const AdminReturnsScreen()),
           GoRoute(
             path: 'team',
             // Owner only (staff cannot hire); the server enforces it too.

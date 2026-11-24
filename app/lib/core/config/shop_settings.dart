@@ -15,6 +15,7 @@ class ShopSettings {
     required this.payments,
     required this.features,
     required this.catalog,
+    this.returns = const ReturnsPolicy(),
   });
 
   factory ShopSettings.fromJson(Map<String, dynamic> json) {
@@ -28,6 +29,7 @@ class ShopSettings {
       // Unknown flags from a newer backend are ignored; missing ones default to off.
       features: {for (final f in Feature.values) f: features[f.name] == true},
       catalog: CatalogSettings.fromJson(json['catalog'] as Map<String, dynamic>),
+      returns: json['returns'] == null ? const ReturnsPolicy() : ReturnsPolicy.fromJson(json['returns'] as Map<String, dynamic>),
     );
   }
 
@@ -38,6 +40,7 @@ class ShopSettings {
   final PaymentOptions payments;
   final Map<Feature, bool> features;
   final CatalogSettings catalog;
+  final ReturnsPolicy returns;
 
   bool isEnabled(Feature feature) => features[feature] ?? false;
 }
@@ -194,4 +197,16 @@ class CustomFieldDef {
   final List<String> options;
 
   String localizedLabel(Locale locale) => label[locale.languageCode] ?? label['en'] ?? key;
+}
+
+/// Returns / exchanges policy (when [Feature.returns] is on).
+@immutable
+class ReturnsPolicy {
+  const ReturnsPolicy({this.windowDays = 7, this.allowExchange = true});
+
+  factory ReturnsPolicy.fromJson(Map<String, dynamic> json) =>
+      ReturnsPolicy(windowDays: json['windowDays'] as int? ?? 7, allowExchange: json['allowExchange'] as bool? ?? true);
+
+  final int windowDays;
+  final bool allowExchange;
 }

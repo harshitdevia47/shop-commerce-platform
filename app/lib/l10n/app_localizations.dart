@@ -1755,6 +1755,300 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The owner\'s role can\'t be changed.'**
   String get errorOwnerLocked;
+
+  /// No description provided for @listOrderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order with a list photo'**
+  String get listOrderTitle;
+
+  /// No description provided for @listOrderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The shop reads your list, packs it and tells you the amount before you pay.'**
+  String get listOrderHint;
+
+  /// No description provided for @listPhotoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo of your list'**
+  String get listPhotoLabel;
+
+  /// No description provided for @prescriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Doctor\'s prescription'**
+  String get prescriptionLabel;
+
+  /// No description provided for @deliveryTimeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery time'**
+  String get deliveryTimeTitle;
+
+  /// No description provided for @sendListOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Send order'**
+  String get sendListOrder;
+
+  /// No description provided for @today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get today;
+
+  /// No description provided for @tomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get tomorrow;
+
+  /// No description provided for @noSlots.
+  ///
+  /// In en, this message translates to:
+  /// **'No delivery times left. Try store pickup or order later.'**
+  String get noSlots;
+
+  /// No description provided for @slotFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Full'**
+  String get slotFull;
+
+  /// No description provided for @deliverySlotLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery: {day}, {time}'**
+  String deliverySlotLine(String day, String time);
+
+  /// No description provided for @yourPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Your photos'**
+  String get yourPhotos;
+
+  /// No description provided for @customerPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer photos'**
+  String get customerPhotos;
+
+  /// No description provided for @awaitingPricing.
+  ///
+  /// In en, this message translates to:
+  /// **'The shop is checking your list. The amount will appear here.'**
+  String get awaitingPricing;
+
+  /// No description provided for @listOrderBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'List order'**
+  String get listOrderBadge;
+
+  /// No description provided for @listOrderCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a photo of your list'**
+  String get listOrderCta;
+
+  /// No description provided for @listOrderCtaSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Write it on paper; the shop packs it and tells you the amount.'**
+  String get listOrderCtaSub;
+
+  /// No description provided for @requestReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Return or exchange'**
+  String get requestReturn;
+
+  /// No description provided for @returnTypeReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Return'**
+  String get returnTypeReturn;
+
+  /// No description provided for @returnTypeExchange.
+  ///
+  /// In en, this message translates to:
+  /// **'Exchange'**
+  String get returnTypeExchange;
+
+  /// No description provided for @returnReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'What went wrong?'**
+  String get returnReasonLabel;
+
+  /// No description provided for @returnItemsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get returnItemsTitle;
+
+  /// No description provided for @returnPhotosLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos (optional)'**
+  String get returnPhotosLabel;
+
+  /// No description provided for @sendRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Send request'**
+  String get sendRequest;
+
+  /// No description provided for @returnSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent. The shop will reply soon.'**
+  String get returnSent;
+
+  /// No description provided for @returnRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the shop'**
+  String get returnRequested;
+
+  /// No description provided for @returnApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get returnApproved;
+
+  /// No description provided for @returnRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Declined'**
+  String get returnRejected;
+
+  /// No description provided for @returnCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get returnCompleted;
+
+  /// No description provided for @returnShopNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop: {note}'**
+  String returnShopNote(String note);
+
+  /// No description provided for @adminReturns.
+  ///
+  /// In en, this message translates to:
+  /// **'Returns'**
+  String get adminReturns;
+
+  /// No description provided for @adminReturnsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Return and exchange requests'**
+  String get adminReturnsSubtitle;
+
+  /// No description provided for @approve.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get approve;
+
+  /// No description provided for @decline.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get decline;
+
+  /// No description provided for @markCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark completed'**
+  String get markCompleted;
+
+  /// No description provided for @returnNoteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Message for the customer'**
+  String get returnNoteLabel;
+
+  /// No description provided for @noReturns.
+  ///
+  /// In en, this message translates to:
+  /// **'No requests.'**
+  String get noReturns;
+
+  /// No description provided for @returnsOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get returnsOpen;
+
+  /// No description provided for @returnsAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get returnsAll;
+
+  /// No description provided for @setAmountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount for this list'**
+  String get setAmountTitle;
+
+  /// No description provided for @amountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount in ₹ (with delivery)'**
+  String get amountLabel;
+
+  /// No description provided for @errorSlot.
+  ///
+  /// In en, this message translates to:
+  /// **'That delivery time is no longer available. Pick another.'**
+  String get errorSlot;
+
+  /// No description provided for @errorListEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a photo of your list.'**
+  String get errorListEmpty;
+
+  /// No description provided for @errorPriceRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the amount for this list.'**
+  String get errorPriceRequired;
+
+  /// No description provided for @errorReturnWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'The time to return this order is over.'**
+  String get errorReturnWindow;
+
+  /// No description provided for @errorReturnExists.
+  ///
+  /// In en, this message translates to:
+  /// **'A request for this order was already sent.'**
+  String get errorReturnExists;
+
+  /// No description provided for @errorReturnItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the items to return.'**
+  String get errorReturnItems;
+
+  /// No description provided for @errorReturnNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Returns are possible after delivery.'**
+  String get errorReturnNotAllowed;
+
+  /// No description provided for @errorReasonRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please write a short reason.'**
+  String get errorReasonRequired;
 }
 
 class _AppLocalizationsDelegate

@@ -53,8 +53,9 @@ void main() {
     });
 
     test('maps known feature flags and ignores unknown ones', () {
-      final settings = ShopSettings.fromJson(shopConfigJson());
+      final settings = ShopSettings.fromJson(shopConfigJson(features: {'deliverySlots': true}));
       expect(settings.isEnabled(Feature.deliverySlots), isTrue);
+      expect(settings.returns.windowDays, 7);
       expect(settings.isEnabled(Feature.returns), isFalse);
       expect(settings.features.length, Feature.values.length);
     });

@@ -11,6 +11,7 @@ import '../../delivery/presentation/delivery_widgets.dart';
 import '../../orders/domain/order_models.dart';
 import '../../orders/presentation/orders_providers.dart';
 import '../../orders/presentation/widgets/bill_summary.dart';
+import '../../orders/presentation/widgets/order_extras.dart';
 import '../../orders/presentation/widgets/order_widgets.dart';
 
 /// One order for the shop: customer, items, payment, and the next step buttons.
@@ -46,13 +47,34 @@ class _AdminOrderDetailScreenState extends ConsumerState<AdminOrderDetailScreen>
     }
   }
 
-  Future<void> _setStatus(OrderStatus status) async {
+  Future<void> _setStatus(OrderStatus status, {bool needsPricing = false}) async {
     String? reason;
+    int? amountPaise;
     if (status == OrderStatus.rejected) {
       reason = await _askReason();
       if (reason == null) return;
     }
-    await _run(() => ref.read(adminOrdersRepositoryProvider).setStatus(widget.orderId, status, reason: reason));
+    if (status == OrderStatus.confirmed && needsPricing && mounted) {
+      // List order: read the photo, pack, and tell the customer the amount.
+      amountPaise = await showDialog<int>(context: context, builder: (_) => const _AmountDialog());
+      if (amountPaise == null) return;
+    }
+    await _run(
+      () => ref.read(adminOrdersRepositoryProvider).setStatus(widget.orderId, status, reason: reason, amountPaise: amountPaise),
+    );
+  }
+
+  Future<void> _setReturnStatus(ReturnRequest request, ReturnStatus status) async {
+    String? note;
+    if (status != ReturnStatus.completed) {
+      note = await showDialog<String>(
+        context: context,
+        builder: (_) => _NoteDialog(title: status == ReturnStatus.approved ? context.l10n.approve : context.l10n.decline, required: status == ReturnStatus.rejected),
+      );
+      if (note == null) return;
+    }
+    await _run(() => ref.read(adminOrdersRepositoryProvider).setReturnStatus(request.id, status, note: note?.isEmpty ?? true ? null : note));
+    ref.invalidate(adminReturnsProvider);
   }
 
   Future<String?> _askReason() => showDialog<String>(context: context, builder: (_) => const _RejectDialog());
@@ -94,7 +116,7 @@ class _AdminOrderDetailScreenState extends ConsumerState<AdminOrderDetailScreen>
             Expanded(
               child: FilledButton(
                 key: const Key('nextStatusButton'),
-                onPressed: _busy ? null : () => _setStatus(forward),
+                onPressed: _busy ? null : () => _setStatus(forward, needsPricing: order.needsPricing),
                 child: Text(forward.actionLabel(l10n)),
               ),
             ),
@@ -131,6 +153,34 @@ class _AdminOrderDetailScreenState extends ConsumerState<AdminOrderDetailScreen>
             Card(
               child: ListTile(leading: const Icon(Icons.sticky_note_2_outlined), title: Text(l10n.customerNote), subtitle: Text(note)),
             ),
+          if (order.returnRequest case final request?)
+            ReturnRequestCard(
+              request: request,
+              actions: [
+                if (request.status == ReturnStatus.requested) ...[
+                  FilledButton.tonal(
+                    key: const Key('approveReturnButton'),
+                    style: FilledButton.styleFrom(minimumSize: const Size(0, 40)),
+                    onPressed: _busy ? null : () => _setReturnStatus(request, ReturnStatus.approved),
+                    child: Text(l10n.approve),
+                  ),
+                  OutlinedButton(
+                    key: const Key('declineReturnButton'),
+                    onPressed: _busy ? null : () => _setReturnStatus(request, ReturnStatus.rejected),
+                    child: Text(l10n.decline),
+                  ),
+                ],
+                if (request.status == ReturnStatus.approved)
+                  FilledButton.tonal(
+                    key: const Key('completeReturnButton'),
+                    style: FilledButton.styleFrom(minimumSize: const Size(0, 40)),
+                    onPressed: _busy ? null : () => _setReturnStatus(request, ReturnStatus.completed),
+                    child: Text(l10n.markCompleted),
+                  ),
+              ],
+            ),
+          OrderSlotTile(order: order),
+          OrderPhotosCard(photos: order.attachments, title: order.needsPricing ? '${l10n.listOrderBadge} · ${l10n.customerPhotos}' : l10n.customerPhotos),
           AdminRiderCard(order: order),
           Card(child: OrderTimeline(order: order)),
           Card(
@@ -158,12 +208,13 @@ class _AdminOrderDetailScreenState extends ConsumerState<AdminOrderDetailScreen>
             ),
           ),
           OrderItemsCard(order: order),
-          BillSummary(
-            subtotalPaise: order.subtotalPaise,
-            deliveryFeePaise: order.deliveryFeePaise,
-            totalPaise: order.totalPaise,
-            showDelivery: order.fulfillment == Fulfillment.delivery,
-          ),
+          if (!order.needsPricing)
+            BillSummary(
+              subtotalPaise: order.subtotalPaise,
+              deliveryFeePaise: order.deliveryFeePaise,
+              totalPaise: order.totalPaise,
+              showDelivery: order.fulfillment == Fulfillment.delivery,
+            ),
         ],
       ),
     );
@@ -208,6 +259,94 @@ class _RejectDialogState extends State<_RejectDialog> {
             if (reason.isNotEmpty) Navigator.pop(context, reason);
           },
           child: Text(l10n.rejectOrder),
+        ),
+      ],
+    );
+  }
+}
+
+/// Amount for a list order (rupees; whole or with paise).
+class _AmountDialog extends StatefulWidget {
+  const _AmountDialog();
+
+  @override
+  State<_AmountDialog> createState() => _AmountDialogState();
+}
+
+class _AmountDialogState extends State<_AmountDialog> {
+  final _amount = TextEditingController();
+
+  @override
+  void dispose() {
+    _amount.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final paise = parseRupees(_amount.text);
+    return AlertDialog(
+      title: Text(l10n.setAmountTitle),
+      content: TextField(
+        key: const Key('listAmountField'),
+        controller: _amount,
+        autofocus: true,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        decoration: InputDecoration(labelText: l10n.amountLabel, prefixText: '₹ '),
+        onChanged: (_) => setState(() {}),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.cancel)),
+        TextButton(
+          key: const Key('confirmAmountButton'),
+          onPressed: paise != null && paise > 0 ? () => Navigator.pop(context, paise) : null,
+          child: Text(OrderStatus.confirmed.actionLabel(l10n)),
+        ),
+      ],
+    );
+  }
+}
+
+/// Message for the customer when answering a return (required when declining).
+class _NoteDialog extends StatefulWidget {
+  const _NoteDialog({required this.title, required this.required});
+
+  final String title;
+  final bool required;
+
+  @override
+  State<_NoteDialog> createState() => _NoteDialogState();
+}
+
+class _NoteDialogState extends State<_NoteDialog> {
+  final _note = TextEditingController();
+
+  @override
+  void dispose() {
+    _note.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return AlertDialog(
+      title: Text(widget.title),
+      content: TextField(
+        key: const Key('returnNoteField'),
+        controller: _note,
+        autofocus: true,
+        maxLength: 300,
+        decoration: InputDecoration(labelText: l10n.returnNoteLabel),
+        onChanged: (_) => setState(() {}),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.cancel)),
+        TextButton(
+          key: const Key('confirmNoteButton'),
+          onPressed: widget.required && _note.text.trim().isEmpty ? null : () => Navigator.pop(context, _note.text.trim()),
+          child: Text(widget.title),
         ),
       ],
     );

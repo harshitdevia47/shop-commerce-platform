@@ -147,6 +147,27 @@ class _HomeContent extends ConsumerWidget {
                 ),
               ),
             ),
+            if (settings.isEnabled(Feature.handwrittenListUpload) || settings.isEnabled(Feature.prescriptionUpload))
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                  child: Card(
+                    color: theme.colorScheme.secondaryContainer,
+                    child: ListTile(
+                      key: const Key('listOrderButton'),
+                      leading: const Icon(Icons.receipt_long_outlined),
+                      title: Text(l10n.listOrderCta),
+                      subtitle: Text(l10n.listOrderCtaSub),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {
+                        const target = '${Routes.checkout}?list=1';
+                        final signedIn = ref.read(authControllerProvider).value != null;
+                        context.push(signedIn ? target : '${Routes.login}?from=${Uri.encodeComponent(target)}');
+                      },
+                    ),
+                  ),
+                ),
+              ),
             SliverToBoxAdapter(child: _Heading(l10n.categoriesTitle)),
             const SliverToBoxAdapter(child: CategoryStrip()),
             SliverToBoxAdapter(child: _Heading(l10n.allProducts)),

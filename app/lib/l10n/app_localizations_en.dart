@@ -929,4 +929,160 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorOwnerLocked => 'The owner\'s role can\'t be changed.';
+
+  @override
+  String get listOrderTitle => 'Order with a list photo';
+
+  @override
+  String get listOrderHint =>
+      'The shop reads your list, packs it and tells you the amount before you pay.';
+
+  @override
+  String get listPhotoLabel => 'Photo of your list';
+
+  @override
+  String get prescriptionLabel => 'Doctor\'s prescription';
+
+  @override
+  String get deliveryTimeTitle => 'Delivery time';
+
+  @override
+  String get sendListOrder => 'Send order';
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String get tomorrow => 'Tomorrow';
+
+  @override
+  String get noSlots =>
+      'No delivery times left. Try store pickup or order later.';
+
+  @override
+  String get slotFull => 'Full';
+
+  @override
+  String deliverySlotLine(String day, String time) {
+    return 'Delivery: $day, $time';
+  }
+
+  @override
+  String get yourPhotos => 'Your photos';
+
+  @override
+  String get customerPhotos => 'Customer photos';
+
+  @override
+  String get awaitingPricing =>
+      'The shop is checking your list. The amount will appear here.';
+
+  @override
+  String get listOrderBadge => 'List order';
+
+  @override
+  String get listOrderCta => 'Send a photo of your list';
+
+  @override
+  String get listOrderCtaSub =>
+      'Write it on paper; the shop packs it and tells you the amount.';
+
+  @override
+  String get requestReturn => 'Return or exchange';
+
+  @override
+  String get returnTypeReturn => 'Return';
+
+  @override
+  String get returnTypeExchange => 'Exchange';
+
+  @override
+  String get returnReasonLabel => 'What went wrong?';
+
+  @override
+  String get returnItemsTitle => 'Items';
+
+  @override
+  String get returnPhotosLabel => 'Photos (optional)';
+
+  @override
+  String get sendRequest => 'Send request';
+
+  @override
+  String get returnSent => 'Request sent. The shop will reply soon.';
+
+  @override
+  String get returnRequested => 'Waiting for the shop';
+
+  @override
+  String get returnApproved => 'Approved';
+
+  @override
+  String get returnRejected => 'Declined';
+
+  @override
+  String get returnCompleted => 'Completed';
+
+  @override
+  String returnShopNote(String note) {
+    return 'Shop: $note';
+  }
+
+  @override
+  String get adminReturns => 'Returns';
+
+  @override
+  String get adminReturnsSubtitle => 'Return and exchange requests';
+
+  @override
+  String get approve => 'Approve';
+
+  @override
+  String get decline => 'Decline';
+
+  @override
+  String get markCompleted => 'Mark completed';
+
+  @override
+  String get returnNoteLabel => 'Message for the customer';
+
+  @override
+  String get noReturns => 'No requests.';
+
+  @override
+  String get returnsOpen => 'Open';
+
+  @override
+  String get returnsAll => 'All';
+
+  @override
+  String get setAmountTitle => 'Amount for this list';
+
+  @override
+  String get amountLabel => 'Amount in ₹ (with delivery)';
+
+  @override
+  String get errorSlot =>
+      'That delivery time is no longer available. Pick another.';
+
+  @override
+  String get errorListEmpty => 'Add a photo of your list.';
+
+  @override
+  String get errorPriceRequired => 'Enter the amount for this list.';
+
+  @override
+  String get errorReturnWindow => 'The time to return this order is over.';
+
+  @override
+  String get errorReturnExists => 'A request for this order was already sent.';
+
+  @override
+  String get errorReturnItems => 'Choose the items to return.';
+
+  @override
+  String get errorReturnNotAllowed => 'Returns are possible after delivery.';
+
+  @override
+  String get errorReasonRequired => 'Please write a short reason.';
 }

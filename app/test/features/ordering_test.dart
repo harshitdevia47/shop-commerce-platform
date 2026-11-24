@@ -82,7 +82,9 @@ class FakeOrders implements OrdersRepository, AdminOrdersRepository {
     status: status,
     fulfillment: r.fulfillment,
     paymentMethod: r.paymentMethod,
-    items: const [OrderItem(productName: 'Basmati Rice', variantLabel: '1 kg', pricePaise: 12000, qty: 1, lineTotalPaise: 12000)],
+    items: const [
+      OrderItem(variantId: 'p1-v1', productName: 'Basmati Rice', variantLabel: '1 kg', pricePaise: 12000, qty: 1, lineTotalPaise: 12000),
+    ],
     itemCount: 1,
     subtotalPaise: total,
     deliveryFeePaise: 0,
@@ -105,8 +107,32 @@ class FakeOrders implements OrdersRepository, AdminOrdersRepository {
       throw error;
     }
     final id = 'o${store.length + 1}';
-    final order = _order(id, store.length + 1, request, request.expectedTotalPaise!);
+    final list = request.items.isEmpty;
+    final base = _order(id, store.length + 1, request, request.expectedTotalPaise ?? 0);
+    final order = Order(
+      id: base.id,
+      number: base.number,
+      status: base.status,
+      fulfillment: base.fulfillment,
+      paymentMethod: base.paymentMethod,
+      items: list ? const [] : base.items,
+      itemCount: list ? 0 : base.itemCount,
+      subtotalPaise: base.subtotalPaise,
+      deliveryFeePaise: 0,
+      totalPaise: base.totalPaise,
+      placedAt: base.placedAt,
+      customerPhone: base.customerPhone,
+      address: base.address,
+      history: base.history,
+      nextStatuses: base.nextStatuses,
+      needsPricing: list,
+      slot: request.slotStart == null
+          ? null
+          : TimeWindow(start: request.slotStart!, end: request.slotStart!.add(const Duration(hours: 4))),
+      attachments: [for (final a in request.attachmentIds) Attachment(id: a, kind: AttachmentKind.handwrittenList)],
+    );
     store[id] = order;
+    if (list) return (order, null);
     payments[id] = Payment(
       orderId: id,
       method: request.paymentMethod,
@@ -145,6 +171,9 @@ class FakeOrders implements OrdersRepository, AdminOrdersRepository {
       placedAt: o.placedAt,
       customerPhone: o.customerPhone,
       address: o.address,
+      slot: o.slot,
+      attachments: o.attachments,
+      returnRequest: o.returnRequest,
       history: [...o.history, StatusChange(status: OrderStatus.cancelled, at: DateTime(2026, 11, 23, 11))],
     );
   }
@@ -184,6 +213,88 @@ class FakeOrders implements OrdersRepository, AdminOrdersRepository {
   @override
   Future<void> deleteAddress(String id) async => addressList.removeWhere((a) => a.id == id);
 
+  // ---- Slots and returns ----
+  List<DeliverySlot> slotList = [];
+  final List<Map<String, Object?>> returnRequests = [];
+  final List<(String, ReturnStatus, String?)> returnStatusCalls = [];
+
+  @override
+  Future<List<DeliverySlot>> slots() async => slotList;
+
+  @override
+  Future<ReturnRequest> requestReturn(
+    String orderId, {
+    required ReturnKind type,
+    required String reason,
+    required List<Map<String, dynamic>> items,
+    List<String> photoIds = const [],
+  }) async {
+    returnRequests.add({'orderId': orderId, 'type': type, 'reason': reason, 'items': items, 'photoIds': photoIds});
+    final request = ReturnRequest(
+      id: 'r1',
+      orderId: orderId,
+      orderNumber: store[orderId]!.number,
+      type: type,
+      status: ReturnStatus.requested,
+      reason: reason,
+      items: [for (final i in items) ReturnLine(variantId: i['variantId'] as String, productName: 'Basmati Rice', variantLabel: '1 kg', qty: i['qty'] as int)],
+      createdAt: DateTime(2026, 11, 24),
+    );
+    _withReturn(orderId, request);
+    return request;
+  }
+
+  void _withReturn(String orderId, ReturnRequest? request) {
+    final o = store[orderId]!;
+    store[orderId] = Order(
+      id: o.id,
+      number: o.number,
+      status: o.status,
+      fulfillment: o.fulfillment,
+      paymentMethod: o.paymentMethod,
+      items: o.items,
+      itemCount: o.itemCount,
+      subtotalPaise: o.subtotalPaise,
+      deliveryFeePaise: o.deliveryFeePaise,
+      totalPaise: o.totalPaise,
+      placedAt: o.placedAt,
+      customerPhone: o.customerPhone,
+      address: o.address,
+      history: o.history,
+      nextStatuses: o.nextStatuses,
+      slot: o.slot,
+      attachments: o.attachments,
+      needsPricing: o.needsPricing,
+      returnRequest: request,
+    );
+  }
+
+  @override
+  Future<List<ReturnRequest>> returns({ReturnStatus? status}) async => [
+    for (final o in store.values)
+      if (o.returnRequest case final r? when status == null || r.status == status) r,
+  ];
+
+  @override
+  Future<ReturnRequest> setReturnStatus(String id, ReturnStatus status, {String? note}) async {
+    returnStatusCalls.add((id, status, note));
+    final order = store.values.firstWhere((o) => o.returnRequest?.id == id);
+    final r = order.returnRequest!;
+    final updated = ReturnRequest(
+      id: r.id,
+      orderId: r.orderId,
+      orderNumber: r.orderNumber,
+      type: r.type,
+      status: status,
+      reason: r.reason,
+      items: r.items,
+      createdAt: r.createdAt,
+      shopNote: note ?? r.shopNote,
+    );
+    _withReturn(order.id, updated);
+    return updated;
+  }
+
   // ---- Admin ----
   final List<(String, OrderStatus, String?)> statusCalls = [];
   final List<String> markedPaid = [];
@@ -198,9 +309,12 @@ class FakeOrders implements OrdersRepository, AdminOrdersRepository {
     null,
   );
 
+  final List<int?> amounts = [];
+
   @override
-  Future<Order> setStatus(String id, OrderStatus status, {String? reason}) async {
+  Future<Order> setStatus(String id, OrderStatus status, {String? reason, int? amountPaise}) async {
     statusCalls.add((id, status, reason));
+    amounts.add(amountPaise);
     final o = store[id]!;
     final next = switch (status) {
       OrderStatus.confirmed => const [OrderStatus.packed, OrderStatus.rejected],
@@ -214,14 +328,18 @@ class FakeOrders implements OrdersRepository, AdminOrdersRepository {
       paymentMethod: o.paymentMethod,
       items: o.items,
       itemCount: o.itemCount,
-      subtotalPaise: o.subtotalPaise,
+      subtotalPaise: amountPaise ?? o.subtotalPaise,
       deliveryFeePaise: o.deliveryFeePaise,
-      totalPaise: o.totalPaise,
+      totalPaise: amountPaise ?? o.totalPaise,
+      needsPricing: amountPaise == null && o.needsPricing,
       placedAt: o.placedAt,
       customerPhone: o.customerPhone,
       address: o.address,
+      slot: o.slot,
+      attachments: o.attachments,
+      returnRequest: o.returnRequest,
       cancelReason: reason,
-      history: [...o.history, StatusChange(status: status, at: DateTime(2026, 11, 23, 11))],
+      history: [...o.history, StatusChange(status: status, at: DateTime.now())],
       nextStatuses: next,
     );
   }
@@ -257,6 +375,9 @@ class FakeOrders implements OrdersRepository, AdminOrdersRepository {
       placedAt: o.placedAt,
       customerPhone: o.customerPhone,
       address: o.address,
+      slot: o.slot,
+      attachments: o.attachments,
+      returnRequest: o.returnRequest,
       customerName: 'Meena',
       history: o.history,
       nextStatuses: asCustomer ? const [OrderStatus.cancelled] : const [OrderStatus.confirmed, OrderStatus.rejected],
@@ -348,6 +469,7 @@ Future<Harness> pumpShop(
   PushService? push,
   void Function(FakeOrders orders)? setup,
   List<Override> extraOverrides = const [],
+  Map<String, bool> features = const {},
 }) async {
   usePhoneScreen(tester);
   quoteDebounce = Duration.zero;
@@ -362,7 +484,7 @@ Future<Harness> pumpShop(
         clientConfigProvider.overrideWithValue(testClient),
         envConfigProvider.overrideWithValue(testEnv),
         sharedPreferencesProvider.overrideWithValue(prefs),
-        shopSettingsRepositoryProvider.overrideWithValue(FakeRepository(ShopSettings.fromJson(shopConfigJson()))),
+        shopSettingsRepositoryProvider.overrideWithValue(FakeRepository(ShopSettings.fromJson(shopConfigJson(features: features)))),
         catalogRepositoryProvider.overrideWithValue(FakeCatalogRepository()),
         ordersRepositoryProvider.overrideWithValue(orders),
         adminOrdersRepositoryProvider.overrideWithValue(orders),

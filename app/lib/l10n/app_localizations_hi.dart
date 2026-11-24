@@ -922,4 +922,159 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get errorOwnerLocked => 'मालिक की भूमिका नहीं बदली जा सकती।';
+
+  @override
+  String get listOrderTitle => 'लिस्ट की फोटो से ऑर्डर';
+
+  @override
+  String get listOrderHint =>
+      'दुकान आपकी लिस्ट पढ़कर पैक करेगी और भुगतान से पहले राशि बताएगी।';
+
+  @override
+  String get listPhotoLabel => 'आपकी लिस्ट की फोटो';
+
+  @override
+  String get prescriptionLabel => 'डॉक्टर का पर्चा';
+
+  @override
+  String get deliveryTimeTitle => 'डिलीवरी का समय';
+
+  @override
+  String get sendListOrder => 'ऑर्डर भेजें';
+
+  @override
+  String get today => 'आज';
+
+  @override
+  String get tomorrow => 'कल';
+
+  @override
+  String get noSlots =>
+      'डिलीवरी का कोई समय नहीं बचा। दुकान से लें या बाद में ऑर्डर करें।';
+
+  @override
+  String get slotFull => 'भर गया';
+
+  @override
+  String deliverySlotLine(String day, String time) {
+    return 'डिलीवरी: $day, $time';
+  }
+
+  @override
+  String get yourPhotos => 'आपकी फोटो';
+
+  @override
+  String get customerPhotos => 'ग्राहक की फोटो';
+
+  @override
+  String get awaitingPricing =>
+      'दुकान आपकी लिस्ट देख रही है। राशि यहाँ दिखेगी।';
+
+  @override
+  String get listOrderBadge => 'लिस्ट ऑर्डर';
+
+  @override
+  String get listOrderCta => 'अपनी लिस्ट की फोटो भेजें';
+
+  @override
+  String get listOrderCtaSub => 'कागज़ पर लिखें; दुकान पैक करके राशि बताएगी।';
+
+  @override
+  String get requestReturn => 'वापसी या बदलें';
+
+  @override
+  String get returnTypeReturn => 'वापसी';
+
+  @override
+  String get returnTypeExchange => 'बदलें';
+
+  @override
+  String get returnReasonLabel => 'क्या गड़बड़ हुई?';
+
+  @override
+  String get returnItemsTitle => 'सामान';
+
+  @override
+  String get returnPhotosLabel => 'फोटो (वैकल्पिक)';
+
+  @override
+  String get sendRequest => 'अनुरोध भेजें';
+
+  @override
+  String get returnSent => 'अनुरोध भेजा। दुकान जल्दी जवाब देगी।';
+
+  @override
+  String get returnRequested => 'दुकान के जवाब का इंतज़ार';
+
+  @override
+  String get returnApproved => 'स्वीकार';
+
+  @override
+  String get returnRejected => 'अस्वीकार';
+
+  @override
+  String get returnCompleted => 'पूरा';
+
+  @override
+  String returnShopNote(String note) {
+    return 'दुकान: $note';
+  }
+
+  @override
+  String get adminReturns => 'वापसी';
+
+  @override
+  String get adminReturnsSubtitle => 'वापसी और बदलने के अनुरोध';
+
+  @override
+  String get approve => 'स्वीकार करें';
+
+  @override
+  String get decline => 'अस्वीकार करें';
+
+  @override
+  String get markCompleted => 'पूरा हुआ';
+
+  @override
+  String get returnNoteLabel => 'ग्राहक के लिए संदेश';
+
+  @override
+  String get noReturns => 'कोई अनुरोध नहीं।';
+
+  @override
+  String get returnsOpen => 'खुले';
+
+  @override
+  String get returnsAll => 'सभी';
+
+  @override
+  String get setAmountTitle => 'इस लिस्ट की राशि';
+
+  @override
+  String get amountLabel => 'राशि ₹ में (डिलीवरी सहित)';
+
+  @override
+  String get errorSlot => 'वह डिलीवरी समय अब उपलब्ध नहीं है। दूसरा चुनें।';
+
+  @override
+  String get errorListEmpty => 'अपनी लिस्ट की फोटो जोड़ें।';
+
+  @override
+  String get errorPriceRequired => 'इस लिस्ट की राशि लिखें।';
+
+  @override
+  String get errorReturnWindow => 'इस ऑर्डर को वापस करने का समय खत्म हो गया।';
+
+  @override
+  String get errorReturnExists =>
+      'इस ऑर्डर के लिए अनुरोध पहले ही भेजा जा चुका है।';
+
+  @override
+  String get errorReturnItems => 'वापस करने का सामान चुनें।';
+
+  @override
+  String get errorReturnNotAllowed => 'डिलीवरी के बाद ही वापसी हो सकती है।';
+
+  @override
+  String get errorReasonRequired => 'कृपया छोटा कारण लिखें।';
 }

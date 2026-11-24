@@ -11,7 +11,9 @@ import '../../../core/utils/money.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../orders/domain/order_models.dart';
 import '../../orders/presentation/orders_providers.dart';
+import '../../orders/presentation/widgets/order_extras.dart';
 import '../../orders/presentation/widgets/order_widgets.dart';
+import '../../orders/presentation/widgets/slot_picker.dart';
 
 /// Shop's order inbox: New / In progress / Completed. Live updates; polls while they are down.
 class AdminOrdersScreen extends ConsumerStatefulWidget {
@@ -123,9 +125,22 @@ class _OrderCard extends StatelessWidget {
               ),
               Text('${order.customerName ?? order.customerPhone} · ${formatOrderTime(context, order.placedAt)}'),
               Text(
-                '${l10n.cartItems(order.itemCount)} · ${formatPaise(order.totalPaise)} · ${order.paymentMethod == PaymentMethod.cod ? l10n.paymentCod : l10n.paymentUpi}',
+                [
+                  if (order.needsPricing) l10n.listOrderBadge else '${l10n.cartItems(order.itemCount)} · ${formatPaise(order.totalPaise)}',
+                  order.paymentMethod == PaymentMethod.cod ? l10n.paymentCod : l10n.paymentUpi,
+                ].join(' · '),
                 style: TextStyle(color: theme.colorScheme.outline),
               ),
+              if (order.slot case final slot?)
+                Text(
+                  l10n.deliverySlotLine(
+                    formatDay(context, slot.start, DateTime.now()),
+                    formatWindow(slot, Localizations.localeOf(context)),
+                  ),
+                  style: theme.textTheme.labelLarge,
+                ),
+              if (order.returnRequest case final request? when request.status == ReturnStatus.requested)
+                Text('${request.type.label(l10n)} · ${request.status.label(l10n)}', style: TextStyle(color: theme.colorScheme.error)),
             ],
           ),
         ),
