@@ -42,6 +42,10 @@ export function buildRoutes(upstreams: UpstreamUrls): RouteRule[] {
     { prefix: '/api/v1/admin/media', target: upstreams.media, auth: 'required', roles: ADMIN_ROLES },
     // Cart pricing is public so guests see totals; everything else about orders needs login.
     { prefix: '/api/v1/orders/quote', target: upstreams.order, auth: 'public' },
+    { prefix: '/api/v1/orders/slots', target: upstreams.order, auth: 'public' },
+    { prefix: '/api/v1/admin/returns', target: upstreams.order, auth: 'required', roles: ADMIN_ROLES },
+    // Private photos (prescriptions, lists, return photos): upload and view, checked by media.
+    { prefix: '/api/v1/media', target: upstreams.media, auth: 'required' },
     { prefix: '/api/v1/orders', target: upstreams.order, auth: 'required' },
     { prefix: '/api/v1/admin/orders', target: upstreams.order, auth: 'required', roles: ADMIN_ROLES },
     { prefix: '/api/v1/payments', target: upstreams.payment, auth: 'required' },

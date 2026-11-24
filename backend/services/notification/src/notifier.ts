@@ -1,7 +1,7 @@
 import type { Logger, ShopConfigSource } from '@qc/common';
 import type { RuntimeConfig } from '@qc/config-schema';
 import type { AnyEvent, EventHandler } from '@qc/events';
-import { defaultReason, fill, formatRupees, messagesFor, type CustomerStatus } from './messages.js';
+import { defaultNote, defaultReason, fill, formatRupees, messagesFor, type CustomerStatus } from './messages.js';
 import type { PushMessage, PushSender } from './push/push-sender.js';
 
 export interface PushTarget {
@@ -75,6 +75,13 @@ function planFor(event: Exclude<AnyEvent, { type: 'delivery.status_changed' }>):
         orderId: p.orderId,
         text: (locale) => {
           const m = messagesFor(locale);
+          if (p.needsPricing) {
+            return fill(m.newListOrder, {
+              n: p.number,
+              fulfillment: p.fulfillment === 'DELIVERY' ? m.delivery : m.pickup,
+              payment: p.paymentMethod,
+            });
+          }
           return fill(m.newOrder, {
             n: p.number,
             amount: formatRupees(p.totalPaise),
@@ -109,6 +116,24 @@ function planFor(event: Exclude<AnyEvent, { type: 'delivery.status_changed' }>):
           }),
       };
     }
+    case 'return.requested': {
+      const p = event.payload;
+      return {
+        audience: { admins: true },
+        route: `/admin/orders/${p.orderId}`,
+        orderId: p.orderId,
+        text: (locale) => fill(p.type === 'EXCHANGE' ? messagesFor(locale).exchangeRequested : messagesFor(locale).returnRequested, { n: p.number }),
+      };
+    }
+    case 'return.status_changed': {
+      const p = event.payload;
+      return {
+        audience: { userIds: [p.customerId] },
+        route: `/orders/${p.orderId}`,
+        orderId: p.orderId,
+        text: (locale, shop) => fill(messagesFor(locale).returnStatus[p.status], { n: p.number, shop, note: p.note ?? defaultNote(locale) }),
+      };
+    }
     case 'payment.utr_submitted': {
       const p = event.payload;
       return {
@@ -136,6 +161,8 @@ export const NOTIFIED_EVENTS = [
   'payment.utr_submitted',
   'payment.marked_paid',
   'delivery.status_changed',
+  'return.requested',
+  'return.status_changed',
 ] as const;
 
 export interface NotifierDeps {

@@ -1,5 +1,6 @@
 import { resolve } from 'node:path';
-import { createLogger } from '@qc/common';
+import { cachedShopConfig, createInternalClient, createLogger } from '@qc/common';
+import type { Features } from '@qc/config-schema';
 import { createMediaApp } from './app.js';
 import { createDb } from './db.js';
 import { loadMediaEnv } from './env.js';
@@ -20,6 +21,10 @@ const app = createMediaApp({
   publicPath: env.MEDIA_PUBLIC_PATH,
   maxUploadBytes: env.MAX_UPLOAD_BYTES,
   serveStatic: env.MEDIA_SERVE_STATIC,
+  shopConfig: cachedShopConfig<{ features: Features }>(
+    createInternalClient({ baseUrl: env.TENANT_URL, secret: env.INTERNAL_HMAC_SECRET, caller: 'media' }),
+    env.SHOP_CONFIG_CACHE_SECONDS * 1000,
+  ),
 });
 
 const server = app.listen(env.PORT, () => logger.info({ port: env.PORT }, 'media service listening'));

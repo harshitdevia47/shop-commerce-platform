@@ -186,6 +186,15 @@ describe('gateway', () => {
     expect((await request(app).get('/api/v1/deliveries/orders/x').set(shop)).status).toBe(401);
   });
 
+  it('slots are public; private photos need login; returns admin needs a shop role', async () => {
+    const shop = { 'x-shop-key': 'shop_a' };
+    expect((await request(app).get('/api/v1/orders/slots').set(shop)).status).toBe(200);
+    expect((await request(app).get('/api/v1/media/private/x').set(shop)).status).toBe(401);
+    const customer = { ...shop, authorization: `Bearer ${await token({ sub: 'u1', shopId: 'id-a', role: 'CUSTOMER' })}` };
+    expect((await request(app).get('/api/v1/media/private/x').set(customer)).status).toBe(200);
+    expect((await request(app).get('/api/v1/admin/returns').set(customer)).status).toBe(403);
+  });
+
   it('never routes /internal paths', async () => {
     const res = await request(app).get('/internal/shops/by-slug/shop_a').set('x-shop-key', 'shop_a');
     expect(res.status).toBe(404);

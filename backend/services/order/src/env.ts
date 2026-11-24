@@ -9,6 +9,7 @@ const envSchema = z.object({
   IDENTITY_URL: z.string().url(),
   CATALOG_URL: z.string().url(),
   PAYMENT_URL: z.string().url(),
+  MEDIA_URL: z.string().url(),
   SHOP_CONFIG_CACHE_SECONDS: z.coerce.number().int().nonnegative().default(60),
 });
 

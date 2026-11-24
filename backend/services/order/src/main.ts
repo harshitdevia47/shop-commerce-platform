@@ -5,7 +5,7 @@ import { Redis } from 'ioredis';
 import { createOrderApp } from './app.js';
 import { createDb } from './db.js';
 import { loadOrderEnv } from './env.js';
-import { catalogPort, identityPort, paymentPort } from './upstreams.js';
+import { catalogPort, identityPort, mediaPort, paymentPort } from './upstreams.js';
 
 const env = loadOrderEnv();
 const logger = createLogger('order', env.LOG_LEVEL);
@@ -23,6 +23,7 @@ const app = createOrderApp({
   catalog: catalogPort(client(env.CATALOG_URL)),
   identity: identityPort(client(env.IDENTITY_URL)),
   payments: paymentPort(client(env.PAYMENT_URL)),
+  media: mediaPort(client(env.MEDIA_URL)),
   events: relay,
 });
 relay.start();

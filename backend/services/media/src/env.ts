@@ -15,6 +15,8 @@ const envSchema = z.object({
   MEDIA_PUBLIC_PATH: z.string().startsWith('/').default('/media'),
   /** Dev only: serve public files from this service too. */
   MEDIA_SERVE_STATIC: booleanString,
+  TENANT_URL: z.string().url(),
+  SHOP_CONFIG_CACHE_SECONDS: z.coerce.number().int().nonnegative().default(60),
   MAX_UPLOAD_BYTES: z.coerce.number().int().positive().default(8 * 1024 * 1024),
 });
 

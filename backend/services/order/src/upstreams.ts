@@ -50,6 +50,13 @@ export interface CatalogPort {
   release(orderId: string): Promise<void>;
 }
 
+export type PrivateKind = 'PRESCRIPTION' | 'HANDWRITTEN_LIST' | 'RETURN_PHOTO';
+
+/** Media service: confirms private photos belong to the customer (404 otherwise). */
+export interface MediaPort {
+  claim(ids: string[], userId: string, kinds: PrivateKind[]): Promise<{ id: string; kind: PrivateKind }[]>;
+}
+
 export interface IdentityPort {
   checkoutProfile(userId: string, addressId?: string): Promise<CheckoutProfile>;
 }
@@ -84,5 +91,12 @@ export function paymentPort(client: InternalClient): PaymentPort {
     void: async (orderId) => {
       await client.post('/internal/payments/void', { body: { orderId } });
     },
+  };
+}
+
+export function mediaPort(client: InternalClient): MediaPort {
+  return {
+    claim: async (ids, userId, kinds) =>
+      ids.length === 0 ? [] : client.post('/internal/media/private/claim', { body: { ids, userId, kinds } }),
   };
 }

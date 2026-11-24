@@ -7,7 +7,7 @@ import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createOrderApp } from '../src/app.js';
 import { createDb } from '../src/db.js';
-import type { CatalogPort, CheckoutAddress, IdentityPort, PaymentPort, PaymentView, VariantSnapshot } from '../src/upstreams.js';
+import type { CatalogPort, CheckoutAddress, IdentityPort, MediaPort, PaymentPort, PaymentView, VariantSnapshot } from '../src/upstreams.js';
 
 const SECRET = process.env.INTERNAL_HMAC_SECRET!;
 const { rawPrisma, db } = createDb(process.env.DATABASE_URL!);
@@ -87,6 +87,21 @@ const payments: PaymentPort = {
   },
 };
 
+/** Fake media: photos[id] = { owner, kind }. */
+let photos: Map<string, { owner: string; kind: 'PRESCRIPTION' | 'HANDWRITTEN_LIST' | 'RETURN_PHOTO' }>;
+const media: MediaPort = {
+  async claim(ids, userId, kinds) {
+    const found = ids.flatMap((id) => {
+      const p = photos.get(id);
+      return p && p.owner === userId && kinds.includes(p.kind) ? [{ id, kind: p.kind }] : [];
+    });
+    if (found.length !== ids.length) throw new AppError('MEDIA_NOT_FOUND', 404, 'nope');
+    return found;
+  },
+};
+/** Test clock (slots and return windows depend on it). */
+let clock: Date;
+
 // ---- Helpers ----
 
 let app: Express;
@@ -139,6 +154,8 @@ beforeAll(() => {
     catalog,
     identity,
     payments,
+    media,
+    now: () => clock,
   });
 });
 
@@ -149,6 +166,8 @@ async function clean() {
   await rawPrisma.order.deleteMany({ where });
   await rawPrisma.orderCounter.deleteMany({ where });
   await rawPrisma.outboxEvent.deleteMany({ where });
+  await rawPrisma.slotBooking.deleteMany({ where });
+  await rawPrisma.returnRequest.deleteMany({ where });
 }
 
 beforeEach(async () => {
@@ -159,6 +178,9 @@ beforeEach(async () => {
     [B_ITEM, { shopId: SHOP_B, snapshot: snapshot(B_ITEM, 'Shirt', 79900, null) }],
   ]);
   reservations = new Map();
+  photos = new Map();
+  // 10:00 IST on 24 Nov 2026.
+  clock = new Date('2026-11-24T04:30:00.000Z');
   paymentCalls = { create: [], void: [] };
   failPaymentCreate = false;
   blocked = new Set();
@@ -174,6 +196,7 @@ beforeEach(async () => {
     payments: { cod: true, upi: { enabled: false }, razorpay: { enabled: false } },
     features: { ...PRESETS.grocery.features, storePickup: shopId === SHOP_A, orderNotes: true },
     catalog: PRESETS.grocery.catalog,
+    returns: { windowDays: 7, allowExchange: true },
   });
   configs = { [SHOP_A]: base(SHOP_A), [SHOP_B]: base(SHOP_B) };
   addresses = {
@@ -514,6 +537,183 @@ describe('internal: existing orders', () => {
     const ask = (shopId: string) => request(app).post('/internal/orders/existing').set(sign(shopId)).send({ ids: [id, missing] });
     expect((await ask(SHOP_A)).body.data).toEqual({ ids: [id] });
     expect((await ask(SHOP_B)).body.data).toEqual({ ids: [] });
+  });
+});
+
+describe('delivery slots', () => {
+  const useSlots = (capacityPerSlot = 10) => {
+    configs[SHOP_A]!.features.deliverySlots = true;
+    configs[SHOP_A]!.delivery.slots = {
+      windows: [
+        { start: '16:00', end: '20:00' },
+        { start: '09:00', end: '12:00' },
+        { start: '12:00', end: '16:00' },
+      ],
+      daysAhead: 2,
+      capacityPerSlot,
+      cutoffMinutes: 60,
+    };
+  };
+  const slots = async () => (await request(app).get('/api/v1/orders/slots').set(sign(SHOP_A))).body.data as { start: string; end: string; available: boolean }[];
+
+  it('offers windows from now (minus the cutoff) for the next days, in shop time', async () => {
+    useSlots();
+    const list = await slots();
+    // 10:00 IST: this morning's 09:00 window is gone; 12:00 and 16:00 today, then all of tomorrow.
+    expect(list.map((s) => s.start)).toEqual([
+      '2026-11-24T06:30:00.000Z',
+      '2026-11-24T10:30:00.000Z',
+      '2026-11-25T03:30:00.000Z',
+      '2026-11-25T06:30:00.000Z',
+      '2026-11-25T10:30:00.000Z',
+    ]);
+    expect(list[0]).toMatchObject({ end: '2026-11-24T10:30:00.000Z', available: true });
+    configs[SHOP_A]!.features.deliverySlots = false;
+    expect(await slots()).toEqual([]);
+  });
+
+  it('delivery orders need an offered window; pickup orders take none', async () => {
+    useSlots();
+    expect((await place()).body.error.code).toBe('SLOT_REQUIRED');
+    expect((await place(order({ slotStart: '2026-11-24T04:00:00.000Z' }))).body.error.code).toBe('SLOT_UNAVAILABLE');
+    expect((await place(order({ fulfillment: 'PICKUP', addressId: undefined, slotStart: '2026-11-24T06:30:00.000Z' }))).body.error.code).toBe('SLOT_NOT_OFFERED');
+    const ok = await place(order({ slotStart: '2026-11-24T06:30:00.000Z' }));
+    expect(ok.status).toBe(201);
+    expect(ok.body.data.order.slot).toEqual({ start: '2026-11-24T06:30:00.000Z', end: '2026-11-24T10:30:00.000Z' });
+    const placed = (await rawPrisma.outboxEvent.findMany({ where: { shopId: SHOP_A, type: 'order.placed' } }))[0]!;
+    expect(placed.envelope).toMatchObject({ payload: { slotStart: '2026-11-24T06:30:00.000Z', needsPricing: false } });
+  });
+
+  it('a full window refuses more orders, even when they race; cancelling frees a place', async () => {
+    useSlots(1);
+    const slotStart = '2026-11-24T06:30:00.000Z';
+    const results = await Promise.all([place(order({ slotStart })), place(order({ slotStart })), place(order({ slotStart }))]);
+    const ok = results.filter((r) => r.status === 201);
+    expect(ok).toHaveLength(1);
+    expect(results.filter((r) => r.body.error?.code === 'SLOT_FULL')).toHaveLength(2);
+    expect(qtyOf(RICE)).toBe(8); // stock of refused orders given back
+    expect((await slots())[0]!.available).toBe(false);
+
+    await request(app).post(`/api/v1/orders/${ok[0]!.body.data.order.id}/cancel`).set(alice()).send({}).expect(200);
+    expect((await slots())[0]!.available).toBe(true);
+    expect((await place(order({ slotStart }))).status).toBe(201);
+  });
+});
+
+describe('photos and list orders', () => {
+  const LIST = randomUUID();
+  const RX = randomUUID();
+  beforeEach(() => {
+    photos.set(LIST, { owner: ALICE, kind: 'HANDWRITTEN_LIST' });
+    photos.set(RX, { owner: ALICE, kind: 'PRESCRIPTION' });
+  });
+
+  it('a list order has no items or payment yet; the shop prices it when accepting', async () => {
+    const res = await place(order({ items: [], attachmentIds: [LIST], paymentMethod: 'UPI' }));
+    expect(res.status, JSON.stringify(res.body)).toBe(201);
+    const { order: placed, payment } = res.body.data;
+    expect(placed).toMatchObject({ needsPricing: true, totalPaise: 0, itemCount: 0, attachments: [{ id: LIST, kind: 'HANDWRITTEN_LIST' }] });
+    expect(payment).toBeNull();
+    expect(paymentCalls.create).toEqual([]);
+    expect(reservations.size).toBe(0);
+
+    const accept = (body: Record<string, unknown>) => request(app).post(`/api/v1/admin/orders/${placed.id}/status`).set(owner()).send(body);
+    expect((await accept({ status: 'CONFIRMED' })).body.error.code).toBe('PRICE_REQUIRED');
+    const priced = await accept({ status: 'CONFIRMED', amountPaise: 45_600 });
+    expect(priced.body.data).toMatchObject({ status: 'CONFIRMED', needsPricing: false, totalPaise: 45_600 });
+    expect(paymentCalls.create).toEqual([placed.id]);
+  });
+
+  it('needs items or a list photo; photos must be the customer\'s own and of a kind the shop takes', async () => {
+    expect((await place(order({ items: [] }))).body.error.code).toBe('CART_EMPTY');
+    photos.set(LIST, { owner: BOB, kind: 'HANDWRITTEN_LIST' });
+    expect((await place(order({ items: [], attachmentIds: [LIST] }))).body.error.code).toBe('MEDIA_NOT_FOUND');
+    // Grocery preset: lists yes, prescriptions no.
+    expect((await place(order({ attachmentIds: [RX] }))).body.error.code).toBe('MEDIA_NOT_FOUND');
+    configs[SHOP_A]!.features.prescriptionUpload = true;
+    const withRx = await place(order({ attachmentIds: [RX] }));
+    expect(withRx.body.data.order).toMatchObject({ needsPricing: false, attachments: [{ id: RX, kind: 'PRESCRIPTION' }] });
+    configs[SHOP_A]!.features.prescriptionUpload = false;
+    configs[SHOP_A]!.features.handwrittenListUpload = false;
+    expect((await place(order({ items: [], attachmentIds: [LIST] }))).body.error.code).toBe('FEATURE_DISABLED');
+  });
+
+  it('only list orders take an amount', async () => {
+    const { id } = (await place()).body.data.order;
+    const res = await request(app).post(`/api/v1/admin/orders/${id}/status`).set(owner()).send({ status: 'CONFIRMED', amountPaise: 100 });
+    expect(res.body.error.code).toBe('PRICE_NOT_EXPECTED');
+  });
+});
+
+describe('returns and exchanges', () => {
+  const PHOTO = randomUUID();
+  const delivered = async () => {
+    const { id } = (await place()).body.data.order;
+    for (const status of ['CONFIRMED', 'PACKED', 'OUT_FOR_DELIVERY', 'DELIVERED']) {
+      await request(app).post(`/api/v1/admin/orders/${id}/status`).set(owner()).send({ status }).expect(200);
+    }
+    return id as string;
+  };
+  const ask = (orderId: string, body: Record<string, unknown> = {}, headers = alice()) =>
+    request(app)
+      .post(`/api/v1/orders/${orderId}/return`)
+      .set(headers)
+      .send({ type: 'RETURN', reason: 'Rice bag was torn', items: [{ variantId: RICE, qty: 1 }], ...body });
+  beforeEach(() => {
+    configs[SHOP_A]!.features.returns = true;
+    photos.set(PHOTO, { owner: ALICE, kind: 'RETURN_PHOTO' });
+  });
+
+  it('customer asks within the window; the shop approves and completes; everyone is told', async () => {
+    const orderId = await delivered();
+    const res = await ask(orderId, { photoIds: [PHOTO] });
+    expect(res.status, JSON.stringify(res.body)).toBe(201);
+    expect(res.body.data).toMatchObject({
+      type: 'RETURN',
+      status: 'REQUESTED',
+      items: [{ variantId: RICE, productName: 'Rice', variantLabel: '1 kg', qty: 1 }],
+      photos: [{ id: PHOTO, kind: 'RETURN_PHOTO' }],
+    });
+    expect((await ask(orderId)).body.error.code).toBe('RETURN_ALREADY_REQUESTED');
+    expect((await request(app).get(`/api/v1/orders/${orderId}`).set(alice())).body.data.returnRequest.status).toBe('REQUESTED');
+
+    const list = (await request(app).get('/api/v1/admin/returns?status=REQUESTED').set(owner())).body.data;
+    expect(list).toHaveLength(1);
+    const id = list[0].id;
+    const move = (body: Record<string, unknown>) => request(app).post(`/api/v1/admin/returns/${id}/status`).set(owner()).send(body);
+    expect((await move({ status: 'COMPLETED' })).body.error.code).toBe('RETURN_STATUS_INVALID');
+    expect((await move({ status: 'REJECTED' })).body.error.code).toBe('REASON_REQUIRED');
+    expect((await move({ status: 'APPROVED', note: 'Bring it to the shop' })).body.data.status).toBe('APPROVED');
+    expect((await move({ status: 'COMPLETED' })).body.data).toMatchObject({ status: 'COMPLETED', shopNote: 'Bring it to the shop' });
+
+    const types = (await rawPrisma.outboxEvent.findMany({ where: { shopId: SHOP_A, type: { startsWith: 'return.' } }, orderBy: { id: 'asc' } })).map(
+      (e) => `${e.type}:${(e.envelope as { payload: { status?: string } }).payload.status ?? ''}`,
+    );
+    expect(types).toEqual(['return.requested:', 'return.status_changed:APPROVED', 'return.status_changed:COMPLETED']);
+  });
+
+  it('only delivered orders, within the window, items from the order, as the shop allows', async () => {
+    const { id: open } = (await place()).body.data.order;
+    expect((await ask(open)).body.error.code).toBe('RETURN_NOT_ALLOWED');
+    const orderId = await delivered();
+    expect((await ask(orderId, { items: [{ variantId: RICE, qty: 3 }] })).body.error.code).toBe('RETURN_ITEMS_INVALID');
+    expect((await ask(orderId, { items: [] })).body.error.code).toBe('RETURN_ITEMS_REQUIRED');
+    configs[SHOP_A]!.returns.allowExchange = false;
+    expect((await ask(orderId, { type: 'EXCHANGE' })).body.error.code).toBe('EXCHANGE_NOT_OFFERED');
+    clock = new Date(clock.getTime() + 8 * 86_400_000);
+    expect((await ask(orderId)).body.error.code).toBe('RETURN_WINDOW_CLOSED');
+    configs[SHOP_A]!.features.returns = false;
+    expect((await ask(orderId)).body.error.code).toBe('FEATURE_DISABLED');
+  });
+
+  it('other customers and other shops cannot see or act on a return', async () => {
+    const orderId = await delivered();
+    expect((await ask(orderId, {}, bob())).status).toBe(404);
+    await ask(orderId).expect(201);
+    configs[SHOP_B]!.features.returns = true;
+    expect((await request(app).get('/api/v1/admin/returns').set(owner(SHOP_B))).body.data).toEqual([]);
+    const id = (await request(app).get('/api/v1/admin/returns').set(owner())).body.data[0].id;
+    expect((await request(app).post(`/api/v1/admin/returns/${id}/status`).set(owner(SHOP_B)).send({ status: 'APPROVED' })).status).toBe(404);
   });
 });
 

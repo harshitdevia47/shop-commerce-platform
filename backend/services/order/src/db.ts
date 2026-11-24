@@ -9,6 +9,8 @@ export const TENANT_MODELS = [
   Prisma.ModelName.OrderStatusChange,
   Prisma.ModelName.OrderCounter,
   Prisma.ModelName.OutboxEvent,
+  Prisma.ModelName.SlotBooking,
+  Prisma.ModelName.ReturnRequest,
 ] as const;
 
 /**

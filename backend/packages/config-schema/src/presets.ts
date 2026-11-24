@@ -29,10 +29,22 @@ const baseDelivery: DeliveryConfig = {
   etaMinutes: 60,
 };
 
+/** Morning, afternoon and evening windows; shops change them in client.json. */
+const DEFAULT_SLOTS = {
+  windows: [
+    { start: '09:00', end: '12:00' },
+    { start: '12:00', end: '16:00' },
+    { start: '16:00', end: '20:00' },
+  ],
+  daysAhead: 2,
+  capacityPerSlot: 10,
+  cutoffMinutes: 60,
+};
+
 export const PRESETS: Record<BusinessType, Preset> = {
   grocery: {
     features: { ...baseFeatures, deliverySlots: true, handwrittenListUpload: true },
-    delivery: { ...baseDelivery, minOrderPaise: 10_000, feePaise: 2_000, freeAbovePaise: 50_000, etaMinutes: 45 },
+    delivery: { ...baseDelivery, minOrderPaise: 10_000, feePaise: 2_000, freeAbovePaise: 50_000, etaMinutes: 45, slots: DEFAULT_SLOTS },
     catalog: {
       variantStyle: 'units',
       variantAxes: [],
@@ -59,7 +71,7 @@ export const PRESETS: Record<BusinessType, Preset> = {
   },
   bakery: {
     features: { ...baseFeatures, deliverySlots: true },
-    delivery: { ...baseDelivery, radiusKm: 4, etaMinutes: 60 },
+    delivery: { ...baseDelivery, radiusKm: 4, etaMinutes: 60, slots: DEFAULT_SLOTS },
     catalog: {
       variantStyle: 'options',
       variantAxes: ['size', 'flavour'],

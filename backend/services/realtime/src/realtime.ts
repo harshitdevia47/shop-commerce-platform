@@ -164,6 +164,14 @@ export function attachRealtime(httpServer: HttpServer, { verify, logger, reportL
         io.to([adminsRoom(shopId), userRoom(shopId, p.customerId)]).emit('payment.updated', update);
         break;
       }
+      case 'return.requested':
+      case 'return.status_changed': {
+        const p = event.payload;
+        // Apps re-fetch the order (it carries the return request); the status is informational.
+        const status = 'status' in p ? `RETURN_${p.status}` : 'RETURN_REQUESTED';
+        io.to([adminsRoom(shopId), userRoom(shopId, p.customerId)]).emit('order.updated', { orderId: p.orderId, number: p.number, status });
+        break;
+      }
       case 'delivery.status_changed': {
         const p = event.payload;
         io.to([adminsRoom(shopId), userRoom(shopId, p.customerId), userRoom(shopId, p.riderId)]).emit('delivery.updated', {
@@ -187,4 +195,6 @@ export const REALTIME_EVENTS = [
   'payment.utr_submitted',
   'payment.marked_paid',
   'delivery.status_changed',
+  'return.requested',
+  'return.status_changed',
 ] as const;

@@ -16,12 +16,16 @@ datasource db {
 enum MediaKind {
   PRODUCT_IMAGE
   CATEGORY_IMAGE
+  /// Private, uploaded by customers:
+  PRESCRIPTION
+  HANDWRITTEN_LIST
+  RETURN_PHOTO
 }
 
 enum Visibility {
   /// Served by nginx from /media without checks (catalog images).
   PUBLIC
-  /// Served only through the media service after access checks (prescriptions, payment proofs; later phases).
+  /// Served only through the media service after access checks (prescriptions, lists, return photos).
   PRIVATE
 }
 

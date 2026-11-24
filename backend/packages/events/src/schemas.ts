@@ -34,9 +34,13 @@ export const EVENTS = {
       number: z.number().int().positive(),
       customerId: uuid,
       totalPaise: paise,
-      itemCount: z.number().int().positive(),
+      /** 0 for a list order (photo of a list / prescription; the shop prices it when accepting). */
+      itemCount: z.number().int().nonnegative(),
       fulfillment: z.enum(['DELIVERY', 'PICKUP']),
       paymentMethod: z.enum(['COD', 'UPI']),
+      needsPricing: z.boolean().optional(),
+      /** Chosen delivery window start (ISO), when slots are on. */
+      slotStart: z.iso.datetime().nullable().optional(),
     }),
   },
   'order.status_changed': {
@@ -51,6 +55,30 @@ export const EVENTS = {
       to: z.enum(ORDER_STATUSES),
       byRole: z.string().nullable(),
       reason: z.string().nullable(),
+    }),
+  },
+  'return.requested': {
+    stream: 'order',
+    version: 1,
+    payload: z.object({
+      returnId: uuid,
+      orderId: uuid,
+      number: z.number().int().positive(),
+      customerId: uuid,
+      type: z.enum(['RETURN', 'EXCHANGE']),
+    }),
+  },
+  'return.status_changed': {
+    stream: 'order',
+    version: 1,
+    payload: z.object({
+      returnId: uuid,
+      orderId: uuid,
+      number: z.number().int().positive(),
+      customerId: uuid,
+      type: z.enum(['RETURN', 'EXCHANGE']),
+      status: z.enum(['APPROVED', 'REJECTED', 'COMPLETED']),
+      note: z.string().nullable(),
     }),
   },
   'payment.utr_submitted': {

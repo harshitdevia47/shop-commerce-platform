@@ -1,8 +1,8 @@
-import { AppError, Errors, handler, requireAdmin, requireShop } from '@qc/common';
+import { AppError, Errors, handler, requireAdmin, requireShop, requireUser } from '@qc/common';
 import { Router, type RequestHandler } from 'express';
 import multer from 'multer';
 import { z } from 'zod';
-import type { MediaService } from './media.service.js';
+import { PRIVATE_KINDS, type MediaService } from './media.service.js';
 
 const ADMIN_KINDS = ['PRODUCT_IMAGE', 'CATEGORY_IMAGE'] as const;
 
@@ -39,6 +39,40 @@ export function mediaRouter(media: MediaService, maxUploadBytes: number): Router
       if (!req.file) throw Errors.badRequest('MEDIA_FILE_REQUIRED', 'Attach an image in the "file" field');
       return media.uploadImage(req.file.buffer, body.kind);
     }, 201),
+  );
+
+  // Customer uploads a private photo (multipart: file, kind). Feature flags decide which kinds a shop takes.
+  router.post(
+    '/api/v1/media/private',
+    requireUser,
+    requireShop,
+    singleFile(maxUploadBytes),
+    handler({ body: z.object({ kind: z.enum(PRIVATE_KINDS) }) }, async ({ body }, req) => {
+      if (!req.file) throw Errors.badRequest('MEDIA_FILE_REQUIRED', 'Attach an image in the "file" field');
+      return media.uploadPrivate(req.file.buffer, body.kind);
+    }, 201),
+  );
+
+  // The uploader or the shop's staff view a private photo. Never cached by shared caches.
+  router.get(
+    '/api/v1/media/private/:id',
+    requireUser,
+    requireShop,
+    handler({ params: z.object({ id: z.uuid() }), query: z.object({ size: z.enum(['full', 'thumb']).default('full') }) }, async ({ params, query }, _req, res) => {
+      const path = await media.privatePath(params.id, query.size);
+      res.setHeader('Cache-Control', 'private, max-age=86400');
+      res.type('image/webp').sendFile(path, { dotfiles: 'deny' });
+    }),
+  );
+
+  // Internal: order service checks a customer's photos before attaching them to an order or return.
+  router.post(
+    '/internal/media/private/claim',
+    requireShop,
+    handler(
+      { body: z.object({ ids: z.array(z.uuid()).max(10), userId: z.uuid(), kinds: z.array(z.enum(PRIVATE_KINDS)).min(1) }).strict() },
+      ({ body }) => media.claim(body.ids, body.userId, body.kinds),
+    ),
   );
 
   // Internal: catalog checks that media ids belong to the shop and gets their URLs.

@@ -98,6 +98,24 @@ export const shopSchema = z
   })
   .strict();
 
+const clockTime = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Expected a time like 09:00');
+
+/** Delivery windows customers choose from (same every day, shop timezone). Used when features.deliverySlots is on. */
+export const slotsSchema = z
+  .object({
+    windows: z
+      .array(z.object({ start: clockTime, end: clockTime }).strict().refine((w) => w.start < w.end, { message: 'end must be after start' }))
+      .min(1)
+      .max(12),
+    /** Days offered, starting today. */
+    daysAhead: z.number().int().min(1).max(7).default(2),
+    /** Orders per window. */
+    capacityPerSlot: z.number().int().min(1).max(500).default(10),
+    /** A window closes this many minutes before it starts. */
+    cutoffMinutes: z.number().int().min(0).max(24 * 60).default(60),
+  })
+  .strict();
+
 export const deliverySchema = z
   .object({
     enabled: z.boolean(),
@@ -109,8 +127,20 @@ export const deliverySchema = z
     /** null = delivery fee always charged. */
     freeAbovePaise: paise.nullable(),
     etaMinutes: z.number().int().positive().max(24 * 60),
+    slots: slotsSchema.optional(),
   })
   .strict();
+
+/** Returns / exchanges policy (used when features.returns is on). */
+export const returnsSchema = z
+  .object({
+    /** Days after delivery a customer may ask. */
+    windowDays: z.number().int().min(1).max(60).default(7),
+    allowExchange: z.boolean().default(true),
+  })
+  .strict();
+
+const DEFAULT_RETURNS = { windowDays: 7, allowExchange: true };
 
 export const paymentsSchema = z
   .object({
@@ -197,6 +227,13 @@ function checkCrossSectionRules(config: RuntimeParts, ctx: z.RefinementCtx): voi
       path: ['features', 'deliverySlots'],
     });
   }
+  if (config.features.deliverySlots && !config.delivery.slots) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'deliverySlots requires delivery.slots (windows customers choose from)',
+      path: ['delivery', 'slots'],
+    });
+  }
 }
 
 export const runtimeConfigSchema = z
@@ -206,6 +243,7 @@ export const runtimeConfigSchema = z
     payments: paymentsSchema,
     features: featuresSchema,
     catalog: catalogSchema,
+    returns: returnsSchema.default(DEFAULT_RETURNS),
   })
   .strict()
   .superRefine(checkCrossSectionRules);
@@ -222,6 +260,7 @@ export const clientConfigSchema = z
     payments: paymentsSchema,
     features: featuresSchema,
     catalog: catalogSchema,
+    returns: returnsSchema.default(DEFAULT_RETURNS),
   })
   .strict()
   .superRefine(checkCrossSectionRules);
@@ -232,4 +271,6 @@ export type Features = z.infer<typeof featuresSchema>;
 export type DeliveryConfig = z.infer<typeof deliverySchema>;
 export type PaymentsConfig = z.infer<typeof paymentsSchema>;
 export type CatalogConfig = z.infer<typeof catalogSchema>;
+export type SlotsConfig = z.infer<typeof slotsSchema>;
+export type ReturnsConfig = z.infer<typeof returnsSchema>;
 export type ShopInfo = z.infer<typeof shopSchema>;

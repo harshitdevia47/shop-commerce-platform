@@ -3,7 +3,7 @@ import { existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createLogger, findRawPrismaOffenders, signInternalHeaders, type Role } from '@qc/common';
+import { createLogger, findRawPrismaOffenders, getContext, signInternalHeaders, type Role } from '@qc/common';
 import type { Express } from 'express';
 import sharp from 'sharp';
 import request from 'supertest';
@@ -50,6 +50,19 @@ beforeAll(() => {
     publicPath: '/media',
     maxUploadBytes: 2 * 1024 * 1024,
     serveStatic: true,
+    // Shop A takes prescriptions and returns photos; shop B takes nothing private.
+    shopConfig: {
+      get: async () => ({
+        features: {
+          deliverySlots: false,
+          storePickup: true,
+          orderNotes: true,
+          returns: getContext()?.shopId === SHOP_A,
+          prescriptionUpload: getContext()?.shopId === SHOP_A,
+          handwrittenListUpload: false,
+        },
+      }),
+    },
   });
 });
 
@@ -132,6 +145,65 @@ describe('POST /internal/media/resolve (tenant isolation)', () => {
   it('rejects malformed ids', async () => {
     const res = await request(app).post('/internal/media/resolve').set(as(SHOP_A, null)).send({ ids: ['x'] });
     expect(res.status).toBe(400);
+  });
+});
+
+describe('private photos (prescriptions, lists, return photos)', () => {
+  const ALICE = randomUUID();
+  const BOB = randomUUID();
+  const who = (shopId: string, userId: string, role: Role) => signInternalHeaders({ requestId: randomUUID(), shopId, userId, role }, SECRET);
+  const uploadPrivate = (kind: string, headers = who(SHOP_A, ALICE, 'CUSTOMER'), shopId = SHOP_A) =>
+    request(app).post('/api/v1/media/private').set(shopId === SHOP_A ? headers : who(shopId, ALICE, 'CUSTOMER')).field('kind', kind).attach('file', smallPhoto, 'rx.jpg');
+  let smallPhoto: Buffer;
+
+  beforeAll(async () => {
+    smallPhoto = await sharp({ create: { width: 800, height: 600, channels: 3, background: '#fff' } }).jpeg().toBuffer();
+  });
+
+  it('stores outside the public folder; only the uploader and shop staff can view it', async () => {
+    const res = await uploadPrivate('PRESCRIPTION');
+    expect(res.status, JSON.stringify(res.body)).toBe(201);
+    const { id } = res.body.data;
+    expect(res.body.data).toEqual({ id, kind: 'PRESCRIPTION', width: 800, height: 600 });
+    const file = await rawPrisma.mediaFile.findUniqueOrThrow({ where: { id } });
+    expect(existsSync(join(root, 'private', file.path))).toBe(true);
+    expect(existsSync(join(root, 'public', file.path))).toBe(false);
+    // Not reachable through the public static mount.
+    expect((await request(app).get(`/media/${file.path}`)).status).not.toBe(200);
+
+    const view = (headers: Record<string, string>, size = 'thumb') => request(app).get(`/api/v1/media/private/${id}?size=${size}`).set(headers);
+    const mine = await view(who(SHOP_A, ALICE, 'CUSTOMER'));
+    expect(mine.status).toBe(200);
+    expect(mine.headers['content-type']).toBe('image/webp');
+    expect(mine.headers['cache-control']).toBe('private, max-age=86400');
+    expect((await view(who(SHOP_A, OWNER, 'STAFF'), 'full')).status).toBe(200);
+    expect((await view(who(SHOP_A, BOB, 'CUSTOMER'))).status).toBe(404);
+    expect((await view(who(SHOP_A, BOB, 'RIDER'))).status).toBe(404);
+    expect((await view(who(SHOP_B, OWNER, 'OWNER'))).status).toBe(404);
+  });
+
+  it('respects feature flags', async () => {
+    expect((await uploadPrivate('HANDWRITTEN_LIST')).body.error.code).toBe('FEATURE_DISABLED');
+    expect((await uploadPrivate('PRESCRIPTION', undefined, SHOP_B)).body.error.code).toBe('FEATURE_DISABLED');
+    expect((await uploadPrivate('PRODUCT_IMAGE')).status).toBe(400);
+  });
+
+  it("claim confirms a customer's own photos of the right kind, in this shop only", async () => {
+    const rx = (await uploadPrivate('PRESCRIPTION')).body.data.id;
+    const photo = (await uploadPrivate('RETURN_PHOTO')).body.data.id;
+    const claim = (body: Record<string, unknown>, shopId = SHOP_A) =>
+      request(app).post('/internal/media/private/claim').set(as(shopId, null)).send(body);
+    expect((await claim({ ids: [rx], userId: ALICE, kinds: ['PRESCRIPTION', 'HANDWRITTEN_LIST'] })).body.data).toEqual([
+      { id: rx, kind: 'PRESCRIPTION', width: 800, height: 600 },
+    ]);
+    expect((await claim({ ids: [rx], userId: BOB, kinds: ['PRESCRIPTION'] })).status).toBe(404);
+    expect((await claim({ ids: [photo], userId: ALICE, kinds: ['PRESCRIPTION'] })).status).toBe(404);
+    expect((await claim({ ids: [rx], userId: ALICE, kinds: ['PRESCRIPTION'] }, SHOP_B)).status).toBe(404);
+  });
+
+  it('private files never resolve as catalog images', async () => {
+    const rx = (await uploadPrivate('PRESCRIPTION')).body.data.id;
+    expect((await request(app).post('/internal/media/resolve').set(as(SHOP_A, null)).send({ ids: [rx] })).body.data).toEqual([]);
   });
 });
 

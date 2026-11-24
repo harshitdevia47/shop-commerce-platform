@@ -50,5 +50,6 @@ export function toRuntimeConfig(config: ClientConfig): RuntimeConfig {
     payments: config.payments,
     features: config.features,
     catalog: config.catalog,
+    returns: config.returns,
   };
 }

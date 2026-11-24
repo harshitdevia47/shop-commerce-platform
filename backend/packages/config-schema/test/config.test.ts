@@ -89,6 +89,12 @@ describe('validation', () => {
     ).toMatch(/storePickup/);
   });
 
+  it('slots need windows; returns policy defaults', () => {
+    expect(issues({ shop: { businessType: 'clothing' }, features: { deliverySlots: true } })).toMatch(/delivery\.slots/);
+    expect(issues({ delivery: { slots: { windows: [{ start: '12:00', end: '09:00' }] } } })).toMatch(/end must be after start/);
+    expect(issues({ delivery: { slots: { windows: [{ start: '9am', end: '12:00' }] } } })).toMatch(/09:00/);
+  });
+
   it('rejects slots without delivery', () => {
     expect(issues({ delivery: { enabled: false }, features: { deliverySlots: true } })).toMatch(/deliverySlots/);
   });
@@ -105,6 +111,8 @@ describe('validation', () => {
 describe('toRuntimeConfig', () => {
   it('drops build-time sections', () => {
     const runtime = toRuntimeConfig(parseClientConfig(load('sharma_kirana')));
-    expect(Object.keys(runtime).sort()).toEqual(['catalog', 'delivery', 'features', 'payments', 'shop']);
+    expect(Object.keys(runtime).sort()).toEqual(['catalog', 'delivery', 'features', 'payments', 'returns', 'shop']);
+    expect(runtime.returns).toEqual({ windowDays: 7, allowExchange: true });
+    expect(runtime.delivery.slots?.windows).toHaveLength(3);
   });
 });

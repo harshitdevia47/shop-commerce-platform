@@ -56,17 +56,26 @@ model Order {
   /// Client-generated key: retrying a timed-out "place order" never creates a second order.
   idempotencyKey   String        @map("idempotency_key") @db.Uuid
   cancelReason     String?       @map("cancel_reason")
+  /// Chosen delivery window (shop config delivery.slots), null when slots are off or for pickup
+  slotStart        DateTime?     @map("slot_start") @db.Timestamptz(3)
+  slotEnd          DateTime?     @map("slot_end") @db.Timestamptz(3)
+  /// Private photos (prescription, handwritten list): [{ id, kind }], ids of media files
+  attachments      Json?
+  /// List order (photo of a handwritten list or prescription, no cart): the shop sets the amount when accepting
+  needsPricing     Boolean       @default(false) @map("needs_pricing")
   placedAt         DateTime      @default(now()) @map("placed_at") @db.Timestamptz(3)
   updatedAt        DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  items   OrderItem[]
-  history OrderStatusChange[]
+  items         OrderItem[]
+  history       OrderStatusChange[]
+  returnRequest ReturnRequest?
 
   @@unique([shopId, id])
   @@unique([shopId, number])
   @@unique([shopId, customerId, idempotencyKey])
   @@index([shopId, status, id])
   @@index([shopId, customerId, id])
+  @@index([shopId, slotStart])
   @@map("orders")
 }
 
@@ -129,4 +138,52 @@ model OutboxEvent {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
   @@map("outbox_events")
+}
+
+/// Orders booked per delivery window. Incremented in the order's transaction only while below capacity.
+model SlotBooking {
+  shopId    String   @map("shop_id") @db.Uuid
+  slotStart DateTime @map("slot_start") @db.Timestamptz(3)
+  booked    Int
+
+  @@id([shopId, slotStart])
+  @@map("slot_bookings")
+}
+
+enum ReturnType {
+  RETURN
+  EXCHANGE
+}
+
+/// REQUESTED → APPROVED → COMPLETED, or REQUESTED → REJECTED.
+enum ReturnStatus {
+  REQUESTED
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+/// A customer's return or exchange request for a delivered order (one per order).
+model ReturnRequest {
+  id         String       @id @default(uuid(7)) @db.Uuid
+  shopId     String       @map("shop_id") @db.Uuid
+  orderId    String       @map("order_id") @db.Uuid
+  customerId String       @map("customer_id") @db.Uuid
+  type       ReturnType
+  status     ReturnStatus @default(REQUESTED)
+  reason     String
+  /// [{ variantId, productName, variantLabel, qty }] snapshot
+  items      Json
+  /// [{ id, kind }] private photos
+  photos     Json?
+  /// Shop's answer (required when rejecting)
+  shopNote   String?      @map("shop_note")
+  createdAt  DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  order Order @relation(fields: [shopId, orderId], references: [shopId, id], onDelete: Cascade, onUpdate: Restrict)
+
+  @@unique([shopId, orderId])
+  @@index([shopId, status, createdAt])
+  @@map("return_requests")
 }

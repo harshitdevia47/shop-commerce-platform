@@ -107,7 +107,20 @@ log in with OTP. From a server shell: `docker compose exec identity node dist/us
 Rider phones share their location only while carrying an order; Android shows a "Sharing your location"
 notification during that time.
 
-## 9. Events (how services stay in sync)
+## 9. Shop options
+
+Per shop in `clients/<slug>/client.json` (then `client.js sync <slug>`):
+
+- `features.deliverySlots` with `delivery.slots` (windows like `{"start": "09:00", "end": "12:00"}`, `daysAhead`,
+  `capacityPerSlot`, `cutoffMinutes`).
+- `features.handwrittenListUpload` / `features.prescriptionUpload`: customers send photos; the shop sets the amount of
+  a list order when accepting it.
+- `features.returns` with `returns: { "windowDays": 7, "allowExchange": true }`.
+
+Customer photos are private files in the `qc_media_private` volume (back it up with the public one). nginx never
+serves them; the media service checks who asks.
+
+## 10. Events (how services stay in sync)
 
 Order and payment write events to their own `outbox_events` table in the same transaction as the change;
 a relay publishes them to Redis Streams (`qc:events:order`, `qc:events:payment`, `qc:events:delivery`). Catalog (stock release),

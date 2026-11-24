@@ -30,6 +30,7 @@ function toRuntimeConfig(shop: Shop): RuntimeConfig {
     payments: shop.payments,
     features: shop.features,
     catalog: shop.catalog,
+    ...(shop.returns ? { returns: shop.returns } : {}),
   });
 }
 
@@ -45,6 +46,7 @@ function toShopColumns(config: ClientConfig) {
     payments: config.payments as Prisma.InputJsonValue,
     features: config.features as Prisma.InputJsonValue,
     catalog: config.catalog as Prisma.InputJsonValue,
+    returns: config.returns as Prisma.InputJsonValue,
   };
 }
 

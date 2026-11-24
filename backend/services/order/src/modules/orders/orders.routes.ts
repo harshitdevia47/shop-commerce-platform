@@ -5,8 +5,8 @@ import type { OrdersService } from './orders.service.js';
 
 const items = z
   .array(z.object({ variantId: z.uuid(), qty: z.number().int().min(1).max(99) }).strict())
-  .min(1)
   .max(100);
+const quoteItems = items.min(1);
 const fulfillment = z.enum(['DELIVERY', 'PICKUP']);
 const idParams = z.object({ id: z.uuid() });
 const STATUSES = [
@@ -32,10 +32,13 @@ export function ordersRouter(orders: OrdersService): Router {
   router.post(
     '/api/v1/orders/quote',
     requireShop,
-    handler({ body: z.object({ items, fulfillment: fulfillment.default('DELIVERY') }).strict() }, ({ body }) =>
+    handler({ body: z.object({ items: quoteItems, fulfillment: fulfillment.default('DELIVERY') }).strict() }, ({ body }) =>
       orders.quote(body.items, body.fulfillment),
     ),
   );
+
+  // Delivery windows (public, like the quote).
+  router.get('/api/v1/orders/slots', requireShop, handler({}, () => orders.slots()));
 
   const mine = Router();
   mine.use(requireUser, requireShop);
@@ -52,6 +55,8 @@ export function ordersRouter(orders: OrdersService): Router {
             note: z.string().trim().min(1).max(500).optional(),
             idempotencyKey: z.uuid(),
             expectedTotalPaise: z.number().int().nonnegative().optional(),
+            slotStart: z.iso.datetime({ offset: true }).optional(),
+            attachmentIds: z.array(z.uuid()).max(5).optional(),
           })
           .strict(),
       },
@@ -85,9 +90,16 @@ export function ordersRouter(orders: OrdersService): Router {
     handler(
       {
         params: idParams,
-        body: z.object({ status: z.enum(STATUSES), reason: z.string().trim().min(1).max(200).optional() }).strict(),
+        body: z
+          .object({
+            status: z.enum(STATUSES),
+            reason: z.string().trim().min(1).max(200).optional(),
+            /** List orders: the amount the shop charges (paise), when accepting. */
+            amountPaise: z.number().int().positive().max(10_000_000).optional(),
+          })
+          .strict(),
       },
-      ({ params, body }) => orders.setStatus(params.id, body.status, body.reason),
+      ({ params, body }) => orders.setStatus(params.id, body.status, body.reason, body.amountPaise),
     ),
   );
   router.use('/api/v1/admin/orders', admin);

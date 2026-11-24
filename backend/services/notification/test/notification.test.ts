@@ -32,6 +32,7 @@ const config: RuntimeConfig = {
   payments: { cod: true, upi: { enabled: false }, razorpay: { enabled: false } },
   features: PRESETS.grocery.features,
   catalog: PRESETS.grocery.catalog,
+  returns: { windowDays: 7, allowExchange: true },
 } as RuntimeConfig;
 
 let devices: PushTarget[];
@@ -186,6 +187,35 @@ describe('who gets what', () => {
       ['rider-new-hi', 'नई डिलीवरी #12', `/rider/deliveries/${DELIVERY}`],
       ['rider-old-en', 'Delivery #12 reassigned', '/rider'],
       ['rider-new-hi', 'डिलीवरी #12 रद्द', `/rider/deliveries/${DELIVERY}`],
+    ]);
+  });
+
+  it('list orders and returns read naturally', async () => {
+    await deliver(
+      buildEvent('order.placed', SHOP, {
+        orderId: ORDER,
+        number: 13,
+        customerId: CUSTOMER,
+        totalPaise: 0,
+        itemCount: 0,
+        fulfillment: 'PICKUP',
+        paymentMethod: 'COD',
+        needsPricing: true,
+      }),
+    );
+    await deliver(buildEvent('return.requested', SHOP, { returnId: DELIVERY, orderId: ORDER, number: 12, customerId: CUSTOMER, type: 'EXCHANGE' }));
+    const changed = (status: 'APPROVED' | 'REJECTED', note: string | null) =>
+      buildEvent('return.status_changed', SHOP, { returnId: DELIVERY, orderId: ORDER, number: 12, customerId: CUSTOMER, type: 'RETURN', status, note });
+    devices[0]!.locale = 'en';
+    await deliver(changed('APPROVED', 'Bring it tomorrow'));
+    await deliver(changed('REJECTED', null));
+    expect(sent.map((m) => [m.token, m.title, m.body])).toEqual([
+      ['owner-en', 'New list order #13', 'Photo of a list · Pickup · COD. Open it to set the amount.'],
+      ['staff-hi', 'नया लिस्ट ऑर्डर #13', 'लिस्ट की फोटो · पिकअप · COD। राशि तय करने के लिए खोलें।'],
+      ['owner-en', 'Exchange request for #12', 'The customer wants to exchange items. Open the order to decide.'],
+      ['staff-hi', '#12 के लिए बदलने का अनुरोध', 'ग्राहक सामान बदलना चाहते हैं। फैसले के लिए ऑर्डर खोलें।'],
+      ['customer-gu', 'Request for #12 approved', 'Sharma Kirana: Bring it tomorrow'],
+      ['customer-gu', 'Request for #12 declined', 'Sharma Kirana: Please contact the shop.'],
     ]);
   });
 

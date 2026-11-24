@@ -1,5 +1,6 @@
 import { join } from 'node:path';
-import { createServiceApp, finalizeApp, internalAuth, type Logger } from '@qc/common';
+import { createServiceApp, finalizeApp, internalAuth, type Logger, type ShopConfigSource } from '@qc/common';
+import type { Features } from '@qc/config-schema';
 import express, { type Express } from 'express';
 import type { Db } from './db.js';
 import { mediaRouter } from './modules/media/media.routes.js';
@@ -14,6 +15,7 @@ export interface MediaAppDeps {
   maxUploadBytes: number;
   /** Dev only: serve public files at `publicPath` (nginx does this in production). */
   serveStatic?: boolean;
+  shopConfig?: ShopConfigSource<{ features: Features }>;
   now?: () => Date;
 }
 
@@ -29,7 +31,7 @@ export function createMediaApp(deps: MediaAppDeps): Express {
     );
   }
 
-  const media = createMediaService({ db, root: deps.root, publicPath: deps.publicPath, now: deps.now });
+  const media = createMediaService({ db, root: deps.root, publicPath: deps.publicPath, shopConfig: deps.shopConfig, now: deps.now });
   app.use(internalAuth(deps.internalSecret));
   app.use(mediaRouter(media, deps.maxUploadBytes));
 
