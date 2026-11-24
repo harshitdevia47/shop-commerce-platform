@@ -41,6 +41,19 @@ export const EVENTS = {
       needsPricing: z.boolean().optional(),
       /** Chosen delivery window start (ISO), when slots are on. */
       slotStart: z.iso.datetime().nullable().optional(),
+      /** Order lines (reporting: top products). Optional: older events have none. */
+      items: z
+        .array(
+          z.object({
+            productId: uuid,
+            variantId: uuid,
+            productName: z.string(),
+            variantLabel: z.string(),
+            qty: z.number().int().positive(),
+            lineTotalPaise: paise,
+          }),
+        )
+        .optional(),
     }),
   },
   'order.status_changed': {
@@ -55,6 +68,8 @@ export const EVENTS = {
       to: z.enum(ORDER_STATUSES),
       byRole: z.string().nullable(),
       reason: z.string().nullable(),
+      /** List orders: the amount the shop set when accepting. */
+      pricedTotalPaise: paise.optional(),
     }),
   },
   'return.requested': {

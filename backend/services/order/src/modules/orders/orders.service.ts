@@ -255,6 +255,7 @@ export function createOrdersService({
         to,
         byRole: context.role ?? null,
         reason: reason ?? null,
+        ...(pricedTotalPaise !== undefined ? { pricedTotalPaise } : {}),
       });
       await tx.outboxEvent.create({ data: toOutboxRow(event) as Prisma.OutboxEventUncheckedCreateInput });
     });
@@ -438,6 +439,14 @@ export function createOrdersService({
             paymentMethod: input.paymentMethod,
             needsPricing: isListOrder,
             slotStart: slot?.start.toISOString() ?? null,
+            items: (priced?.lines ?? []).map((l) => ({
+              productId: l.productId,
+              variantId: l.variantId,
+              productName: l.productName,
+              variantLabel: l.label,
+              qty: l.qty,
+              lineTotalPaise: l.lineTotalPaise,
+            })),
           });
           await tx.outboxEvent.create({ data: toOutboxRow(event) as Prisma.OutboxEventUncheckedCreateInput });
         });

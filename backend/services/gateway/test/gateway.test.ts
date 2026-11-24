@@ -37,7 +37,7 @@ async function token(claims: Record<string, unknown>, expiresIn = '15m'): Promis
 function buildApp(perMinute = 1000, target = upstreamUrl) {
   return createGatewayApp({
     logger: createLogger('gateway-test', 'silent'),
-    routes: buildRoutes({ tenant: target, identity: target, catalog: target, media: target, order: target, payment: target, delivery: target }),
+    routes: buildRoutes({ tenant: target, identity: target, catalog: target, media: target, order: target, payment: target, delivery: target, reporting: target }),
     mediaStaticTarget: target,
     shops: new ShopResolver(async (slug) => {
       lookups++;
@@ -182,6 +182,8 @@ describe('gateway', () => {
     expect((await request(app).get('/api/v1/admin/riders').set(await as('RIDER'))).status).toBe(403);
     expect((await request(app).get('/api/v1/admin/team').set(await as('OWNER'))).status).toBe(200);
     expect((await request(app).get('/api/v1/admin/team').set(await as('STAFF'))).status).toBe(403);
+    expect((await request(app).get('/api/v1/admin/reports/summary').set(await as('OWNER'))).status).toBe(200);
+    expect((await request(app).get('/api/v1/admin/reports/summary').set(await as('STAFF'))).status).toBe(403);
     expect((await request(app).get('/api/v1/deliveries/orders/x').set(await as('CUSTOMER'))).status).toBe(200);
     expect((await request(app).get('/api/v1/deliveries/orders/x').set(shop)).status).toBe(401);
   });

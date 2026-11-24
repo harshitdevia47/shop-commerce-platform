@@ -457,7 +457,17 @@ describe('events (outbox)', () => {
       eventId: rows[0]!.id,
       shopId: SHOP_A,
       version: 1,
-      payload: { orderId: placed.id, number: placed.number, customerId: ALICE, totalPaise: 34000, paymentMethod: 'COD' },
+      payload: {
+        orderId: placed.id,
+        number: placed.number,
+        customerId: ALICE,
+        totalPaise: 34000,
+        paymentMethod: 'COD',
+        items: [
+          { variantId: RICE, productName: 'Rice', variantLabel: '1 kg', qty: 2, lineTotalPaise: 24000 },
+          { variantId: DAL, productName: 'Dal', variantLabel: '1 kg', qty: 1, lineTotalPaise: 8000 },
+        ],
+      },
     });
   });
 
@@ -622,6 +632,8 @@ describe('photos and list orders', () => {
     const priced = await accept({ status: 'CONFIRMED', amountPaise: 45_600 });
     expect(priced.body.data).toMatchObject({ status: 'CONFIRMED', needsPricing: false, totalPaise: 45_600 });
     expect(paymentCalls.create).toEqual([placed.id]);
+    const accepted = (await rawPrisma.outboxEvent.findMany({ where: { shopId: SHOP_A, type: 'order.status_changed' } }))[0]!;
+    expect(accepted.envelope).toMatchObject({ payload: { to: 'CONFIRMED', pricedTotalPaise: 45_600 } });
   });
 
   it('needs items or a list photo; photos must be the customer\'s own and of a kind the shop takes', async () => {

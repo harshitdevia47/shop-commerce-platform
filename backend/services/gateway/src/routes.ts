@@ -24,6 +24,7 @@ export interface UpstreamUrls {
   order: string;
   payment: string;
   delivery: string;
+  reporting: string;
 }
 
 /**
@@ -56,6 +57,8 @@ export function buildRoutes(upstreams: UpstreamUrls): RouteRule[] {
     { prefix: '/api/v1/admin/deliveries', target: upstreams.delivery, auth: 'required', roles: ADMIN_ROLES },
     { prefix: '/api/v1/rider', target: upstreams.delivery, auth: 'required', roles: ['RIDER'] },
     { prefix: '/api/v1/deliveries', target: upstreams.delivery, auth: 'required' },
+    // Sales figures: owner only.
+    { prefix: '/api/v1/admin/reports', target: upstreams.reporting, auth: 'required', roles: ['OWNER'] },
   ];
   // Longest prefix first so specific rules win.
   return rules.sort((a, b) => b.prefix.length - a.prefix.length);

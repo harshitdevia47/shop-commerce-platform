@@ -154,6 +154,20 @@ services:
     deploy:
       resources: { limits: { memory: 256m } }
 
+  # Sales read models from order/payment events; owner reports.
+  reporting:
+    <<: *service
+    build: { context: ../backend, dockerfile: Dockerfile, args: { SERVICE: reporting } }
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/qc_reporting
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    deploy:
+      resources: { limits: { memory: 192m } }
+
   # Turns events into push notifications. No routes besides /health.
   notification:
     <<: *service
@@ -203,6 +217,7 @@ services:
       ORDER_URL: http://order:3000
       PAYMENT_URL: http://payment:3000
       DELIVERY_URL: http://delivery:3000
+      REPORTING_URL: http://reporting:3000
       JWT_PUBLIC_KEY_FILE: /run/secrets/jwt_public_key
       TRUST_PROXY_HOPS: 1
     secrets: [jwt_public_key]
@@ -215,6 +230,7 @@ services:
       order: { condition: service_started }
       payment: { condition: service_started }
       delivery: { condition: service_started }
+      reporting: { condition: service_started }
     deploy:
       resources: { limits: { memory: 256m } }
 
