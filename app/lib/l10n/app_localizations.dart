@@ -3141,6 +3141,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Team accounts are removed by the shop owner, and the owner account through support.'**
   String get errorAccountDeleteTeam;
+
+  /// No description provided for @subscriptionDueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'App subscription due: {amount} since {date}'**
+  String subscriptionDueTitle(String amount, String date);
+
+  /// No description provided for @subscriptionPayTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Please pay by UPI to {upi}.'**
+  String subscriptionPayTo(String upi);
+
+  /// No description provided for @subscriptionPayNoUpi.
+  ///
+  /// In en, this message translates to:
+  /// **'Please pay to keep your app running. Message support if you need help.'**
+  String get subscriptionPayNoUpi;
+
+  /// No description provided for @subscriptionPausedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Online orders are paused: subscription unpaid'**
+  String get subscriptionPausedTitle;
+
+  /// No description provided for @subscriptionPausedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay {amount} to turn orders back on. Customers can still see your shop.'**
+  String subscriptionPausedBody(String amount);
+
+  /// No description provided for @subscriptionPayButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay by UPI'**
+  String get subscriptionPayButton;
+
+  /// No description provided for @shopSuspendedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This shop is not taking online orders right now. Please call the shop.'**
+  String get shopSuspendedBody;
 }
 
 class _AppLocalizationsDelegate

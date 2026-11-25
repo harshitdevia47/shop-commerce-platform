@@ -1718,4 +1718,34 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errorAccountDeleteTeam =>
       'Team accounts are removed by the shop owner, and the owner account through support.';
+
+  @override
+  String subscriptionDueTitle(String amount, String date) {
+    return 'App subscription due: $amount since $date';
+  }
+
+  @override
+  String subscriptionPayTo(String upi) {
+    return 'Please pay by UPI to $upi.';
+  }
+
+  @override
+  String get subscriptionPayNoUpi =>
+      'Please pay to keep your app running. Message support if you need help.';
+
+  @override
+  String get subscriptionPausedTitle =>
+      'Online orders are paused: subscription unpaid';
+
+  @override
+  String subscriptionPausedBody(String amount) {
+    return 'Pay $amount to turn orders back on. Customers can still see your shop.';
+  }
+
+  @override
+  String get subscriptionPayButton => 'Pay by UPI';
+
+  @override
+  String get shopSuspendedBody =>
+      'This shop is not taking online orders right now. Please call the shop.';
 }

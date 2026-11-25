@@ -97,6 +97,7 @@ String errorMessage(AppLocalizations l10n, Object error) {
   return switch (error.code) {
     'SHOP_INACTIVE' => l10n.errorShopInactive,
     'ORDERS_PAUSED' => l10n.shopPausedTitle,
+    'SHOP_SUSPENDED' => l10n.shopSuspendedBody,
     'SETTINGS_INVALID' => l10n.settingsFixFields,
     'VALIDATION_FAILED' => l10n.errorPhoneInvalid,
     'OTP_INVALID' => l10n.errorOtpInvalid(error.detailInt('attemptsLeft') ?? 0),

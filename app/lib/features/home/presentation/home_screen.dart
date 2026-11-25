@@ -6,6 +6,7 @@ import '../../../core/config/shop_settings.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/providers.dart';
 import '../../../core/router/routes.dart';
+import '../../../core/utils/launcher.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/language_menu.dart';
@@ -115,7 +116,26 @@ class _HomeContent extends ConsumerWidget {
                 ),
               ),
             ),
-            if (settings.ordering.paused)
+            if (settings.subscription.state == SubscriptionState.paused)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                  child: Card(
+                    key: const Key('shopSuspendedBanner'),
+                    color: theme.colorScheme.errorContainer,
+                    child: ListTile(
+                      leading: const Icon(Icons.storefront_outlined),
+                      title: Text(l10n.shopSuspendedBody),
+                      trailing: IconButton(
+                        tooltip: l10n.callShop,
+                        icon: const Icon(Icons.call),
+                        onPressed: () => ref.read(externalLauncherProvider)(Uri(scheme: 'tel', path: settings.shop.phone)),
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            else if (settings.ordering.paused)
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),

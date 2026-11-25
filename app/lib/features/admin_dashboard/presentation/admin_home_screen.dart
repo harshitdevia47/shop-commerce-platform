@@ -9,6 +9,7 @@ import '../../../core/router/routes.dart';
 import '../../auth/domain/auth_models.dart';
 import '../../auth/presentation/auth_controller.dart';
 import 'setup_checklist.dart';
+import 'subscription_card.dart';
 
 /// OWNER/STAFF landing page: orders, products, categories, and (owner) the team.
 class AdminHomeScreen extends ConsumerWidget {
@@ -37,6 +38,7 @@ class AdminHomeScreen extends ConsumerWidget {
           const SizedBox(height: 4),
           Text(l10n.adminWelcome(user?.name ?? user?.phone ?? ''), style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 24),
+          const SubscriptionCard(),
           if (ref.watch(shopSettingsProvider).value?.ordering.paused ?? false) ...[
             Card(
               key: const Key('pausedNotice'),

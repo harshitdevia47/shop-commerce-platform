@@ -17,6 +17,7 @@ class ShopSettings {
     required this.catalog,
     this.returns = const ReturnsPolicy(),
     this.ordering = const OrderingState(),
+    this.subscription = const SubscriptionInfo(),
   });
 
   factory ShopSettings.fromJson(Map<String, dynamic> json) {
@@ -32,6 +33,9 @@ class ShopSettings {
       catalog: CatalogSettings.fromJson(json['catalog'] as Map<String, dynamic>),
       returns: json['returns'] == null ? const ReturnsPolicy() : ReturnsPolicy.fromJson(json['returns'] as Map<String, dynamic>),
       ordering: json['ordering'] == null ? const OrderingState() : OrderingState.fromJson(json['ordering'] as Map<String, dynamic>),
+      subscription: json['subscription'] == null
+          ? const SubscriptionInfo()
+          : SubscriptionInfo.fromJson(json['subscription'] as Map<String, dynamic>),
     );
   }
 
@@ -44,6 +48,9 @@ class ShopSettings {
   final CatalogSettings catalog;
   final ReturnsPolicy returns;
   final OrderingState ordering;
+
+  /// The shop's subscription to the platform (set by the platform only).
+  final SubscriptionInfo subscription;
 
   bool isEnabled(Feature feature) => features[feature] ?? false;
 }
@@ -166,6 +173,27 @@ class OrderingState {
 
   final bool paused;
   final String? message;
+}
+
+enum SubscriptionState { ok, due, paused }
+
+/// Platform subscription: `due` reminds the owner to pay; `paused` = the platform stopped new orders.
+@immutable
+class SubscriptionInfo {
+  const SubscriptionInfo({this.state = SubscriptionState.ok, this.amountPaise, this.dueDate, this.payTo});
+
+  factory SubscriptionInfo.fromJson(Map<String, dynamic> json) => SubscriptionInfo(
+    // Unknown states from a newer backend count as ok (never block on a value the app does not know).
+    state: SubscriptionState.values.asNameMap()[json['state']] ?? SubscriptionState.ok,
+    amountPaise: (json['amountPaise'] as num?)?.toInt(),
+    dueDate: json['dueDate'] == null ? null : DateTime.tryParse(json['dueDate'] as String),
+    payTo: json['payTo'] as String?,
+  );
+
+  final SubscriptionState state;
+  final int? amountPaise;
+  final DateTime? dueDate;
+  final String? payTo;
 }
 
 @immutable

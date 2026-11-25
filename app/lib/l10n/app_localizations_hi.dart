@@ -1714,4 +1714,34 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get errorAccountDeleteTeam =>
       'टीम के अकाउंट दुकान के मालिक हटाते हैं, और मालिक का अकाउंट सपोर्ट से बंद होता है।';
+
+  @override
+  String subscriptionDueTitle(String amount, String date) {
+    return 'ऐप सब्सक्रिप्शन बाकी: $amount, $date से';
+  }
+
+  @override
+  String subscriptionPayTo(String upi) {
+    return 'कृपया UPI से $upi पर भुगतान करें।';
+  }
+
+  @override
+  String get subscriptionPayNoUpi =>
+      'ऐप चालू रखने के लिए कृपया भुगतान करें। मदद के लिए सपोर्ट को मैसेज करें।';
+
+  @override
+  String get subscriptionPausedTitle =>
+      'ऑनलाइन ऑर्डर बंद हैं: सब्सक्रिप्शन बाकी';
+
+  @override
+  String subscriptionPausedBody(String amount) {
+    return 'ऑर्डर फिर से चालू करने के लिए $amount भुगतान करें। ग्राहक अभी भी आपकी दुकान देख सकते हैं।';
+  }
+
+  @override
+  String get subscriptionPayButton => 'UPI से भुगतान करें';
+
+  @override
+  String get shopSuspendedBody =>
+      'यह दुकान अभी ऑनलाइन ऑर्डर नहीं ले रही है। कृपया दुकान को फ़ोन करें।';
 }

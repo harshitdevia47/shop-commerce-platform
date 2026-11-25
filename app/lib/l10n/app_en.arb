@@ -952,5 +952,36 @@
   "deleteAccountConfirm": "Delete",
   "deleteAccountDone": "Your account was deleted",
   "errorAccountOpenOrders": "You have an order on its way. You can delete your account after it is delivered or cancelled.",
-  "errorAccountDeleteTeam": "Team accounts are removed by the shop owner, and the owner account through support."
+  "errorAccountDeleteTeam": "Team accounts are removed by the shop owner, and the owner account through support.",
+  "subscriptionDueTitle": "App subscription due: {amount} since {date}",
+  "@subscriptionDueTitle": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionPayTo": "Please pay by UPI to {upi}.",
+  "@subscriptionPayTo": {
+    "placeholders": {
+      "upi": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionPayNoUpi": "Please pay to keep your app running. Message support if you need help.",
+  "subscriptionPausedTitle": "Online orders are paused: subscription unpaid",
+  "subscriptionPausedBody": "Pay {amount} to turn orders back on. Customers can still see your shop.",
+  "@subscriptionPausedBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionPayButton": "Pay by UPI",
+  "shopSuspendedBody": "This shop is not taking online orders right now. Please call the shop."
 }

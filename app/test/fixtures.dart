@@ -37,6 +37,7 @@ Map<String, dynamic> shopConfigJson({
   bool razorpay = false,
   Map<String, bool> features = const {},
   Map<String, dynamic>? ordering,
+  Map<String, dynamic>? subscription,
 }) => {
   'id': '01a206e8-75c7-71d8-b22b-d3223bce1039',
   'slug': 'sharma_kirana',
@@ -80,6 +81,7 @@ Map<String, dynamic> shopConfigJson({
   },
   'returns': {'windowDays': 7, 'allowExchange': true},
   'ordering': ?ordering,
+  'subscription': ?subscription,
   'catalog': {
     'variantStyle': 'units',
     'variantAxes': <String>[],

@@ -506,5 +506,12 @@
   "deleteAccountConfirm": "ડિલીટ કરો",
   "deleteAccountDone": "તમારું એકાઉન્ટ ડિલીટ થઈ ગયું",
   "errorAccountOpenOrders": "તમારો એક ઓર્ડર હજુ રસ્તામાં છે. તે પહોંચી જાય અથવા રદ થાય પછી તમે એકાઉન્ટ ડિલીટ કરી શકશો.",
-  "errorAccountDeleteTeam": "ટીમના એકાઉન્ટ દુકાનના માલિક કાઢે છે, અને માલિકનું એકાઉન્ટ સપોર્ટ દ્વારા બંધ થાય છે."
+  "errorAccountDeleteTeam": "ટીમના એકાઉન્ટ દુકાનના માલિક કાઢે છે, અને માલિકનું એકાઉન્ટ સપોર્ટ દ્વારા બંધ થાય છે.",
+  "subscriptionDueTitle": "ઍપનું લવાજમ બાકી: {amount}, {date} થી",
+  "subscriptionPayTo": "કૃપા કરી UPI થી {upi} પર ચૂકવો.",
+  "subscriptionPayNoUpi": "ઍપ ચાલુ રાખવા કૃપા કરી ચૂકવણી કરો. મદદ માટે સપોર્ટને મેસેજ કરો.",
+  "subscriptionPausedTitle": "ઑનલાઇન ઓર્ડર બંધ છે: લવાજમ બાકી",
+  "subscriptionPausedBody": "ઓર્ડર ફરી ચાલુ કરવા {amount} ચૂકવો. ગ્રાહકો હજુ પણ તમારી દુકાન જોઈ શકે છે.",
+  "subscriptionPayButton": "UPI થી ચૂકવો",
+  "shopSuspendedBody": "આ દુકાન હાલમાં ઑનલાઇન ઓર્ડર લેતી નથી. કૃપા કરી દુકાનને ફોન કરો."
 }
