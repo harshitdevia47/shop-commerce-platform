@@ -34,6 +34,7 @@ const config: RuntimeConfig = {
   catalog: PRESETS.grocery.catalog,
   returns: { windowDays: 7, allowExchange: true },
   ordering: { paused: false },
+  subscription: { state: 'ok' },
 } as RuntimeConfig;
 
 let devices: PushTarget[];

@@ -1,5 +1,5 @@
 import { Errors, handler, requireAdmin, requireRole, requireShop } from '@qc/common';
-import { SLUG_PATTERN } from '@qc/config-schema';
+import { SLUG_PATTERN, safeParseClientConfig, subscriptionStateSchema } from '@qc/config-schema';
 import { Router } from 'express';
 import { z } from 'zod';
 import { ownerSettingsPatchSchema, type ShopsService } from './shops.service.js';
@@ -28,6 +28,27 @@ export function shopsRouter(shops: ShopsService): Router {
     '/internal/shop/config',
     requireShop,
     handler({}, () => shops.getCurrentConfig()),
+  );
+
+  // Internal (platform service only): all shops, subscription state, and shop setup from client.json.
+  router.get('/internal/platform/shops', handler({}, () => shops.listForPlatform()));
+  router.put(
+    '/internal/platform/shops/:id/subscription',
+    handler({ params: z.object({ id: z.uuid() }), body: subscriptionStateSchema }, async ({ params, body }, _req, res) => {
+      await shops.setSubscription(params.id, body);
+      res.status(204).end();
+    }),
+  );
+  router.post(
+    '/internal/platform/shops/sync',
+    handler({}, async (_input, req) => {
+      const parsed = safeParseClientConfig(req.body);
+      if (!parsed.success) {
+        throw Errors.badRequest('CLIENT_CONFIG_INVALID', 'client.json is not valid', z.prettifyError(parsed.error));
+      }
+      const shop = await shops.upsertFromClientConfig(parsed.data);
+      return { id: shop.id, slug: shop.slug, created: shop.created };
+    }),
   );
 
   // Internal: gateway resolves X-Shop-Key -> shop id.

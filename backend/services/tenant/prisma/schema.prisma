@@ -45,6 +45,8 @@ model Shop {
   returns      Json?
   /// Validated by @qc/config-schema orderingSchema (null = taking orders)
   ordering     Json?
+  /// Set only by the platform service (@qc/config-schema subscriptionStateSchema; null = ok)
+  subscription Json?
   /// Set when the owner edits settings in the app: client.json sync then leaves those settings alone
   settingsEditedAt DateTime? @map("settings_edited_at") @db.Timestamptz(3)
   isActive     Boolean      @default(true) @map("is_active")

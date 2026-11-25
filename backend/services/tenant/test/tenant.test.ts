@@ -9,6 +9,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createTenantApp } from '../src/app.js';
 import { createDb } from '../src/db.js';
 import { createShopsService, type ShopRef } from '../src/modules/shops/shops.service.js';
+import { Prisma } from '../src/generated/prisma/client.js';
 
 const secret = process.env.INTERNAL_HMAC_SECRET!;
 const { rawPrisma, db } = createDb(process.env.DATABASE_URL!);
@@ -196,6 +197,67 @@ describe('GET /api/v1/shop/config', () => {
   it('returns 404 for an unknown shop id', async () => {
     const res = await request(app).get('/api/v1/shop/config').set(as(randomUUID()));
     expect(res.status).toBe(404);
+  });
+});
+
+describe('platform: subscription state and shop list', () => {
+  afterAll(async () => {
+    await rawPrisma.shop.updateMany({ data: { subscription: Prisma.DbNull } });
+  });
+
+  it('defaults to ok; the platform sets it; the app config shows it', async () => {
+    const config = async () => (await request(app).get('/api/v1/shop/config').set(as(shopA.id))).body.data;
+    expect((await config()).subscription).toEqual({ state: 'ok' });
+
+    const state = { state: 'paused', amountPaise: 99900, dueDate: '2026-12-05', payTo: 'owner@okaxis' };
+    const put = await request(app).put(`/internal/platform/shops/${shopA.id}/subscription`).set(as()).send(state);
+    expect(put.status).toBe(204);
+    expect((await config()).subscription).toEqual(state);
+    expect((await request(app).get('/api/v1/shop/config').set(as(shopB.id))).body.data.subscription).toEqual({ state: 'ok' });
+  });
+
+  it('rejects bad states and unknown shops', async () => {
+    expect((await request(app).put(`/internal/platform/shops/${shopA.id}/subscription`).set(as()).send({ state: 'gone' })).status).toBe(400);
+    expect((await request(app).put(`/internal/platform/shops/${randomUUID()}/subscription`).set(as()).send({ state: 'ok' })).status).toBe(404);
+  });
+
+  it('the owner cannot change it, and client.json sync keeps it', async () => {
+    await request(app).put(`/internal/platform/shops/${shopA.id}/subscription`).set(as()).send({ state: 'paused' }).expect(204);
+    const owner = signInternalHeaders({ requestId: randomUUID(), shopId: shopA.id, userId: randomUUID(), role: 'OWNER' }, secret);
+    const patch = await request(app).patch('/api/v1/admin/settings').set(owner).send({ subscription: { state: 'ok' } });
+    expect(patch.body.error.code).toBe('VALIDATION_FAILED');
+    await shops.upsertFromClientConfig(loadClient('sharma_kirana'), { resetSettings: true });
+    expect((await request(app).get('/internal/shop/config').set(as(shopA.id))).body.data.subscription).toEqual({ state: 'paused' });
+  });
+
+  it('lists every shop for the platform', async () => {
+    const res = await request(app).get('/internal/platform/shops').set(as());
+    const slugs = res.body.data.map((s: { slug: string }) => s.slug);
+    expect(slugs).toEqual(expect.arrayContaining(['sharma_kirana', 'style_hub']));
+    expect(res.body.data.find((s: { slug: string }) => s.slug === 'sharma_kirana')).toMatchObject({
+      id: shopA.id,
+      name: expect.any(String),
+      businessType: 'grocery',
+      isActive: true,
+      contact: { phone: expect.any(String) },
+      createdAt: expect.any(String),
+    });
+  });
+
+  it('syncs a client.json sent by the platform (create, then update)', async () => {
+    const json = { ...JSON.parse(readFileSync(join(clientsDir, 'sharma_kirana', 'client.json'), 'utf8')), slug: 'platform_sync_test' };
+    json.build = { ...json.build, androidPackage: 'in.qcommerce.platformsynctest' };
+    try {
+      const first = await request(app).post('/internal/platform/shops/sync').set(as()).send(json);
+      expect(first.status).toBe(200);
+      expect(first.body.data).toMatchObject({ slug: 'platform_sync_test', created: true });
+      const again = await request(app).post('/internal/platform/shops/sync').set(as()).send(json);
+      expect(again.body.data).toMatchObject({ id: first.body.data.id, created: false });
+      const bad = await request(app).post('/internal/platform/shops/sync').set(as()).send({ ...json, slug: 'Bad Slug' });
+      expect(bad.status).toBe(400);
+    } finally {
+      await rawPrisma.shop.deleteMany({ where: { slug: 'platform_sync_test' } });
+    }
   });
 });
 

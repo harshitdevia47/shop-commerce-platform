@@ -1,5 +1,5 @@
 import { AppError, Errors, requireShopId } from '@qc/common';
-import { runtimeConfigSchema, type ClientConfig, type RuntimeConfig } from '@qc/config-schema';
+import { runtimeConfigSchema, type ClientConfig, type RuntimeConfig, type SubscriptionState } from '@qc/config-schema';
 import { z } from 'zod';
 import type { Db } from '../../db.js';
 import { Prisma, type Shop } from '../../generated/prisma/client.js';
@@ -9,6 +9,16 @@ export interface ShopRef {
   id: string;
   slug: string;
   isActive: boolean;
+}
+
+export interface PlatformShop {
+  id: string;
+  slug: string;
+  name: string;
+  businessType: string;
+  contact: RuntimeConfig['shop']['contact'];
+  isActive: boolean;
+  createdAt: string;
 }
 
 export interface PublicShopConfig extends RuntimeConfig {
@@ -33,6 +43,7 @@ function toRuntimeConfig(shop: Shop): RuntimeConfig {
     catalog: shop.catalog,
     ...(shop.returns ? { returns: shop.returns } : {}),
     ...(shop.ordering ? { ordering: shop.ordering } : {}),
+    ...(shop.subscription ? { subscription: shop.subscription } : {}),
   });
 }
 
@@ -180,7 +191,27 @@ export function createShopsService(db: Db, now: () => Date = () => new Date()) {
      * Once the owner has edited settings in the app, client.json only updates the shop name,
      * business type and catalog shape, unless `resetSettings` (the platform overwrites everything).
      */
-    async upsertFromClientConfig(config: ClientConfig, options: { resetSettings?: boolean } = {}): Promise<ShopRef & { keptOwnerSettings: boolean }> {
+    /** Platform: every shop with its basics (the platform service tracks subscriptions per shop). */
+    async listForPlatform(): Promise<PlatformShop[]> {
+      const rows = await db.shop.findMany({ orderBy: { createdAt: 'asc' } });
+      return rows.map((s) => ({
+        id: s.id,
+        slug: s.slug,
+        name: s.name,
+        businessType: s.businessType,
+        contact: s.contact as RuntimeConfig['shop']['contact'],
+        isActive: s.isActive,
+        createdAt: s.createdAt.toISOString(),
+      }));
+    },
+
+    /** Platform: set the subscription state the apps and the order service see. */
+    async setSubscription(shopId: string, state: SubscriptionState): Promise<void> {
+      const result = await db.shop.updateMany({ where: { id: shopId }, data: { subscription: state as Prisma.InputJsonValue } });
+      if (result.count === 0) throw Errors.notFound('SHOP_NOT_FOUND', 'Shop not found');
+    },
+
+    async upsertFromClientConfig(config: ClientConfig, options: { resetSettings?: boolean } = {}): Promise<ShopRef & { keptOwnerSettings: boolean; created: boolean }> {
       const columns = toShopColumns(config);
       const existing = await db.shop.findUnique({ where: { slug: config.slug }, select: { settingsEditedAt: true } });
       const keep = !!existing?.settingsEditedAt && !options.resetSettings;
@@ -200,7 +231,7 @@ export function createShopsService(db: Db, now: () => Date = () => new Date()) {
         update,
         select: { id: true, slug: true, isActive: true },
       });
-      return { ...shop, keptOwnerSettings: keep };
+      return { ...shop, keptOwnerSettings: keep, created: !existing };
     },
   };
 }

@@ -52,5 +52,6 @@ export function toRuntimeConfig(config: ClientConfig): RuntimeConfig {
     catalog: config.catalog,
     returns: config.returns,
     ordering: { paused: false },
+    subscription: { state: 'ok' },
   };
 }

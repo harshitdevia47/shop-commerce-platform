@@ -151,6 +151,21 @@ export const orderingSchema = z
   })
   .strict();
 
+/**
+ * Subscription state set ONLY by the platform service (the shop pays the platform monthly).
+ * `due`: owner sees a reminder; `paused`: the platform stopped new orders until paid. Runtime only.
+ */
+export const subscriptionStateSchema = z
+  .object({
+    state: z.enum(['ok', 'due', 'paused']),
+    amountPaise: z.number().int().nonnegative().optional(),
+    /** YYYY-MM-DD (shop time). */
+    dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+    /** Platform owner's UPI ID the shop pays to. */
+    payTo: z.string().trim().min(3).max(100).optional(),
+  })
+  .strict();
+
 export const paymentsSchema = z
   .object({
     cod: z.boolean(),
@@ -254,6 +269,7 @@ export const runtimeConfigSchema = z
     catalog: catalogSchema,
     returns: returnsSchema.default(DEFAULT_RETURNS),
     ordering: orderingSchema.default({ paused: false }),
+    subscription: subscriptionStateSchema.default({ state: 'ok' }),
   })
   .strict()
   .superRefine(checkCrossSectionRules);
@@ -284,4 +300,5 @@ export type CatalogConfig = z.infer<typeof catalogSchema>;
 export type SlotsConfig = z.infer<typeof slotsSchema>;
 export type ReturnsConfig = z.infer<typeof returnsSchema>;
 export type OrderingConfig = z.infer<typeof orderingSchema>;
+export type SubscriptionState = z.infer<typeof subscriptionStateSchema>;
 export type ShopInfo = z.infer<typeof shopSchema>;

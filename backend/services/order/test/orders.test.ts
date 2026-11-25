@@ -198,6 +198,7 @@ beforeEach(async () => {
     catalog: PRESETS.grocery.catalog,
     returns: { windowDays: 7, allowExchange: true },
     ordering: { paused: false },
+    subscription: { state: 'ok' },
   });
   configs = { [SHOP_A]: base(SHOP_A), [SHOP_B]: base(SHOP_B) };
   addresses = {
