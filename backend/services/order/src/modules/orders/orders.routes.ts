@@ -115,6 +115,13 @@ export function ordersRouter(orders: OrdersService): Router {
     ),
   );
 
+  // Internal only (identity, before deleting an account): orders of this customer still in progress.
+  router.get(
+    '/internal/orders/customers/:userId/open-count',
+    requireShop,
+    handler({ params: z.object({ userId: z.uuid() }) }, async ({ params }) => ({ count: await orders.openCountFor(params.userId) })),
+  );
+
   // Internal only (catalog/payment sweepers). The gateway never routes /internal.
   router.post(
     '/internal/orders/existing',

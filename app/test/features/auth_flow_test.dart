@@ -170,4 +170,51 @@ void main() {
     expect(find.text('Welcome to Sharma Kirana'), findsOneWidget); // back to browsing as a guest
     expect(find.byIcon(Icons.login), findsOneWidget);
   });
+
+  Future<void> openDelete(WidgetTester tester) async {
+    await tester.tap(find.byKey(const Key('accountButton')));
+    await tester.pumpAndSettle();
+    final button = find.byKey(const Key('deleteAccountButton'));
+    await tester.ensureVisible(button);
+    await tester.pumpAndSettle();
+    await tester.tap(button);
+    await tester.pumpAndSettle();
+    expect(find.text('Delete your account?'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('confirmDeleteAccount')));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('customer deletes the account after confirming', (tester) async {
+    final api = FakeAuthApi();
+    final store = InMemorySessionStore();
+    await pumpApp(tester, api: api, store: store);
+    await loginWithPhone(tester);
+    await openDelete(tester);
+
+    expect(api.deletions, 1);
+    expect(store.session, isNull);
+    expect(find.text('Your account was deleted'), findsOneWidget);
+    expect(find.text('Welcome to Sharma Kirana'), findsOneWidget);
+  });
+
+  testWidgets('deletion refused while an order is on its way keeps the session', (tester) async {
+    final api = FakeAuthApi()..deleteError = 'ACCOUNT_HAS_OPEN_ORDERS';
+    final store = InMemorySessionStore();
+    await pumpApp(tester, api: api, store: store);
+    await loginWithPhone(tester);
+    await openDelete(tester);
+
+    expect(store.session, isNotNull);
+    expect(find.textContaining('You have an order on its way'), findsOneWidget);
+  });
+
+  testWidgets('owners see no delete button', (tester) async {
+    final api = FakeAuthApi(role: UserRole.owner);
+    await pumpApp(tester, api: api, store: InMemorySessionStore());
+    await loginWithPhone(tester);
+    await tester.tap(find.byIcon(Icons.account_circle_outlined));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('logoutButton')), findsOneWidget);
+    expect(find.byKey(const Key('deleteAccountButton')), findsNothing);
+  });
 }

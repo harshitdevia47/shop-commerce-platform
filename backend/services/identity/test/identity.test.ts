@@ -34,6 +34,8 @@ class CapturingSms implements SmsProvider {
 }
 
 let clock: Date;
+/** Unfinished orders per user, as the order service would answer. */
+let openOrders: Map<string, number>;
 let sms: CapturingSms;
 let app: Express;
 let publicKeyPem: string;
@@ -58,6 +60,7 @@ async function build(devEcho = false): Promise<Express> {
     logger: createLogger('identity-test', 'silent'),
     internalSecret: SECRET,
     sms,
+    orders: { countFor: async (userId) => openOrders.get(userId) ?? 0 },
     limits: new MemoryRateLimitStore(() => clock.getTime()),
     otpSecret: 'test-otp-secret-test-otp-secret-0123456789',
     otpDevEcho: devEcho,
@@ -90,6 +93,7 @@ beforeAll(async () => {
 beforeEach(async () => {
   clock = new Date('2026-11-23T10:00:00Z');
   sms = new CapturingSms();
+  openOrders = new Map();
   app = await build();
   await rawPrisma.refreshToken.deleteMany();
   await rawPrisma.otpChallenge.deleteMany();
@@ -545,6 +549,67 @@ describe('team (owner manages staff and riders)', () => {
     const other = await owner(SHOP_B);
     expect((await request(app).delete(`/api/v1/admin/team/${rider.id}`).set(other.headers())).status).toBe(404);
     expect((await request(app).get('/api/v1/admin/team').set(other.headers())).body.data).toHaveLength(1);
+  });
+});
+
+describe('deleting my account', () => {
+  const home = { line1: '12 Station Road', city: 'Bhavnagar', pincode: '364001' };
+  const TOKEN = 'fcm-token-'.padEnd(40, 'd');
+
+  it('removes phone, name, addresses, devices and sessions; the phone starts fresh next time', async () => {
+    const session = await login();
+    const me = () => as(SHOP_A, { userId: session.user.id, role: 'CUSTOMER' });
+    await request(app).patch('/api/v1/me').set(me()).send({ name: 'Asha' }).expect(200);
+    await request(app).post('/api/v1/me/addresses').set(me()).send(home).expect(201);
+    await request(app).put('/api/v1/me/devices').set(me()).send({ token: TOKEN, platform: 'android', locale: 'gu' }).expect(204);
+
+    const res = await request(app).delete('/api/v1/me').set(me());
+    expect(res.status).toBe(200);
+    expect(res.body.data).toEqual({ deleted: true });
+
+    const row = await rawPrisma.user.findUniqueOrThrow({ where: { id: session.user.id } });
+    expect(row).toMatchObject({ phone: `deleted:${session.user.id}`, name: null, isBlocked: true });
+    expect(row.deletedAt).not.toBeNull();
+    expect(await rawPrisma.address.count({ where: { userId: session.user.id } })).toBe(0);
+    expect(await rawPrisma.device.count({ where: { userId: session.user.id } })).toBe(0);
+    expect(await rawPrisma.refreshToken.count({ where: { userId: session.user.id } })).toBe(0);
+
+    expect((await request(app).get('/api/v1/me').set(me())).status).toBe(404);
+    expect((await request(app).get(`/internal/users/${session.user.id}/checkout`).set(as(SHOP_A))).status).toBe(404);
+    expect((await request(app).post('/api/v1/auth/refresh').set(as(SHOP_A)).send({ refreshToken: session.refreshToken })).status).toBe(401);
+
+    clock = new Date(clock.getTime() + 60_000);
+    const again = await login();
+    expect(again.isNewUser).toBe(true);
+    expect(again.user.id).not.toBe(session.user.id);
+  });
+
+  it('waits for orders in progress', async () => {
+    const session = await login();
+    openOrders.set(session.user.id, 1);
+    const res = await request(app).delete('/api/v1/me').set(as(SHOP_A, { userId: session.user.id, role: 'CUSTOMER' }));
+    expect(res.status).toBe(409);
+    expect(res.body.error.code).toBe('ACCOUNT_HAS_OPEN_ORDERS');
+    expect((await rawPrisma.user.findUniqueOrThrow({ where: { id: session.user.id } })).deletedAt).toBeNull();
+  });
+
+  it('owner and team accounts cannot delete themselves', async () => {
+    const session = await login();
+    for (const [role, code] of [
+      ['OWNER', 'ACCOUNT_DELETE_OWNER'],
+      ['RIDER', 'ACCOUNT_DELETE_TEAM'],
+    ] as const) {
+      await rawPrisma.user.update({ where: { id: session.user.id }, data: { role } });
+      const res = await request(app).delete('/api/v1/me').set(as(SHOP_A, { userId: session.user.id, role }));
+      expect(res.body.error.code).toBe(code);
+    }
+  });
+
+  it("cannot delete another shop's user", async () => {
+    const session = await login();
+    const res = await request(app).delete('/api/v1/me').set(as(SHOP_B, { userId: session.user.id, role: 'CUSTOMER' }));
+    expect(res.status).toBe(404);
+    expect((await rawPrisma.user.findUniqueOrThrow({ where: { id: session.user.id } })).deletedAt).toBeNull();
   });
 });
 

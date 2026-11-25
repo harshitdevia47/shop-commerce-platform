@@ -503,6 +503,9 @@ export function createOrdersService({
       return rows.map((r) => r.id);
     },
 
+    /** Orders of a customer that are not finished yet (delivered, picked up, cancelled or rejected). */
+    openCountFor: (customerId: string) => db.order.count({ where: { customerId, status: { notIn: [...DONE] } } }),
+
     getMine: async (id: string) => toOrderView(await find(id, true)),
     getForShop: async (id: string) => toOrderView(await find(id, false)),
 

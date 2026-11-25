@@ -1690,4 +1690,28 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get legalAgree => 'आगे बढ़कर आप इनसे सहमत हैं:';
+
+  @override
+  String get deleteAccount => 'मेरा अकाउंट डिलीट करें';
+
+  @override
+  String get deleteAccountTitle => 'अपना अकाउंट डिलीट करें?';
+
+  @override
+  String get deleteAccountBody =>
+      'आपका फ़ोन नंबर, नाम और सेव किए गए पते हटा दिए जाएंगे और आप लॉग आउट हो जाएंगे। पुराने ऑर्डर दुकान के हिसाब के लिए दुकान के पास रहेंगे। यह वापस नहीं हो सकता।';
+
+  @override
+  String get deleteAccountConfirm => 'डिलीट करें';
+
+  @override
+  String get deleteAccountDone => 'आपका अकाउंट डिलीट हो गया';
+
+  @override
+  String get errorAccountOpenOrders =>
+      'आपका एक ऑर्डर अभी रास्ते में है। उसके डिलीवर या रद्द होने के बाद आप अकाउंट डिलीट कर सकते हैं।';
+
+  @override
+  String get errorAccountDeleteTeam =>
+      'टीम के अकाउंट दुकान के मालिक हटाते हैं, और मालिक का अकाउंट सपोर्ट से बंद होता है।';
 }

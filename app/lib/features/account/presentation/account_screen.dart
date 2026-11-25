@@ -9,7 +9,7 @@ import '../../../core/widgets/language_menu.dart';
 import '../../auth/domain/auth_models.dart';
 import '../../auth/presentation/auth_controller.dart';
 
-/// Profile: name, language, logout. Shared by every role.
+/// Profile: name, language, logout, and (customers) account deletion. Shared by every role.
 class AccountScreen extends ConsumerStatefulWidget {
   const AccountScreen({super.key});
 
@@ -46,6 +46,37 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       messenger.showSnackBar(SnackBar(content: Text(errorMessage(l10n, error))));
     } finally {
       if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  Future<void> _deleteAccount() async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final error = Theme.of(context).colorScheme.error;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.deleteAccountTitle),
+        content: Text(l10n.deleteAccountBody),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.cancel)),
+          TextButton(
+            key: const Key('confirmDeleteAccount'),
+            style: TextButton.styleFrom(foregroundColor: error),
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.deleteAccountConfirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _saving = true);
+    try {
+      await ref.read(authControllerProvider.notifier).deleteAccount();
+      messenger.showSnackBar(SnackBar(content: Text(l10n.deleteAccountDone)));
+    } on Object catch (e) {
+      if (mounted) setState(() => _saving = false);
+      messenger.showSnackBar(SnackBar(content: Text(errorMessage(l10n, e)), duration: const Duration(seconds: 6)));
     }
   }
 
@@ -94,6 +125,18 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           ),
           const SizedBox(height: 16),
           const LegalLinks(),
+          if (user.role == UserRole.customer) ...[
+            const SizedBox(height: 24),
+            Center(
+              child: TextButton.icon(
+                key: const Key('deleteAccountButton'),
+                style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
+                onPressed: _saving ? null : _deleteAccount,
+                icon: const Icon(Icons.delete_outline),
+                label: Text(l10n.deleteAccount),
+              ),
+            ),
+          ],
         ],
       ),
     );

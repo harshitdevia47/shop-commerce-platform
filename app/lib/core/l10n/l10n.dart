@@ -105,6 +105,8 @@ String errorMessage(AppLocalizations l10n, Object error) {
     'OTP_RESEND_TOO_SOON' => l10n.errorOtpTooSoon,
     'OTP_TOO_MANY_REQUESTS' || 'RATE_LIMITED' => l10n.errorOtpTooManyRequests,
     'USER_BLOCKED' => l10n.errorUserBlocked,
+    'ACCOUNT_HAS_OPEN_ORDERS' => l10n.errorAccountOpenOrders,
+    'ACCOUNT_DELETE_OWNER' || 'ACCOUNT_DELETE_TEAM' => l10n.errorAccountDeleteTeam,
     'SMS_SEND_FAILED' => l10n.errorSmsFailed,
     'REFRESH_TOKEN_INVALID' || 'REFRESH_TOKEN_EXPIRED' || 'REFRESH_TOKEN_REUSED' => l10n.sessionExpired,
     'PRODUCT_INVALID_VARIANTS' => l10n.errorInvalidVariants,

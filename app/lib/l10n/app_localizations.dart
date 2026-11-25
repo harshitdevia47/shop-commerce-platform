@@ -3099,6 +3099,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'By continuing you agree to the'**
   String get legalAgree;
+
+  /// No description provided for @deleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete my account'**
+  String get deleteAccount;
+
+  /// No description provided for @deleteAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete your account?'**
+  String get deleteAccountTitle;
+
+  /// No description provided for @deleteAccountBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your phone number, name and saved addresses will be removed and you will be logged out. Past orders stay with the shop for its accounts. This cannot be undone.'**
+  String get deleteAccountBody;
+
+  /// No description provided for @deleteAccountConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteAccountConfirm;
+
+  /// No description provided for @deleteAccountDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account was deleted'**
+  String get deleteAccountDone;
+
+  /// No description provided for @errorAccountOpenOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'You have an order on its way. You can delete your account after it is delivered or cancelled.'**
+  String get errorAccountOpenOrders;
+
+  /// No description provided for @errorAccountDeleteTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Team accounts are removed by the shop owner, and the owner account through support.'**
+  String get errorAccountDeleteTeam;
 }
 
 class _AppLocalizationsDelegate

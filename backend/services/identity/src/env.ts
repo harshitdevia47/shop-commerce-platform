@@ -29,6 +29,8 @@ const envSchema = z
     WHATSAPP_API_VERSION: z.string().regex(/^v\d+\.\d+$/).default('v21.0'),
     /** Dev only: include the OTP in the API response so emulators can log in without SMS. */
     OTP_DEV_ECHO: booleanString,
+    /** Order service (open orders block account deletion). */
+    ORDER_URL: z.string().url(),
     /** Used by scripts/users.ts to resolve shop slugs. */
     TENANT_URL: z.string().url().optional(),
   })

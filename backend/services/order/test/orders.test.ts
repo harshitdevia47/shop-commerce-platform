@@ -559,6 +559,19 @@ describe('internal: existing orders', () => {
   });
 });
 
+describe('internal: open orders of a customer', () => {
+  it('counts unfinished orders, in the caller shop only', async () => {
+    const count = async (shopId = SHOP_A) =>
+      (await request(app).get(`/internal/orders/customers/${ALICE}/open-count`).set(sign(shopId))).body.data.count;
+    expect(await count()).toBe(0);
+    const { id } = (await place()).body.data.order;
+    expect(await count()).toBe(1);
+    expect(await count(SHOP_B)).toBe(0);
+    await request(app).post(`/api/v1/orders/${id}/cancel`).set(alice()).send({}).expect(200);
+    expect(await count()).toBe(0);
+  });
+});
+
 describe('delivery slots', () => {
   const useSlots = (capacityPerSlot = 10) => {
     configs[SHOP_A]!.features.deliverySlots = true;

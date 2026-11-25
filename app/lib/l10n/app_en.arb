@@ -945,5 +945,12 @@
   },
   "privacyPolicy": "Privacy policy",
   "termsOfUse": "Terms of use",
-  "legalAgree": "By continuing you agree to the"
+  "legalAgree": "By continuing you agree to the",
+  "deleteAccount": "Delete my account",
+  "deleteAccountTitle": "Delete your account?",
+  "deleteAccountBody": "Your phone number, name and saved addresses will be removed and you will be logged out. Past orders stay with the shop for its accounts. This cannot be undone.",
+  "deleteAccountConfirm": "Delete",
+  "deleteAccountDone": "Your account was deleted",
+  "errorAccountOpenOrders": "You have an order on its way. You can delete your account after it is delivered or cancelled.",
+  "errorAccountDeleteTeam": "Team accounts are removed by the shop owner, and the owner account through support."
 }

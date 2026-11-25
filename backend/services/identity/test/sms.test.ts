@@ -74,6 +74,7 @@ describe('SMS settings', () => {
   const base = {
     DATABASE_URL: 'postgresql://x/y',
     REDIS_URL: 'redis://x',
+    ORDER_URL: 'http://order:3000',
     INTERNAL_HMAC_SECRET: 'x'.repeat(40),
     OTP_SECRET: 'y'.repeat(40),
     JWT_PRIVATE_KEY: '-----BEGIN PRIVATE KEY-----\nabc\n-----END PRIVATE KEY-----',

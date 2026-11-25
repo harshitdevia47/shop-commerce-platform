@@ -251,5 +251,17 @@ class FakeAuthApi implements AuthApi {
   @override
   Future<AppUser> updateMe({String? name, String? locale}) async =>
       profile = AppUser(id: profile!.id, phone: profile!.phone, role: profile!.role, name: name ?? profile!.name);
+
+  int deletions = 0;
+
+  /// Set to make the next delete fail with this error code.
+  String? deleteError;
+
+  @override
+  Future<void> deleteMe() async {
+    if (deleteError case final code?) throw ApiException(code, 'refused', statusCode: 409);
+    deletions++;
+    profile = null;
+  }
 }
 

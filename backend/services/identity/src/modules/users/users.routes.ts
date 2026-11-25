@@ -2,9 +2,9 @@ import { LOCALES } from '@qc/config-schema';
 import { getContext, handler, requireUser } from '@qc/common';
 import { Router } from 'express';
 import { z } from 'zod';
-import { toPublicUser, type UsersService } from './users.service.js';
+import { toPublicUser, type OpenOrders, type UsersService } from './users.service.js';
 
-export function usersRouter(users: UsersService): Router {
+export function usersRouter(users: UsersService, orders: OpenOrders): Router {
   const router = Router();
   router.use('/api/v1/me', requireUser);
 
@@ -27,6 +27,14 @@ export function usersRouter(users: UsersService): Router {
       },
       async ({ body }) => toPublicUser(await users.updateProfile(getContext()!.userId!, body)),
     ),
+  );
+
+  router.delete(
+    '/api/v1/me',
+    handler({}, async () => {
+      await users.deleteAccount(getContext()!.userId!, orders);
+      return { deleted: true };
+    }),
   );
 
   return router;

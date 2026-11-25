@@ -11,7 +11,7 @@ import { createTokenService } from './modules/auth/token.service.js';
 import { teamRouter } from './modules/team/team.routes.js';
 import { createTeamService } from './modules/team/team.service.js';
 import { usersRouter } from './modules/users/users.routes.js';
-import { createUsersService } from './modules/users/users.service.js';
+import { createUsersService, type OpenOrders } from './modules/users/users.service.js';
 import type { SmsProvider } from './sms/sms-provider.js';
 
 export interface IdentityAppDeps {
@@ -19,6 +19,8 @@ export interface IdentityAppDeps {
   logger: Logger;
   internalSecret: string;
   sms: SmsProvider;
+  /** Order service: unfinished orders block account deletion. */
+  orders: OpenOrders;
   limits: RateLimitStore;
   otpSecret: string;
   otpDevEcho: boolean;
@@ -48,7 +50,7 @@ export async function createIdentityApp(deps: IdentityAppDeps): Promise<Express>
   app.use(devicesRouter(devices));
   app.use(teamRouter(createTeamService(db, tokens)));
   app.use(addressesRouter(createAddressesService(db, now), users));
-  app.use(usersRouter(users));
+  app.use(usersRouter(users, deps.orders));
 
   finalizeApp(app, logger);
   return app;

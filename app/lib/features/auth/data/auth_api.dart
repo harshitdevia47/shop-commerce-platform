@@ -15,6 +15,9 @@ abstract interface class AuthApi {
   /// Registers this phone's push token (notifications are written in [locale]).
   Future<void> registerDevice({required String token, required String locale});
   Future<AppUser> updateMe({String? name, String? locale});
+
+  /// Deletes the signed-in customer's account (server refuses while an order is in progress).
+  Future<void> deleteMe();
 }
 
 /// `POST /auth/refresh` on a Dio without the auth interceptor. Top-level so the authenticated
@@ -66,4 +69,9 @@ class HttpAuthApi implements AuthApi {
   Future<AppUser> updateMe({String? name, String? locale}) async => AppUser.fromJson(
     await unwrap<Map<String, dynamic>>(_authed.patch<dynamic>('/api/v1/me', data: {'name': ?name, 'locale': ?locale})),
   );
+
+  @override
+  Future<void> deleteMe() async {
+    await unwrap<Map<String, dynamic>>(_authed.delete<dynamic>('/api/v1/me'));
+  }
 }

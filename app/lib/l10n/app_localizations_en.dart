@@ -1694,4 +1694,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get legalAgree => 'By continuing you agree to the';
+
+  @override
+  String get deleteAccount => 'Delete my account';
+
+  @override
+  String get deleteAccountTitle => 'Delete your account?';
+
+  @override
+  String get deleteAccountBody =>
+      'Your phone number, name and saved addresses will be removed and you will be logged out. Past orders stay with the shop for its accounts. This cannot be undone.';
+
+  @override
+  String get deleteAccountConfirm => 'Delete';
+
+  @override
+  String get deleteAccountDone => 'Your account was deleted';
+
+  @override
+  String get errorAccountOpenOrders =>
+      'You have an order on its way. You can delete your account after it is delivered or cancelled.';
+
+  @override
+  String get errorAccountDeleteTeam =>
+      'Team accounts are removed by the shop owner, and the owner account through support.';
 }

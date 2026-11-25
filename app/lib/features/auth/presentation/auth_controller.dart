@@ -65,6 +65,14 @@ class AuthController extends AsyncNotifier<AppUser?> {
     }
   }
 
+  /// Deletes the account on the server, then forgets the session on this phone (the server has
+  /// already removed its sessions and push tokens). Throws [ApiException] when refused.
+  Future<void> deleteAccount() async {
+    await ref.read(authApiProvider).deleteMe();
+    await ref.read(sessionStoreProvider).clear();
+    state = const AsyncData(null);
+  }
+
   /// Called by [AuthInterceptor] after a silent refresh (role may have changed).
   void sessionRefreshed(AuthSession session) {
     if (state.value != session.user) state = AsyncData(session.user);

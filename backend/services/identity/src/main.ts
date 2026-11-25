@@ -1,4 +1,4 @@
-import { RedisRateLimitStore, createLogger } from '@qc/common';
+import { RedisRateLimitStore, createInternalClient, createLogger } from '@qc/common';
 import { Redis } from 'ioredis';
 import { createIdentityApp } from './app.js';
 import { createDb } from './db.js';
@@ -14,9 +14,15 @@ redis.on('error', (err) => logger.warn({ err }, 'redis error'));
 
 if (env.OTP_DEV_ECHO) logger.warn('OTP_DEV_ECHO is on: OTP codes are returned in API responses (development only)');
 
+const orderClient = createInternalClient({ baseUrl: env.ORDER_URL, secret: env.INTERNAL_HMAC_SECRET, caller: 'identity' });
+
 const app = await createIdentityApp({
   db,
   logger,
+  orders: {
+    countFor: async (userId) =>
+      (await orderClient.get<{ count: number }>(`/internal/orders/customers/${encodeURIComponent(userId)}/open-count`)).count,
+  },
   internalSecret: env.INTERNAL_HMAC_SECRET,
   sms: createSmsProvider(
     env.SMS_PROVIDER === 'msg91'

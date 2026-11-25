@@ -126,8 +126,8 @@ happens with your orders; the operator keeps the service running and handles dat
 
 <h2>How long it is kept</h2>
 <ul>
-  <li>Your account and addresses: until you delete your account.</li>
-  <li>Orders and payment records: as long as the shop needs them for its accounts and as long as tax and accounting law requires, even after the account is deleted. Your name and phone number are removed from them where the law allows.</li>
+  <li>Your account and addresses: until you delete your account. Deleting it removes your phone number, name, saved addresses and the app's sessions and notification tokens straight away.</li>
+  <li>Orders and payment records: as long as the shop needs them for its accounts and as long as tax and accounting law requires, even after the account is deleted. These keep the name, phone number and address written on each order, like a paper bill.</li>
   <li>Login codes expire after 5 minutes. Technical logs are kept for a short time. Backups are overwritten within about two weeks.</li>
 </ul>
 
@@ -139,7 +139,7 @@ perfectly secure, but we work to protect your information and will inform you as
 <h2>Your choices and rights</h2>
 <ul>
   <li><strong>See and correct</strong> your name and addresses in the app (Account).</li>
-  <li><strong>Delete your account</strong>: from the app (Account), or by asking the shop or the operator using the contacts below. We confirm the deletion; order records are kept as described above.</li>
+  <li><strong>Delete your account</strong>: in the app, Account → Delete my account (possible once no order is still on its way), or by asking the shop or the operator using the contacts below. Order records are kept as described above.</li>
   <li><strong>Turn off notifications</strong> in your phone's settings.</li>
   <li>Ask questions or complain about how your information is handled using the contacts below. Under India's Digital Personal Data Protection Act, 2023 you may also approach the Data Protection Board of India.</li>
 </ul>
