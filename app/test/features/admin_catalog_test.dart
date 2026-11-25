@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:qc_app/app.dart';
@@ -107,7 +108,11 @@ final owner = AuthSession(
   user: const AppUser(id: 'o', phone: '+919876543210', role: UserRole.owner, name: 'Ramesh'),
 );
 
-Future<FakeAdminCatalog> pumpAdmin(WidgetTester tester, {Map<String, dynamic>? config}) async {
+Future<FakeAdminCatalog> pumpAdmin(
+  WidgetTester tester, {
+  Map<String, dynamic>? config,
+  List<Override> extraOverrides = const [],
+}) async {
   usePhoneScreen(tester);
   SharedPreferences.setMockInitialValues({});
   final prefs = await SharedPreferences.getInstance();
@@ -123,6 +128,7 @@ Future<FakeAdminCatalog> pumpAdmin(WidgetTester tester, {Map<String, dynamic>? c
         adminCatalogRepositoryProvider.overrideWithValue(admin),
         sessionStoreProvider.overrideWithValue(InMemorySessionStore(owner)),
         photoSourceProvider.overrideWithValue(({required camera}) async => '/tmp/photo.jpg'),
+        ...extraOverrides,
       ],
       child: const QcApp(),
     ),

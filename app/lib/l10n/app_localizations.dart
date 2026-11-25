@@ -2637,6 +2637,288 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter a number from {min} to {max}'**
   String settingsNumberRange(int min, int max);
+
+  /// No description provided for @importShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get importShort;
+
+  /// No description provided for @importTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from Excel'**
+  String get importTitle;
+
+  /// No description provided for @importEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Have a list of products in Excel? Add them all at once.'**
+  String get importEmptyHint;
+
+  /// No description provided for @importHowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add many products at once'**
+  String get importHowTitle;
+
+  /// No description provided for @importStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'Get the template and open it in Excel or Google Sheets (on the phone or a computer).'**
+  String get importStep1;
+
+  /// No description provided for @importStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill one row per size: category, name, size (like 1 kg), price, MRP, stock. Gujarati/Hindi names are optional.'**
+  String get importStep2;
+
+  /// No description provided for @importStep3.
+  ///
+  /// In en, this message translates to:
+  /// **'Save it as Excel (.xlsx) or CSV and choose it here. We check every row before anything is saved.'**
+  String get importStep3;
+
+  /// No description provided for @importRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Products already in your shop (same name) are updated, not added twice: new prices, stock and sizes. Empty stock = not counted (for new items) or unchanged (for existing ones).'**
+  String get importRules;
+
+  /// No description provided for @importGetTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Get the template'**
+  String get importGetTemplate;
+
+  /// No description provided for @importTemplateShareText.
+  ///
+  /// In en, this message translates to:
+  /// **'Product list template. Fill it in and import it in the shop app.'**
+  String get importTemplateShareText;
+
+  /// No description provided for @importPickFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Excel or CSV file'**
+  String get importPickFile;
+
+  /// No description provided for @importPickAnother.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose another file'**
+  String get importPickAnother;
+
+  /// No description provided for @importFile.
+  ///
+  /// In en, this message translates to:
+  /// **'File: {name}'**
+  String importFile(String name);
+
+  /// No description provided for @importWrongFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an Excel (.xlsx) or CSV file. Old .xls files: open in Excel and save as .xlsx.'**
+  String get importWrongFile;
+
+  /// No description provided for @importUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'This file could not be read. Save it again as .xlsx or CSV and try once more.'**
+  String get importUnreadable;
+
+  /// No description provided for @importColumnsMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'These columns are missing in the first row: {columns}. Use the template.'**
+  String importColumnsMissing(String columns);
+
+  /// No description provided for @importEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'The file has no products.'**
+  String get importEmpty;
+
+  /// No description provided for @importTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'At most 2000 rows per file. Split it into smaller files.'**
+  String get importTooLarge;
+
+  /// No description provided for @importFixRows.
+  ///
+  /// In en, this message translates to:
+  /// **'Some rows need fixing. See the list below.'**
+  String get importFixRows;
+
+  /// No description provided for @importReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to import {rows} rows'**
+  String importReady(int rows);
+
+  /// No description provided for @importNotReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix these rows first'**
+  String get importNotReady;
+
+  /// No description provided for @importNewProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'New products: {products} ({sizes} sizes)'**
+  String importNewProducts(int products, int sizes);
+
+  /// No description provided for @importUpdatedProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated products: {products} ({sizes} sizes)'**
+  String importUpdatedProducts(int products, int sizes);
+
+  /// No description provided for @importNewCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'New categories: {names}'**
+  String importNewCategories(String names);
+
+  /// No description provided for @importIgnoredColumns.
+  ///
+  /// In en, this message translates to:
+  /// **'Not imported (unknown columns): {names}'**
+  String importIgnoredColumns(String names);
+
+  /// No description provided for @importPhotosNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos are not in the file: add them later from each product.'**
+  String get importPhotosNote;
+
+  /// No description provided for @importConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Import {count} products'**
+  String importConfirm(int count);
+
+  /// No description provided for @importDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done: {added} added, {updated} updated'**
+  String importDone(int added, int updated);
+
+  /// No description provided for @importErrorsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} problems'**
+  String importErrorsTitle(int count);
+
+  /// No description provided for @importErrorsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix them in your file, save, and choose it again. Nothing has been saved yet.'**
+  String get importErrorsHint;
+
+  /// No description provided for @importRowLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Row {row}'**
+  String importRowLabel(int row);
+
+  /// No description provided for @importRowColumnLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Row {row} · column {column}'**
+  String importRowColumnLabel(int row, String column);
+
+  /// No description provided for @importMoreErrors.
+  ///
+  /// In en, this message translates to:
+  /// **'…and {count} more'**
+  String importMoreErrors(int count);
+
+  /// No description provided for @importErrNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Product name is empty'**
+  String get importErrNameRequired;
+
+  /// No description provided for @importErrNameTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Name is too long (max 120 letters)'**
+  String get importErrNameTooLong;
+
+  /// No description provided for @importErrPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Price must be a number like 120 or 120.50'**
+  String get importErrPrice;
+
+  /// No description provided for @importErrMrp.
+  ///
+  /// In en, this message translates to:
+  /// **'MRP must be a number like 150'**
+  String get importErrMrp;
+
+  /// No description provided for @importErrMrpBelow.
+  ///
+  /// In en, this message translates to:
+  /// **'MRP is lower than the price'**
+  String get importErrMrpBelow;
+
+  /// No description provided for @importErrStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock must be a whole number (0 or more)'**
+  String get importErrStock;
+
+  /// No description provided for @importErrSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Size is empty (like 1 kg, 500 g, 1 pack)'**
+  String get importErrSize;
+
+  /// No description provided for @importErrOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the option values (like size, colour)'**
+  String get importErrOption;
+
+  /// No description provided for @importErrDuplicateRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Same product and size appears twice'**
+  String get importErrDuplicateRow;
+
+  /// No description provided for @importErrDuplicateProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'This product appears more than once'**
+  String get importErrDuplicateProduct;
+
+  /// No description provided for @importErrTooManyVariants.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many sizes for one product (max 50)'**
+  String get importErrTooManyVariants;
+
+  /// No description provided for @importErrField.
+  ///
+  /// In en, this message translates to:
+  /// **'This value is not allowed here'**
+  String get importErrField;
+
+  /// No description provided for @importErrFieldRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'A required detail is missing'**
+  String get importErrFieldRequired;
+
+  /// No description provided for @importErrOther.
+  ///
+  /// In en, this message translates to:
+  /// **'This row has a problem'**
+  String get importErrOther;
 }
 
 class _AppLocalizationsDelegate

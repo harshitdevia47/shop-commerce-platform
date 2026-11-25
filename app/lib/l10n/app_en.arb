@@ -727,5 +727,155 @@
         "type": "int"
       }
     }
+  },
+  "importShort": "Import",
+  "importTitle": "Import from Excel",
+  "importEmptyHint": "Have a list of products in Excel? Add them all at once.",
+  "importHowTitle": "Add many products at once",
+  "importStep1": "Get the template and open it in Excel or Google Sheets (on the phone or a computer).",
+  "importStep2": "Fill one row per size: category, name, size (like 1 kg), price, MRP, stock. Gujarati/Hindi names are optional.",
+  "importStep3": "Save it as Excel (.xlsx) or CSV and choose it here. We check every row before anything is saved.",
+  "importRules": "Products already in your shop (same name) are updated, not added twice: new prices, stock and sizes. Empty stock = not counted (for new items) or unchanged (for existing ones).",
+  "importGetTemplate": "Get the template",
+  "importTemplateShareText": "Product list template. Fill it in and import it in the shop app.",
+  "importPickFile": "Choose Excel or CSV file",
+  "importPickAnother": "Choose another file",
+  "importFile": "File: {name}",
+  "importWrongFile": "Choose an Excel (.xlsx) or CSV file. Old .xls files: open in Excel and save as .xlsx.",
+  "importUnreadable": "This file could not be read. Save it again as .xlsx or CSV and try once more.",
+  "importColumnsMissing": "These columns are missing in the first row: {columns}. Use the template.",
+  "importEmpty": "The file has no products.",
+  "importTooLarge": "At most 2000 rows per file. Split it into smaller files.",
+  "importFixRows": "Some rows need fixing. See the list below.",
+  "importReady": "Ready to import {rows} rows",
+  "importNotReady": "Fix these rows first",
+  "importNewProducts": "New products: {products} ({sizes} sizes)",
+  "importUpdatedProducts": "Updated products: {products} ({sizes} sizes)",
+  "importNewCategories": "New categories: {names}",
+  "importIgnoredColumns": "Not imported (unknown columns): {names}",
+  "importPhotosNote": "Photos are not in the file: add them later from each product.",
+  "importConfirm": "Import {count} products",
+  "importDone": "Done: {added} added, {updated} updated",
+  "importErrorsTitle": "{count} problems",
+  "importErrorsHint": "Fix them in your file, save, and choose it again. Nothing has been saved yet.",
+  "importRowLabel": "Row {row}",
+  "importRowColumnLabel": "Row {row} · column {column}",
+  "importMoreErrors": "…and {count} more",
+  "importErrNameRequired": "Product name is empty",
+  "importErrNameTooLong": "Name is too long (max 120 letters)",
+  "importErrPrice": "Price must be a number like 120 or 120.50",
+  "importErrMrp": "MRP must be a number like 150",
+  "importErrMrpBelow": "MRP is lower than the price",
+  "importErrStock": "Stock must be a whole number (0 or more)",
+  "importErrSize": "Size is empty (like 1 kg, 500 g, 1 pack)",
+  "importErrOption": "Choose the option values (like size, colour)",
+  "importErrDuplicateRow": "Same product and size appears twice",
+  "importErrDuplicateProduct": "This product appears more than once",
+  "importErrTooManyVariants": "Too many sizes for one product (max 50)",
+  "importErrField": "This value is not allowed here",
+  "importErrFieldRequired": "A required detail is missing",
+  "importErrOther": "This row has a problem",
+  "@importFile": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@importColumnsMissing": {
+    "placeholders": {
+      "columns": {
+        "type": "String"
+      }
+    }
+  },
+  "@importReady": {
+    "placeholders": {
+      "rows": {
+        "type": "int"
+      }
+    }
+  },
+  "@importNewProducts": {
+    "placeholders": {
+      "products": {
+        "type": "int"
+      },
+      "sizes": {
+        "type": "int"
+      }
+    }
+  },
+  "@importUpdatedProducts": {
+    "placeholders": {
+      "products": {
+        "type": "int"
+      },
+      "sizes": {
+        "type": "int"
+      }
+    }
+  },
+  "@importNewCategories": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "@importIgnoredColumns": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "@importConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@importDone": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "updated": {
+        "type": "int"
+      }
+    }
+  },
+  "@importErrorsTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@importRowLabel": {
+    "placeholders": {
+      "row": {
+        "type": "int"
+      }
+    }
+  },
+  "@importRowColumnLabel": {
+    "placeholders": {
+      "row": {
+        "type": "int"
+      },
+      "column": {
+        "type": "String"
+      }
+    }
+  },
+  "@importMoreErrors": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

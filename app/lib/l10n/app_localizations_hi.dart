@@ -1404,4 +1404,183 @@ class AppLocalizationsHi extends AppLocalizations {
   String settingsNumberRange(int min, int max) {
     return '$min से $max के बीच की संख्या लिखें';
   }
+
+  @override
+  String get importShort => 'इम्पोर्ट';
+
+  @override
+  String get importTitle => 'Excel से जोड़ें';
+
+  @override
+  String get importEmptyHint => 'Excel में सामान की सूची है? सब एक साथ जोड़ें।';
+
+  @override
+  String get importHowTitle => 'बहुत सारा सामान एक साथ जोड़ें';
+
+  @override
+  String get importStep1 =>
+      'टेम्पलेट लें और Excel या Google Sheets में खोलें (फ़ोन या कंप्यूटर पर)।';
+
+  @override
+  String get importStep2 =>
+      'हर साइज़ के लिए एक लाइन भरें: कैटेगरी, नाम, साइज़ (जैसे 1 kg), कीमत, MRP, स्टॉक। गुजराती/हिंदी नाम वैकल्पिक हैं।';
+
+  @override
+  String get importStep3 =>
+      'Excel (.xlsx) या CSV में सेव करें और यहां चुनें। कुछ भी सेव करने से पहले हर लाइन जांची जाती है।';
+
+  @override
+  String get importRules =>
+      'दुकान में पहले से मौजूद सामान (वही नाम) दोबारा नहीं जुड़ता, अपडेट होता है: नई कीमत, स्टॉक और साइज़। खाली स्टॉक = नए सामान के लिए गिनती नहीं, पुराने के लिए बदलाव नहीं।';
+
+  @override
+  String get importGetTemplate => 'टेम्पलेट लें';
+
+  @override
+  String get importTemplateShareText =>
+      'सामान की सूची का टेम्पलेट। भरकर दुकान के ऐप में इम्पोर्ट करें।';
+
+  @override
+  String get importPickFile => 'Excel या CSV फ़ाइल चुनें';
+
+  @override
+  String get importPickAnother => 'दूसरी फ़ाइल चुनें';
+
+  @override
+  String importFile(String name) {
+    return 'फ़ाइल: $name';
+  }
+
+  @override
+  String get importWrongFile =>
+      'Excel (.xlsx) या CSV फ़ाइल चुनें। पुरानी .xls फ़ाइल: Excel में खोलकर .xlsx में सेव करें।';
+
+  @override
+  String get importUnreadable =>
+      'यह फ़ाइल पढ़ी नहीं जा सकी। फिर से .xlsx या CSV में सेव करके कोशिश करें।';
+
+  @override
+  String importColumnsMissing(String columns) {
+    return 'पहली लाइन में ये कॉलम नहीं हैं: $columns। टेम्पलेट इस्तेमाल करें।';
+  }
+
+  @override
+  String get importEmpty => 'फ़ाइल में कोई सामान नहीं है।';
+
+  @override
+  String get importTooLarge =>
+      'एक फ़ाइल में ज़्यादा से ज़्यादा 2000 लाइन। छोटी फ़ाइलों में बांटें।';
+
+  @override
+  String get importFixRows => 'कुछ लाइनें ठीक करनी हैं। नीचे सूची देखें।';
+
+  @override
+  String importReady(int rows) {
+    return '$rows लाइनें इम्पोर्ट के लिए तैयार';
+  }
+
+  @override
+  String get importNotReady => 'पहले ये लाइनें ठीक करें';
+
+  @override
+  String importNewProducts(int products, int sizes) {
+    return 'नया सामान: $products ($sizes साइज़)';
+  }
+
+  @override
+  String importUpdatedProducts(int products, int sizes) {
+    return 'अपडेट होने वाला सामान: $products ($sizes साइज़)';
+  }
+
+  @override
+  String importNewCategories(String names) {
+    return 'नई कैटेगरी: $names';
+  }
+
+  @override
+  String importIgnoredColumns(String names) {
+    return 'इम्पोर्ट नहीं होंगे (अनजान कॉलम): $names';
+  }
+
+  @override
+  String get importPhotosNote =>
+      'फ़ाइल में फ़ोटो नहीं हैं: बाद में हर सामान में जोड़ें।';
+
+  @override
+  String importConfirm(int count) {
+    return '$count सामान इम्पोर्ट करें';
+  }
+
+  @override
+  String importDone(int added, int updated) {
+    return 'हो गया: $added जोड़े, $updated अपडेट';
+  }
+
+  @override
+  String importErrorsTitle(int count) {
+    return '$count समस्याएं';
+  }
+
+  @override
+  String get importErrorsHint =>
+      'फ़ाइल में ठीक करें, सेव करें और फिर चुनें। अभी कुछ सेव नहीं हुआ है।';
+
+  @override
+  String importRowLabel(int row) {
+    return 'लाइन $row';
+  }
+
+  @override
+  String importRowColumnLabel(int row, String column) {
+    return 'लाइन $row · कॉलम $column';
+  }
+
+  @override
+  String importMoreErrors(int count) {
+    return '…और $count और';
+  }
+
+  @override
+  String get importErrNameRequired => 'सामान का नाम खाली है';
+
+  @override
+  String get importErrNameTooLong =>
+      'नाम बहुत लंबा है (ज़्यादा से ज़्यादा 120 अक्षर)';
+
+  @override
+  String get importErrPrice => 'कीमत 120 या 120.50 जैसी संख्या होनी चाहिए';
+
+  @override
+  String get importErrMrp => 'MRP 150 जैसी संख्या होनी चाहिए';
+
+  @override
+  String get importErrMrpBelow => 'MRP कीमत से कम है';
+
+  @override
+  String get importErrStock => 'स्टॉक पूरी संख्या होनी चाहिए (0 या ज़्यादा)';
+
+  @override
+  String get importErrSize => 'साइज़ खाली है (जैसे 1 kg, 500 g, 1 पैक)';
+
+  @override
+  String get importErrOption => 'विकल्प लिखें (जैसे साइज़, रंग)';
+
+  @override
+  String get importErrDuplicateRow => 'वही सामान और साइज़ दो बार है';
+
+  @override
+  String get importErrDuplicateProduct => 'यह सामान एक से ज़्यादा बार है';
+
+  @override
+  String get importErrTooManyVariants =>
+      'एक सामान के बहुत सारे साइज़ (ज़्यादा से ज़्यादा 50)';
+
+  @override
+  String get importErrField => 'यह मान यहां मान्य नहीं है';
+
+  @override
+  String get importErrFieldRequired => 'ज़रूरी जानकारी नहीं है';
+
+  @override
+  String get importErrOther => 'इस लाइन में समस्या है';
 }

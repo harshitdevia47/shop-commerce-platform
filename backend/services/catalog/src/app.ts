@@ -3,6 +3,8 @@ import type { Express } from 'express';
 import type { Db } from './db.js';
 import { categoriesRouter } from './modules/categories/categories.routes.js';
 import { createCategoriesService } from './modules/categories/categories.service.js';
+import { importRouter } from './modules/import/import.routes.js';
+import { createImportService } from './modules/import/import.service.js';
 import { productsRouter } from './modules/products/products.routes.js';
 import { createProductsService } from './modules/products/products.service.js';
 import { stockRouter } from './modules/stock/stock.routes.js';
@@ -20,7 +22,7 @@ export interface CatalogAppDeps {
 
 export function createCatalogApp(deps: CatalogAppDeps): Express {
   const { db, logger, now } = deps;
-  const app = createServiceApp({ service: 'catalog', logger, ready: () => db.$queryRaw`SELECT 1` });
+  const app = createServiceApp({ service: 'catalog', logger, jsonLimit: '4mb', ready: () => db.$queryRaw`SELECT 1` });
 
   const categories = createCategoriesService(db, deps.media, now);
   const products = createProductsService({ db, categories, settings: deps.settings, media: deps.media, now });
@@ -28,6 +30,7 @@ export function createCatalogApp(deps: CatalogAppDeps): Express {
   app.use(internalAuth(deps.internalSecret));
   app.use(categoriesRouter(categories));
   app.use(productsRouter(products));
+  app.use(importRouter(createImportService(db, deps.settings)));
   app.use(stockRouter(createStockService(db, now)));
 
   finalizeApp(app, logger);

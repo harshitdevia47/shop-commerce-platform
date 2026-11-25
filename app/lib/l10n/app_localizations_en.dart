@@ -1409,4 +1409,183 @@ class AppLocalizationsEn extends AppLocalizations {
   String settingsNumberRange(int min, int max) {
     return 'Enter a number from $min to $max';
   }
+
+  @override
+  String get importShort => 'Import';
+
+  @override
+  String get importTitle => 'Import from Excel';
+
+  @override
+  String get importEmptyHint =>
+      'Have a list of products in Excel? Add them all at once.';
+
+  @override
+  String get importHowTitle => 'Add many products at once';
+
+  @override
+  String get importStep1 =>
+      'Get the template and open it in Excel or Google Sheets (on the phone or a computer).';
+
+  @override
+  String get importStep2 =>
+      'Fill one row per size: category, name, size (like 1 kg), price, MRP, stock. Gujarati/Hindi names are optional.';
+
+  @override
+  String get importStep3 =>
+      'Save it as Excel (.xlsx) or CSV and choose it here. We check every row before anything is saved.';
+
+  @override
+  String get importRules =>
+      'Products already in your shop (same name) are updated, not added twice: new prices, stock and sizes. Empty stock = not counted (for new items) or unchanged (for existing ones).';
+
+  @override
+  String get importGetTemplate => 'Get the template';
+
+  @override
+  String get importTemplateShareText =>
+      'Product list template. Fill it in and import it in the shop app.';
+
+  @override
+  String get importPickFile => 'Choose Excel or CSV file';
+
+  @override
+  String get importPickAnother => 'Choose another file';
+
+  @override
+  String importFile(String name) {
+    return 'File: $name';
+  }
+
+  @override
+  String get importWrongFile =>
+      'Choose an Excel (.xlsx) or CSV file. Old .xls files: open in Excel and save as .xlsx.';
+
+  @override
+  String get importUnreadable =>
+      'This file could not be read. Save it again as .xlsx or CSV and try once more.';
+
+  @override
+  String importColumnsMissing(String columns) {
+    return 'These columns are missing in the first row: $columns. Use the template.';
+  }
+
+  @override
+  String get importEmpty => 'The file has no products.';
+
+  @override
+  String get importTooLarge =>
+      'At most 2000 rows per file. Split it into smaller files.';
+
+  @override
+  String get importFixRows => 'Some rows need fixing. See the list below.';
+
+  @override
+  String importReady(int rows) {
+    return 'Ready to import $rows rows';
+  }
+
+  @override
+  String get importNotReady => 'Fix these rows first';
+
+  @override
+  String importNewProducts(int products, int sizes) {
+    return 'New products: $products ($sizes sizes)';
+  }
+
+  @override
+  String importUpdatedProducts(int products, int sizes) {
+    return 'Updated products: $products ($sizes sizes)';
+  }
+
+  @override
+  String importNewCategories(String names) {
+    return 'New categories: $names';
+  }
+
+  @override
+  String importIgnoredColumns(String names) {
+    return 'Not imported (unknown columns): $names';
+  }
+
+  @override
+  String get importPhotosNote =>
+      'Photos are not in the file: add them later from each product.';
+
+  @override
+  String importConfirm(int count) {
+    return 'Import $count products';
+  }
+
+  @override
+  String importDone(int added, int updated) {
+    return 'Done: $added added, $updated updated';
+  }
+
+  @override
+  String importErrorsTitle(int count) {
+    return '$count problems';
+  }
+
+  @override
+  String get importErrorsHint =>
+      'Fix them in your file, save, and choose it again. Nothing has been saved yet.';
+
+  @override
+  String importRowLabel(int row) {
+    return 'Row $row';
+  }
+
+  @override
+  String importRowColumnLabel(int row, String column) {
+    return 'Row $row · column $column';
+  }
+
+  @override
+  String importMoreErrors(int count) {
+    return '…and $count more';
+  }
+
+  @override
+  String get importErrNameRequired => 'Product name is empty';
+
+  @override
+  String get importErrNameTooLong => 'Name is too long (max 120 letters)';
+
+  @override
+  String get importErrPrice => 'Price must be a number like 120 or 120.50';
+
+  @override
+  String get importErrMrp => 'MRP must be a number like 150';
+
+  @override
+  String get importErrMrpBelow => 'MRP is lower than the price';
+
+  @override
+  String get importErrStock => 'Stock must be a whole number (0 or more)';
+
+  @override
+  String get importErrSize => 'Size is empty (like 1 kg, 500 g, 1 pack)';
+
+  @override
+  String get importErrOption => 'Choose the option values (like size, colour)';
+
+  @override
+  String get importErrDuplicateRow => 'Same product and size appears twice';
+
+  @override
+  String get importErrDuplicateProduct => 'This product appears more than once';
+
+  @override
+  String get importErrTooManyVariants =>
+      'Too many sizes for one product (max 50)';
+
+  @override
+  String get importErrField => 'This value is not allowed here';
+
+  @override
+  String get importErrFieldRequired => 'A required detail is missing';
+
+  @override
+  String get importErrOther => 'This row has a problem';
 }

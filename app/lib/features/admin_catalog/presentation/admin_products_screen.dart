@@ -59,7 +59,17 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
     final locale = ref.watch(localeProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.adminProducts)),
+      appBar: AppBar(
+        title: Text(l10n.adminProducts),
+        actions: [
+          TextButton.icon(
+            key: const Key('importProductsButton'),
+            onPressed: () => context.push(Routes.adminImportProducts),
+            icon: const Icon(Icons.upload_file_outlined),
+            label: Text(l10n.importShort),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         key: const Key('addProductButton'),
         onPressed: () => context.push(Routes.adminNewProduct),
@@ -96,7 +106,25 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
           ),
           Expanded(
             child: switch (state) {
-              AsyncValue(:final value?) when value.items.isEmpty => Center(child: Text(l10n.noProducts)),
+              AsyncValue(:final value?) when value.items.isEmpty => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 12,
+                    children: [
+                      Text(l10n.noProducts, textAlign: TextAlign.center),
+                      Text(l10n.importEmptyHint, textAlign: TextAlign.center),
+                      OutlinedButton.icon(
+                        key: const Key('importFromEmptyButton'),
+                        onPressed: () => context.push(Routes.adminImportProducts),
+                        icon: const Icon(Icons.upload_file_outlined),
+                        label: Text(l10n.importTitle),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               AsyncValue(:final value?) => RefreshIndicator(
                 onRefresh: () async => ref.invalidate(provider),
                 child: ListView.separated(
