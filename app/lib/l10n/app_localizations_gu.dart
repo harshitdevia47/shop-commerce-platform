@@ -1671,4 +1671,13 @@ class AppLocalizationsGu extends AppLocalizations {
   String supportNoWhatsapp(String number) {
     return 'WhatsApp નથી. સપોર્ટને $number પર મેસેજ કરો.';
   }
+
+  @override
+  String get privacyPolicy => 'ગોપનીયતા નીતિ';
+
+  @override
+  String get termsOfUse => 'ઉપયોગની શરતો';
+
+  @override
+  String get legalAgree => 'આગળ વધીને તમે આ સાથે સંમત થાઓ છો:';
 }

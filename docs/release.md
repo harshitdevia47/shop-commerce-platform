@@ -49,7 +49,7 @@ same code.
 - Store listing: short and full description (English, Gujarati, Hindi), icon 512 px (`clients/<slug>/icon.png`
   scaled up), at least 2 phone screenshots, feature graphic 1024×500.
 - App content:
-  - Privacy policy URL (required): host one page per shop or a shared one naming the shop.
+  - Privacy policy URL (required): `https://api.your-domain.in/legal/<slug>/privacy` (served per shop, docs/deploy.md 6d).
   - Data safety: phone number (login), name and address (delivery), approximate and precise location
     (riders only, while delivering), photos (prescriptions / lists / return photos, only when the customer
     adds them), purchase history. Data is encrypted in transit; users can ask for deletion.

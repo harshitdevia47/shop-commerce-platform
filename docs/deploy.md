@@ -159,6 +159,19 @@ The app opens Razorpay Checkout right after the order is placed; the payment is 
 server verifies Razorpay's signature (or the signed webhook arrives if the app was closed). Refunds for
 cancelled paid orders are done in the Razorpay dashboard. Test first with `rzp_test_` keys.
 
+## 6d. Privacy policy and terms
+
+Every shop has two public pages, filled in with that shop's name, address and enabled options:
+
+- `https://api.your-domain.in/legal/<slug>/privacy` (Play Console → App content → Privacy policy)
+- `https://api.your-domain.in/legal/<slug>/terms`
+
+The apps link to them on the login screen and in Account. Set the operator details in `.env`
+(`LEGAL_OPERATOR_NAME`, `LEGAL_CONTACT_EMAIL`, `LEGAL_CITY` for courts, `LEGAL_EFFECTIVE_DATE`), then
+`docker compose up -d tenant`. Change `LEGAL_EFFECTIVE_DATE` whenever the text changes. The text lives in
+`backend/services/tenant/src/modules/legal/legal.pages.ts` and describes what the platform collects: update
+it when that changes, and have it reviewed by a lawyer before launch.
+
 ## 7. Push notifications (Firebase Cloud Messaging)
 
 FCM is the only Firebase service used. One Firebase project serves every shop app.

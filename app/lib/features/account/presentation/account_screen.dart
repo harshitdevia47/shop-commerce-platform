@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../core/widgets/legal_links.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/router/routes.dart';
 import '../../../core/widgets/language_menu.dart';
@@ -91,6 +92,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             icon: const Icon(Icons.logout),
             label: Text(l10n.logout),
           ),
+          const SizedBox(height: 16),
+          const LegalLinks(),
         ],
       ),
     );

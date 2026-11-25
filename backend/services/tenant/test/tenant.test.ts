@@ -12,7 +12,12 @@ import { createShopsService, type ShopRef } from '../src/modules/shops/shops.ser
 
 const secret = process.env.INTERNAL_HMAC_SECRET!;
 const { rawPrisma, db } = createDb(process.env.DATABASE_URL!);
-const app = createTenantApp({ db, logger: createLogger('tenant-test', 'silent'), internalSecret: secret });
+const app = createTenantApp({
+  db,
+  logger: createLogger('tenant-test', 'silent'),
+  internalSecret: secret,
+  legal: { name: 'Bharat Shop Apps', email: 'support@example.in', city: 'Bhavnagar, Gujarat', effectiveDate: '2026-12-01' },
+});
 const shops = createShopsService(db);
 
 const clientsDir = fileURLToPath(new URL('../../../../clients/', import.meta.url));
@@ -98,6 +103,49 @@ describe('owner settings', () => {
     expect((await config()).delivery.feePaise).toBe(4200);
     await shops.upsertFromClientConfig(loadClient('sharma_kirana'), { resetSettings: true });
     expect((await config()).delivery.feePaise).toBe(2000);
+  });
+});
+
+describe('privacy policy and terms', () => {
+  it('serves each shop its own pages, as safe HTML', async () => {
+    const privacy = await request(app).get('/legal/sharma_kirana/privacy').set(as(shopA.id));
+    expect(privacy.status).toBe(200);
+    expect(privacy.headers['content-type']).toContain('text/html');
+    expect(privacy.headers['content-security-policy']).toContain("default-src 'none'");
+    expect(privacy.text).toContain('<h1>Privacy policy</h1>');
+    expect(privacy.text).toContain('Sharma Kirana');
+    expect(privacy.text).toContain('Bharat Shop Apps');
+    expect(privacy.text).toContain('1 December 2026');
+    expect(privacy.text).toContain('Station Road, Bhavnagar');
+    expect(privacy.text).not.toContain('<mark>');
+
+    const terms = await request(app).get('/legal/style_hub/terms').set(as(shopB.id));
+    expect(terms.text).toContain('<h1>Terms of use</h1>');
+    expect(terms.text).toContain('Style Hub');
+    expect(terms.text).not.toContain('Sharma Kirana');
+    expect(terms.text).toContain('courts at Bhavnagar, Gujarat');
+  });
+
+  it('marks missing operator details instead of hiding them', async () => {
+    const bare = createTenantApp({ db, logger: createLogger('tenant-test', 'silent'), internalSecret: secret });
+    const res = await request(bare).get('/legal/sharma_kirana/privacy').set(as(shopA.id));
+    expect(res.text).toContain('<mark>[operator name not set]</mark>');
+  });
+
+  it('escapes shop text', async () => {
+    const { privacyPolicyHtml } = await import('../src/modules/legal/legal.pages.js');
+    const config = (await request(app).get('/api/v1/shop/config').set(as(shopA.id))).body.data;
+    const html = privacyPolicyHtml({
+      shop: { ...config.shop, name: '<script>alert(1)</script>' },
+      features: config.features,
+      payments: config.payments,
+      returnsWindow: 7,
+      operator: {},
+      privacyUrl: 'privacy',
+      termsUrl: 'terms',
+    });
+    expect(html).not.toContain('<script>');
+    expect(html).toContain('&lt;script&gt;');
   });
 });
 

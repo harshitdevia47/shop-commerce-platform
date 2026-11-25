@@ -3081,6 +3081,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'WhatsApp is not installed. Message support at {number}.'**
   String supportNoWhatsapp(String number);
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy'**
+  String get privacyPolicy;
+
+  /// No description provided for @termsOfUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of use'**
+  String get termsOfUse;
+
+  /// No description provided for @legalAgree.
+  ///
+  /// In en, this message translates to:
+  /// **'By continuing you agree to the'**
+  String get legalAgree;
 }
 
 class _AppLocalizationsDelegate

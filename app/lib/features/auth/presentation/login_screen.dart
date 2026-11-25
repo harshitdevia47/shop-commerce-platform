@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../core/widgets/legal_links.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/providers.dart';
 import '../../../core/router/routes.dart';
@@ -104,6 +105,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ? const SizedBox.square(dimension: 20, child: CircularProgressIndicator(strokeWidth: 2))
                   : Text(l10n.sendOtp),
             ),
+            const SizedBox(height: 16),
+            LegalLinks(prefix: l10n.legalAgree),
           ],
         ),
       ),

@@ -942,5 +942,8 @@
         "type": "String"
       }
     }
-  }
+  },
+  "privacyPolicy": "Privacy policy",
+  "termsOfUse": "Terms of use",
+  "legalAgree": "By continuing you agree to the"
 }

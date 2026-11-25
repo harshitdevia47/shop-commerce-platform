@@ -496,5 +496,8 @@
   "supportTitle": "મદદ જોઈએ?",
   "supportSubtitle": "WhatsApp પર સપોર્ટ સાથે વાત કરો",
   "supportMessage": "નમસ્તે, મને {shop} એપમાં મદદ જોઈએ છે.",
-  "supportNoWhatsapp": "WhatsApp નથી. સપોર્ટને {number} પર મેસેજ કરો."
+  "supportNoWhatsapp": "WhatsApp નથી. સપોર્ટને {number} પર મેસેજ કરો.",
+  "privacyPolicy": "ગોપનીયતા નીતિ",
+  "termsOfUse": "ઉપયોગની શરતો",
+  "legalAgree": "આગળ વધીને તમે આ સાથે સંમત થાઓ છો:"
 }

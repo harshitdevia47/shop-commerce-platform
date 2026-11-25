@@ -61,6 +61,8 @@ export function buildRoutes(upstreams: UpstreamUrls): RouteRule[] {
     { prefix: '/api/v1/deliveries', target: upstreams.delivery, auth: 'required' },
     // Razorpay webhooks: /api/v1/webhooks/razorpay/<slug>; the payment service checks the signature.
     { prefix: '/api/v1/webhooks/razorpay', target: upstreams.payment, auth: 'public', shopKeyFromPath: true },
+    // Privacy policy and terms pages: /legal/<slug>/privacy|terms (opened in a browser, no X-Shop-Key).
+    { prefix: '/legal', target: upstreams.tenant, auth: 'public', shopKeyFromPath: true },
     // Sales figures: owner only.
     { prefix: '/api/v1/admin/reports', target: upstreams.reporting, auth: 'required', roles: ['OWNER'] },
   ];

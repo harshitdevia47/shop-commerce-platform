@@ -1685,4 +1685,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String supportNoWhatsapp(String number) {
     return 'WhatsApp is not installed. Message support at $number.';
   }
+
+  @override
+  String get privacyPolicy => 'Privacy policy';
+
+  @override
+  String get termsOfUse => 'Terms of use';
+
+  @override
+  String get legalAgree => 'By continuing you agree to the';
 }

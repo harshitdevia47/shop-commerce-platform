@@ -1681,4 +1681,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String supportNoWhatsapp(String number) {
     return 'WhatsApp नहीं है। सपोर्ट को $number पर मैसेज करें।';
   }
+
+  @override
+  String get privacyPolicy => 'गोपनीयता नीति';
+
+  @override
+  String get termsOfUse => 'उपयोग की शर्तें';
+
+  @override
+  String get legalAgree => 'आगे बढ़कर आप इनसे सहमत हैं:';
 }

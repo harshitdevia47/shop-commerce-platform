@@ -7,7 +7,16 @@ const env = loadTenantEnv();
 const logger = createLogger('tenant', env.LOG_LEVEL);
 const { rawPrisma, db } = createDb(env.DATABASE_URL);
 
-const app = createTenantApp({ db, logger, internalSecret: env.INTERNAL_HMAC_SECRET });
+const legal = {
+  name: env.LEGAL_OPERATOR_NAME,
+  email: env.LEGAL_CONTACT_EMAIL,
+  city: env.LEGAL_CITY,
+  effectiveDate: env.LEGAL_EFFECTIVE_DATE,
+};
+if (env.NODE_ENV === 'production' && Object.values(legal).some((v) => !v)) {
+  logger.warn('LEGAL_* settings are incomplete: the privacy policy and terms show placeholders');
+}
+const app = createTenantApp({ db, logger, internalSecret: env.INTERNAL_HMAC_SECRET, legal });
 const server = app.listen(env.PORT, () => logger.info({ port: env.PORT }, 'tenant service listening'));
 
 function shutdown(signal: string): void {
