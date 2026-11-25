@@ -27,6 +27,8 @@ const envSchema = z
     REPORTING_URL: z.string().url(),
     /** UPI ID shops pay the subscription to. */
     PLATFORM_UPI_ID: z.string().trim().min(3).optional(),
+    /** Prefilled monthly fee (₹) for new subscriptions. */
+    PLATFORM_DEFAULT_FEE_RUPEES: z.coerce.number().int().positive().max(100_000).optional(),
     /** sha256 (hex) of the token `npm run new-shop` sends; unset = the new-shop API is off. */
     PLATFORM_API_TOKEN_HASH: z.string().regex(/^[0-9a-f]{64}$/).optional(),
   })

@@ -18,6 +18,12 @@ const mailer = createMailer(
   logger,
 );
 
+const directory = createHttpShopDirectory(
+  { tenant: env.TENANT_URL, identity: env.IDENTITY_URL, catalog: env.CATALOG_URL, reporting: env.REPORTING_URL },
+  env.INTERNAL_HMAC_SECRET,
+  logger,
+);
+
 const app = createPlatformApp({
   db,
   logger,
@@ -27,13 +33,11 @@ const app = createPlatformApp({
   admins: env.ADMIN_EMAILS,
   origin: env.ADMIN_ORIGIN,
   cookie: { secure: env.ADMIN_ORIGIN.startsWith('https://') },
+  directory,
+  payTo: env.PLATFORM_UPI_ID,
+  defaultFeeRupees: env.PLATFORM_DEFAULT_FEE_RUPEES,
 });
 // Hourly: date-driven state changes (paid → due) reach the shop apps; failed pushes are repaired.
-const directory = createHttpShopDirectory(
-  { tenant: env.TENANT_URL, identity: env.IDENTITY_URL, catalog: env.CATALOG_URL, reporting: env.REPORTING_URL },
-  env.INTERNAL_HMAC_SECRET,
-  logger,
-);
 const subscriptions = createSubscriptionsService({ db, directory, logger, payTo: env.PLATFORM_UPI_ID });
 const pushJob = startIntervalJob('push-app-states', 60 * 60_000, () => subscriptions.pushAll(), logger);
 void pushJob.runOnce();

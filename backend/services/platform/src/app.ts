@@ -5,7 +5,9 @@ import type { Mailer } from './mail/mailer.js';
 import { authRouter } from './modules/auth/auth.routes.js';
 import { createAuthService } from './modules/auth/auth.service.js';
 import { requireAdmin, requireSameOrigin, type CookieOptions } from './modules/auth/session.js';
-import { PAGE_HEADERS, html, page } from './web/layout.js';
+import type { ShopDirectory } from './modules/subscriptions/shop-directory.js';
+import { pagesRouter } from './modules/subscriptions/subscriptions.routes.js';
+import { createSubscriptionsService } from './modules/subscriptions/subscriptions.service.js';
 
 export interface PlatformAppDeps {
   db: Db;
@@ -17,6 +19,12 @@ export interface PlatformAppDeps {
   /** e.g. https://admin.example.in */
   origin: string;
   cookie: CookieOptions;
+  /** Other services' internal APIs. */
+  directory: ShopDirectory;
+  /** Platform owner's UPI ID (shown to shop owners and in reminders). */
+  payTo?: string;
+  /** Prefilled in the "set up subscription" form. */
+  defaultFeeRupees?: number;
   now?: () => Date;
 }
 
@@ -35,9 +43,8 @@ export function createPlatformApp(deps: PlatformAppDeps): Express {
   app.use(authRouter(auth, deps.cookie));
 
   const admin = requireAdmin(auth, deps.cookie);
-  app.get('/', admin, (_req, res) => {
-    res.set(PAGE_HEADERS).send(page('Shops', html`<h1>Shops</h1>`, { admin: res.locals.admin as string }));
-  });
+  const subscriptions = createSubscriptionsService({ db, directory: deps.directory, logger, payTo: deps.payTo, now: deps.now });
+  app.use(pagesRouter({ subscriptions, directory: deps.directory, admin, logger, payTo: deps.payTo, defaultFeeRupees: deps.defaultFeeRupees, now: deps.now }));
 
   finalizeApp(app, logger);
   return app;

@@ -26,8 +26,9 @@ export interface TestApp {
   clock: { now: Date };
 }
 
-export function buildApp(extra: Partial<PlatformAppDeps> = {}): TestApp {
+export function buildApp(extra: Partial<PlatformAppDeps> = {}): TestApp & { directory: FakeDirectory } {
   const mailer = new CapturingMailer();
+  const directory = (extra.directory as FakeDirectory | undefined) ?? new FakeDirectory();
   const clock = { now: new Date('2026-11-26T04:30:00Z') };
   const app = createPlatformApp({
     db,
@@ -39,9 +40,11 @@ export function buildApp(extra: Partial<PlatformAppDeps> = {}): TestApp {
     origin: ORIGIN,
     cookie: { secure: false },
     now: () => clock.now,
+    directory,
+    payTo: 'me@okaxis',
     ...extra,
   });
-  return { app, mailer, clock };
+  return { app, mailer, clock, directory };
 }
 
 /** Posts a form the way a browser on the admin site does. */
