@@ -33,7 +33,10 @@ export function clearSessionCookie(res: Response, options: CookieOptions): void 
 export function requireSameOrigin(origin: string) {
   return (req: Request, res: Response, next: NextFunction) => {
     if (req.method !== 'POST' || req.path.startsWith('/api/')) return next();
-    if (req.headers.origin !== origin) {
+    const sent = req.headers.origin;
+    // Some browsers send "Origin: null" (privacy settings); then trust their own Sec-Fetch-Site.
+    const sameSite = sent === origin || ((sent === undefined || sent === 'null') && req.headers['sec-fetch-site'] === 'same-origin');
+    if (!sameSite) {
       res.status(403).type('text/plain').send('Forbidden');
       return;
     }

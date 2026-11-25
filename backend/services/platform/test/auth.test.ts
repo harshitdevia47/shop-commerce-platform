@@ -101,6 +101,18 @@ describe('sessions and protection', () => {
     expect((await request(t.app).post('/logout').set('origin', ORIGIN).type('form').send({})).status).toBe(303);
   });
 
+  it('accepts a browser post with Origin null when the browser says it is same-origin', async () => {
+    // Chrome sends "Origin: null" on form posts from pages with Referrer-Policy: no-referrer.
+    const ok = await request(t.app).post('/login').set('origin', 'null').set('sec-fetch-site', 'same-origin').type('form').send({ email: ADMIN });
+    expect(ok.status).toBe(200);
+    const cross = await request(t.app).post('/login').set('origin', 'null').set('sec-fetch-site', 'cross-site').type('form').send({ email: ADMIN });
+    expect(cross.status).toBe(403);
+  });
+
+  it('pages ask the browser to send the real Origin', async () => {
+    expect((await request(t.app).get('/login')).headers['referrer-policy']).toBe('same-origin');
+  });
+
   it('health is open', async () => {
     expect((await request(t.app).get('/health')).status).toBe(200);
   });

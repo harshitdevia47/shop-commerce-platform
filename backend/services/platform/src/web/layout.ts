@@ -94,6 +94,7 @@ export const PAGE_HEADERS: Record<string, string> = {
   'content-type': 'text/html; charset=utf-8',
   'content-security-policy': "default-src 'none'; style-src 'unsafe-inline'; img-src 'self' data:; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
   'cache-control': 'no-store',
-  'referrer-policy': 'no-referrer',
+  // same-origin (not no-referrer): with no-referrer browsers send "Origin: null" on form posts.
+  'referrer-policy': 'same-origin',
   'x-content-type-options': 'nosniff',
 };
