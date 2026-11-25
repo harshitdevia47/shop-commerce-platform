@@ -52,6 +52,10 @@ Each service applies its own pending Prisma migrations on start (`migrate deploy
 
 ## 3. Add shops and owners
 
+Normally from the laptop: `cd backend && npm run new-shop` creates the shop, its owner and its
+subscription on the server through the admin site (section 6e; needs `backend/.env.platform`).
+By hand on the server:
+
 Client folders (`clients/<slug>/client.json`) are mounted into the tenant container read-only.
 
 ```bash
@@ -114,12 +118,13 @@ archives into the `qc_media` / `qc_media_private` volumes, then `docker compose 
 `docker compose --profile monitoring up -d uptime-kuma`, then `ssh -L 3001:localhost:3001 deploy@server`
 and open http://localhost:3001. Add monitors (it runs inside the Docker network):
 
-- HTTPS `https://api.example.in/health` (public, every 60 s; certificate expiry alert on)
+- HTTPS `https://api.example.in/health` and `https://admin.example.in/health` (public, every 60 s; certificate expiry alert on)
 - HTTP `http://<service>:3000/ready` for tenant, identity, catalog, media, order, payment, delivery,
-  notification, reporting (database reachability)
+  notification, reporting, platform (database reachability)
 - TCP `postgres:5432`, `redis:6379`
 
-Point notifications at Telegram or email. Also watch the dead-letter stream (section 10) and disk space
+Point notifications at email (Settings → Notifications → SMTP: `smtp.gmail.com`, port 465, your Gmail and
+the same app password as section 6e), or Telegram. Also watch the dead-letter stream (section 10) and disk space
 (`df -h`, Docker images: `docker system df`; prune old images after updates with `docker image prune`).
 
 ## 6b. Login codes (OTP) for production
@@ -177,6 +182,36 @@ The apps link to them on the login screen and in Account. Set the operator detai
 `docker compose up -d tenant`. Change `LEGAL_EFFECTIVE_DATE` whenever the text changes. The text lives in
 `backend/services/tenant/src/modules/legal/legal.pages.ts` and describes what the platform collects: update
 it when that changes, and have it reviewed by a lawyer before launch.
+
+## 6e. Platform admin (subscriptions)
+
+The platform owner's private site at `https://admin.<domain>`: which shops paid, Mark paid (UPI), Extend 7
+days, Pause / Resume online orders, app numbers per shop, and one email at 09:00 IST when a shop is 7 days
+overdue. Nothing is paused automatically.
+
+1. **DNS:** an A record `admin.<domain>` → the server. Certificate:
+   `certbot ... -d admin.example.in` (same command as section 4), and in `nginx/nginx.conf` (copied from
+   `nginx.tls.conf`) replace `admin.example.in` with your admin host.
+2. **Database** (only on servers created before the admin site existed; new servers get it automatically):
+   `docker compose exec postgres psql -U qc -d postgres -c "CREATE DATABASE qc_platform"`
+3. **Gmail app password** (free; the server sends login codes and alerts from your Gmail):
+   Google Account → Security → turn on 2-Step Verification → search "App passwords" → create one named
+   "shop admin" → copy the 16 letters into `deploy/secrets/mail/gmail-app-password` (no spaces, `chmod 600`).
+4. **`.env`:** `ADMIN_EMAILS` (your Gmail; comma separated for more people), `ADMIN_ORIGIN=https://admin.<domain>`,
+   `LOGIN_CODE_SECRET` (`openssl rand -hex 32`), `MAIL_PROVIDER=gmail`, `MAIL_USER` (your Gmail),
+   `MAIL_APP_PASSWORD_FILE=/run/mail/gmail-app-password`, `PLATFORM_UPI_ID` (where shops pay you),
+   `PLATFORM_DEFAULT_FEE_RUPEES`.
+5. **Laptop → server for `npm run new-shop`:** `node backend/scripts/platform-token.mjs` prints a token and its
+   hash. Hash → `PLATFORM_API_TOKEN_HASH` in `deploy/.env`; on the laptop create `backend/.env.platform` with
+   `PLATFORM_URL=https://admin.<domain>`, `PLATFORM_TOKEN=<token>` and `PLATFORM_DEFAULT_FEE_RUPEES=999`
+   (gitignored; keep the token secret).
+6. `docker compose up -d platform nginx`, open `https://admin.<domain>`, log in with the code from Gmail.
+   Shops created before this show **Not set up**: open each and set its fee and due day.
+
+How it reaches the apps: the platform service sets the shop's `subscription` in tenant (`ok`, `due` with
+amount/date/UPI ID, `paused`), right after every action and once an hour. `due` shows the owner a reminder
+card with a Pay by UPI button; `paused` makes the order service refuse new orders (`SHOP_SUSPENDED`) and
+customers see "Please call the shop". Mark paid resumes and moves the due date ahead.
 
 ## 7. Push notifications (Firebase Cloud Messaging)
 

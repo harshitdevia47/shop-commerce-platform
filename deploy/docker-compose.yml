@@ -196,6 +196,31 @@ services:
     deploy:
       resources: { limits: { memory: 192m } }
 
+  # Platform owner's admin site (subscriptions), reached through nginx at admin.<domain>.
+  platform:
+    <<: *service
+    image: qc-backend:latest
+    pull_policy: never
+    working_dir: /app/services/platform
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/qc_platform
+      REDIS_URL: redis://redis:6379
+      TENANT_URL: http://tenant:3000
+      IDENTITY_URL: http://identity:3000
+      CATALOG_URL: http://catalog:3000
+      REPORTING_URL: http://reporting:3000
+      # ADMIN_EMAILS, ADMIN_ORIGIN, LOGIN_CODE_SECRET, MAIL_*, PLATFORM_* come from .env;
+      # the Gmail app password from a file in secrets/mail (docs/deploy.md, "Platform admin").
+      MAIL_APP_PASSWORD_FILE: ${MAIL_APP_PASSWORD_FILE:-}
+    volumes:
+      - ./secrets/mail:/run/mail:ro
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    deploy:
+      resources: { limits: { memory: 192m } }
+
   # Turns events into push notifications. No routes besides /health.
   notification:
     <<: *service
@@ -292,7 +317,7 @@ services:
       - certbot-webroot:/var/www/certbot:ro
       - media:/srv/media:ro
     networks: [internal]
-    depends_on: [gateway, realtime]
+    depends_on: [gateway, realtime, platform]
 
 networks:
   internal:
