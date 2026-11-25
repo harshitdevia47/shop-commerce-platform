@@ -318,6 +318,10 @@ export function createOrdersService({
       if (existing) return { order: toOrderView(existing), payment: null };
 
       const config = await shopConfig.get();
+      // The platform's pause (unpaid subscription) wins over the owner's own "Taking orders" switch.
+      if (config.subscription?.state === 'paused') {
+        throw new AppError('SHOP_SUSPENDED', 409, 'This shop is not taking online orders right now');
+      }
       if (config.ordering?.paused) {
         throw new AppError('ORDERS_PAUSED', 409, config.ordering.pausedMessage ?? 'The shop is not taking orders right now', {
           message: config.ordering.pausedMessage ?? null,

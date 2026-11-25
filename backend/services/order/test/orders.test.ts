@@ -331,6 +331,17 @@ describe('place order', () => {
     expect(reservations.size).toBe(0);
   });
 
+  it('a shop paused by the platform takes no orders, even with the owner switch on', async () => {
+    configs[SHOP_A]!.subscription = { state: 'paused' };
+    configs[SHOP_A]!.ordering = { paused: false };
+    const res = await place();
+    expect(res.status).toBe(409);
+    expect(res.body.error.code).toBe('SHOP_SUSPENDED');
+    expect(reservations.size).toBe(0);
+    configs[SHOP_A]!.subscription = { state: 'due', amountPaise: 99900, dueDate: '2026-12-05' };
+    expect((await place()).status).toBe(201);
+  });
+
   it('blocked customers cannot order', async () => {
     blocked.add(ALICE);
     expect((await place()).body.error.code).toBe('USER_BLOCKED');
