@@ -111,7 +111,7 @@ describe('validation', () => {
 describe('toRuntimeConfig', () => {
   it('drops build-time sections', () => {
     const runtime = toRuntimeConfig(parseClientConfig(load('sharma_kirana')));
-    expect(Object.keys(runtime).sort()).toEqual(['catalog', 'delivery', 'features', 'payments', 'returns', 'shop']);
+    expect(Object.keys(runtime).sort()).toEqual(['catalog', 'delivery', 'features', 'ordering', 'payments', 'returns', 'shop']);
     expect(runtime.returns).toEqual({ windowDays: 7, allowExchange: true });
     expect(runtime.delivery.slots?.windows).toHaveLength(3);
   });

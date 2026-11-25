@@ -2,6 +2,7 @@
  * Client config CLI.
  *   npm run client -- validate [slug]   validate one client (or all) incl. asset files
  *   npm run client -- sync <slug>       validate, then create/update the shop in the tenant DB
+ *                                       (keeps settings the owner edited in the app; --reset-settings overwrites)
  *   npm run client -- list              list shops in the tenant DB
  */
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
@@ -80,8 +81,14 @@ async function main(): Promise<number> {
       const { rawPrisma, db } = requireDb();
       try {
         // Shop is the tenant root (not a tenant-scoped model), so this works without request context.
-        const shop = await createShopsService(db).upsertFromClientConfig(config);
+        const shop = await createShopsService(db).upsertFromClientConfig(config, {
+          resetSettings: process.argv.includes('--reset-settings'),
+        });
         console.log(`✔ synced ${shop.slug} (id ${shop.id}, active ${shop.isActive})`);
+        if (shop.keptOwnerSettings) {
+          console.log('  The owner changed settings in the app: kept them (name, business type and catalog updated).');
+          console.log('  Use --reset-settings to overwrite them with client.json.');
+        }
       } finally {
         await rawPrisma.$disconnect();
       }

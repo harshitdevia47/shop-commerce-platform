@@ -1,8 +1,8 @@
-import { Errors, handler, requireShop } from '@qc/common';
+import { Errors, handler, requireAdmin, requireRole, requireShop } from '@qc/common';
 import { SLUG_PATTERN } from '@qc/config-schema';
 import { Router } from 'express';
 import { z } from 'zod';
-import type { ShopsService } from './shops.service.js';
+import { ownerSettingsPatchSchema, type ShopsService } from './shops.service.js';
 
 export function shopsRouter(shops: ShopsService): Router {
   const router = Router();
@@ -12,6 +12,15 @@ export function shopsRouter(shops: ShopsService): Router {
     '/api/v1/shop/config',
     requireShop,
     handler({}, () => shops.getCurrentConfig()),
+  );
+
+  // Shop settings screen: staff may look, only the owner changes them.
+  router.get('/api/v1/admin/settings', requireAdmin, requireShop, handler({}, () => shops.getCurrentConfig()));
+  router.patch(
+    '/api/v1/admin/settings',
+    requireRole('OWNER'),
+    requireShop,
+    handler({ body: ownerSettingsPatchSchema }, ({ body }) => shops.updateOwnerSettings(body)),
   );
 
   // Internal: runtime config of the shop in the signed context (catalog validates custom fields with it).

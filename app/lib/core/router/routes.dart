@@ -18,6 +18,7 @@ abstract final class Routes {
   static const adminNewProduct = '/admin/products/new';
   static const adminCategories = '/admin/categories';
   static const adminTeam = '/admin/team';
+  static const adminSettings = '/admin/settings';
   static const adminReturns = '/admin/returns';
   static const adminReports = '/admin/reports';
 

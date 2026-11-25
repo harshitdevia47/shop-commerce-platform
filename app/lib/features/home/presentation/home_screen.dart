@@ -115,6 +115,21 @@ class _HomeContent extends ConsumerWidget {
                 ),
               ),
             ),
+            if (settings.ordering.paused)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                  child: Card(
+                    key: const Key('shopPausedBanner'),
+                    color: theme.colorScheme.errorContainer,
+                    child: ListTile(
+                      leading: const Icon(Icons.storefront_outlined),
+                      title: Text(l10n.shopPausedTitle),
+                      subtitle: Text(settings.ordering.message ?? l10n.shopPausedBody),
+                    ),
+                  ),
+                ),
+              ),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),

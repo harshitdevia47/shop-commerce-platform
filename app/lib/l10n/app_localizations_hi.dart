@@ -1189,4 +1189,219 @@ class AppLocalizationsHi extends AppLocalizations {
   String otpSubtitleWhatsApp(String phone) {
     return '$phone पर WhatsApp पर भेजा गया';
   }
+
+  @override
+  String get adminSettings => 'दुकान सेटिंग्स';
+
+  @override
+  String get adminSettingsSubtitle => 'डिलीवरी, भुगतान, समय, दुकान बंद करना';
+
+  @override
+  String get settingsSave => 'सेटिंग्स सेव करें';
+
+  @override
+  String get settingsSaved => 'सेटिंग्स सेव हो गईं। ग्राहक अब इन्हें देखेंगे।';
+
+  @override
+  String get settingsFixFields => 'कृपया चिह्नित खाने ठीक करें';
+
+  @override
+  String get settingsAcceptingOrders => 'ऑर्डर ले रहे हैं';
+
+  @override
+  String get settingsOpenHint => 'ग्राहक अभी ऑर्डर दे सकते हैं';
+
+  @override
+  String get settingsPausedHint =>
+      'ग्राहक सामान देख सकते हैं, पर ऑर्डर नहीं दे सकते';
+
+  @override
+  String get settingsPausedMessage => 'ग्राहकों के लिए संदेश (वैकल्पिक)';
+
+  @override
+  String get settingsPausedMessageHint =>
+      'जैसे: दिवाली के लिए बंद, 3 नवंबर को फिर खुलेगा';
+
+  @override
+  String get settingsTooLong => 'बहुत लंबा है';
+
+  @override
+  String get settingsPausedNotice =>
+      'आपकी दुकान ऑर्डर नहीं ले रही है। फिर से खोलने के लिए टैप करें।';
+
+  @override
+  String get settingsDeliverySection => 'डिलीवरी और पिकअप';
+
+  @override
+  String get settingsHomeDelivery => 'होम डिलीवरी';
+
+  @override
+  String get settingsDeliveryFee => 'डिलीवरी शुल्क';
+
+  @override
+  String get settingsMinOrder => 'डिलीवरी के लिए न्यूनतम ऑर्डर';
+
+  @override
+  String get settingsFreeAbove => 'इससे ऊपर मुफ़्त डिलीवरी';
+
+  @override
+  String get settingsFreeAboveHint => 'हमेशा शुल्क लेना हो तो खाली छोड़ें';
+
+  @override
+  String get settingsRadius => 'दुकान से डिलीवरी दूरी';
+
+  @override
+  String get settingsEta => 'सामान्य डिलीवरी समय';
+
+  @override
+  String get settingsMinutes => 'मिनट';
+
+  @override
+  String get settingsPincodes => 'डिलीवरी पिनकोड (वैकल्पिक)';
+
+  @override
+  String get settingsPincodesHint =>
+      'कॉमा से अलग करें। खाली = दूरी के अंदर कोई भी पिनकोड';
+
+  @override
+  String get settingsPickup => 'ग्राहक दुकान से ले जा सकते हैं';
+
+  @override
+  String get settingsPickupHint =>
+      'पिकअप पर कोई डिलीवरी शुल्क या न्यूनतम ऑर्डर नहीं';
+
+  @override
+  String get settingsSlotsSection => 'डिलीवरी टाइम स्लॉट';
+
+  @override
+  String get settingsSlots => 'ग्राहक समय चुनें';
+
+  @override
+  String get settingsSlotsHint => 'हर दिन वही स्लॉट';
+
+  @override
+  String get settingsSlotAdd => 'टाइम स्लॉट जोड़ें';
+
+  @override
+  String get settingsSlotRemove => 'स्लॉट हटाएं';
+
+  @override
+  String get settingsSlotStart => 'स्लॉट शुरू';
+
+  @override
+  String get settingsSlotEnd => 'स्लॉट खत्म';
+
+  @override
+  String get settingsSlotOrder =>
+      'खत्म होने का समय शुरू होने के समय के बाद होना चाहिए';
+
+  @override
+  String get settingsSlotCapacity => 'एक स्लॉट में ऑर्डर';
+
+  @override
+  String get settingsPaymentsSection => 'भुगतान';
+
+  @override
+  String get settingsCod => 'कैश ऑन डिलीवरी';
+
+  @override
+  String get settingsUpi => 'आपके खाते में UPI';
+
+  @override
+  String get settingsUpiHint =>
+      'ग्राहक किसी भी UPI ऐप से भुगतान करें; पैसे आने पर आप पुष्टि करें';
+
+  @override
+  String get settingsUpiId => 'आपकी UPI ID';
+
+  @override
+  String get settingsUpiName => 'भुगतान के समय दिखने वाला नाम';
+
+  @override
+  String get settingsOnlineOn => 'ऑनलाइन भुगतान (Razorpay) चालू है';
+
+  @override
+  String get settingsOnlineHint => 'बदलने के लिए सपोर्ट से संपर्क करें';
+
+  @override
+  String get settingsReturnsSection => 'रिटर्न';
+
+  @override
+  String get settingsReturns => 'रिटर्न अनुरोध स्वीकार करें';
+
+  @override
+  String get settingsReturnDays => 'ग्राहक इतने समय में पूछ सकते हैं';
+
+  @override
+  String get settingsDays => 'दिन';
+
+  @override
+  String get settingsExchange => 'बदली भी दें';
+
+  @override
+  String get settingsExtrasSection => 'ऑर्डर विकल्प';
+
+  @override
+  String get settingsOrderNotes => 'ग्राहक ऑर्डर में नोट लिख सकें';
+
+  @override
+  String get settingsListUpload => 'लिखी हुई सूची की फ़ोटो से ऑर्डर';
+
+  @override
+  String get settingsListUploadHint =>
+      'स्वीकार करते समय आप बिल की राशि तय करें';
+
+  @override
+  String get settingsPrescription => 'प्रिस्क्रिप्शन फ़ोटो अपलोड';
+
+  @override
+  String get settingsContactSection => 'दुकान संपर्क';
+
+  @override
+  String get settingsShopPhone => 'दुकान का फ़ोन';
+
+  @override
+  String get settingsShopWhatsapp => 'WhatsApp नंबर (वैकल्पिक)';
+
+  @override
+  String get settingsShopAddress => 'दुकान का पता';
+
+  @override
+  String get settingsPlatformNote =>
+      'दुकान का नाम, लोगो, रंग और ऐप आपके ऐप प्रदाता संभालते हैं। बदलने के लिए सपोर्ट से संपर्क करें।';
+
+  @override
+  String get settingsInvalidAmount => '20 या 20.50 जैसी राशि लिखें';
+
+  @override
+  String get settingsInvalidPincodes => 'हर पिनकोड में 6 अंक होते हैं';
+
+  @override
+  String get settingsInvalidUpi => 'shopname@okaxis जैसी UPI ID लिखें';
+
+  @override
+  String get settingsRequired => 'ज़रूरी';
+
+  @override
+  String get settingsNeedDeliveryOrPickup =>
+      'होम डिलीवरी या पिकअप चालू करें, वरना ग्राहक ऑर्डर नहीं दे पाएंगे';
+
+  @override
+  String get settingsNeedPayment => 'कम से कम एक भुगतान तरीका चालू करें';
+
+  @override
+  String get settingsNeedSlot =>
+      'कम से कम एक टाइम स्लॉट जोड़ें, या स्लॉट बंद करें';
+
+  @override
+  String get shopPausedTitle => 'दुकान अभी ऑर्डर नहीं ले रही है';
+
+  @override
+  String get shopPausedBody =>
+      'आप सामान देख सकते हैं। कृपया बाद में फिर देखें।';
+
+  @override
+  String settingsNumberRange(int min, int max) {
+    return '$min से $max के बीच की संख्या लिखें';
+  }
 }

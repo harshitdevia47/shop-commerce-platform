@@ -1196,4 +1196,217 @@ class AppLocalizationsEn extends AppLocalizations {
   String otpSubtitleWhatsApp(String phone) {
     return 'Sent on WhatsApp to $phone';
   }
+
+  @override
+  String get adminSettings => 'Shop settings';
+
+  @override
+  String get adminSettingsSubtitle =>
+      'Delivery, payments, timings, closing the shop';
+
+  @override
+  String get settingsSave => 'Save settings';
+
+  @override
+  String get settingsSaved => 'Settings saved. Customers see them now.';
+
+  @override
+  String get settingsFixFields => 'Please fix the highlighted fields';
+
+  @override
+  String get settingsAcceptingOrders => 'Taking orders';
+
+  @override
+  String get settingsOpenHint => 'Customers can place orders now';
+
+  @override
+  String get settingsPausedHint => 'Customers can browse but cannot order';
+
+  @override
+  String get settingsPausedMessage => 'Message for customers (optional)';
+
+  @override
+  String get settingsPausedMessageHint =>
+      'e.g. Closed for Diwali, open again on 3 Nov';
+
+  @override
+  String get settingsTooLong => 'Too long';
+
+  @override
+  String get settingsPausedNotice =>
+      'Your shop is not taking orders. Tap to open it again.';
+
+  @override
+  String get settingsDeliverySection => 'Delivery and pickup';
+
+  @override
+  String get settingsHomeDelivery => 'Home delivery';
+
+  @override
+  String get settingsDeliveryFee => 'Delivery fee';
+
+  @override
+  String get settingsMinOrder => 'Minimum order for delivery';
+
+  @override
+  String get settingsFreeAbove => 'Free delivery above';
+
+  @override
+  String get settingsFreeAboveHint => 'Leave empty to always charge the fee';
+
+  @override
+  String get settingsRadius => 'Delivery distance from shop';
+
+  @override
+  String get settingsEta => 'Usual delivery time';
+
+  @override
+  String get settingsMinutes => 'min';
+
+  @override
+  String get settingsPincodes => 'Delivery pincodes (optional)';
+
+  @override
+  String get settingsPincodesHint =>
+      'Comma separated. Empty = any pincode within distance';
+
+  @override
+  String get settingsPickup => 'Customers can pick up at the shop';
+
+  @override
+  String get settingsPickupHint => 'No delivery fee or minimum for pickup';
+
+  @override
+  String get settingsSlotsSection => 'Delivery time slots';
+
+  @override
+  String get settingsSlots => 'Let customers choose a time';
+
+  @override
+  String get settingsSlotsHint => 'Same slots every day';
+
+  @override
+  String get settingsSlotAdd => 'Add time slot';
+
+  @override
+  String get settingsSlotRemove => 'Remove slot';
+
+  @override
+  String get settingsSlotStart => 'Slot starts at';
+
+  @override
+  String get settingsSlotEnd => 'Slot ends at';
+
+  @override
+  String get settingsSlotOrder => 'The end time must be after the start time';
+
+  @override
+  String get settingsSlotCapacity => 'Orders per slot';
+
+  @override
+  String get settingsPaymentsSection => 'Payments';
+
+  @override
+  String get settingsCod => 'Cash on delivery';
+
+  @override
+  String get settingsUpi => 'UPI to your account';
+
+  @override
+  String get settingsUpiHint =>
+      'Customers pay from any UPI app; you confirm when the money arrives';
+
+  @override
+  String get settingsUpiId => 'Your UPI ID';
+
+  @override
+  String get settingsUpiName => 'Name shown when paying';
+
+  @override
+  String get settingsOnlineOn => 'Online payments (Razorpay) are on';
+
+  @override
+  String get settingsOnlineHint => 'Contact support to change them';
+
+  @override
+  String get settingsReturnsSection => 'Returns';
+
+  @override
+  String get settingsReturns => 'Accept return requests';
+
+  @override
+  String get settingsReturnDays => 'Customers can ask within';
+
+  @override
+  String get settingsDays => 'days';
+
+  @override
+  String get settingsExchange => 'Offer exchanges too';
+
+  @override
+  String get settingsExtrasSection => 'Order options';
+
+  @override
+  String get settingsOrderNotes => 'Customers can add a note to the order';
+
+  @override
+  String get settingsListUpload => 'Order by photo of a written list';
+
+  @override
+  String get settingsListUploadHint =>
+      'You set the bill amount when you accept';
+
+  @override
+  String get settingsPrescription => 'Prescription photo upload';
+
+  @override
+  String get settingsContactSection => 'Shop contact';
+
+  @override
+  String get settingsShopPhone => 'Shop phone';
+
+  @override
+  String get settingsShopWhatsapp => 'WhatsApp number (optional)';
+
+  @override
+  String get settingsShopAddress => 'Shop address';
+
+  @override
+  String get settingsPlatformNote =>
+      'Shop name, logo, colours and the app itself are managed by your app provider. Contact support to change them.';
+
+  @override
+  String get settingsInvalidAmount => 'Enter an amount like 20 or 20.50';
+
+  @override
+  String get settingsInvalidPincodes => 'Each pincode has 6 digits';
+
+  @override
+  String get settingsInvalidUpi => 'Enter a UPI ID like shopname@okaxis';
+
+  @override
+  String get settingsRequired => 'Required';
+
+  @override
+  String get settingsNeedDeliveryOrPickup =>
+      'Turn on home delivery or pickup, otherwise customers cannot order';
+
+  @override
+  String get settingsNeedPayment => 'Turn on at least one way to pay';
+
+  @override
+  String get settingsNeedSlot =>
+      'Add at least one time slot, or turn slots off';
+
+  @override
+  String get shopPausedTitle => 'The shop is not taking orders right now';
+
+  @override
+  String get shopPausedBody =>
+      'You can still look at products. Please check again later.';
+
+  @override
+  String settingsNumberRange(int min, int max) {
+    return 'Enter a number from $min to $max';
+  }
 }

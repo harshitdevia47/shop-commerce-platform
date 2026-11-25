@@ -16,6 +16,7 @@ class ShopSettings {
     required this.features,
     required this.catalog,
     this.returns = const ReturnsPolicy(),
+    this.ordering = const OrderingState(),
   });
 
   factory ShopSettings.fromJson(Map<String, dynamic> json) {
@@ -30,6 +31,7 @@ class ShopSettings {
       features: {for (final f in Feature.values) f: features[f.name] == true},
       catalog: CatalogSettings.fromJson(json['catalog'] as Map<String, dynamic>),
       returns: json['returns'] == null ? const ReturnsPolicy() : ReturnsPolicy.fromJson(json['returns'] as Map<String, dynamic>),
+      ordering: json['ordering'] == null ? const OrderingState() : OrderingState.fromJson(json['ordering'] as Map<String, dynamic>),
     );
   }
 
@@ -41,6 +43,7 @@ class ShopSettings {
   final Map<Feature, bool> features;
   final CatalogSettings catalog;
   final ReturnsPolicy returns;
+  final OrderingState ordering;
 
   bool isEnabled(Feature feature) => features[feature] ?? false;
 }
@@ -55,6 +58,8 @@ class ShopInfo {
     required this.phone,
     required this.address,
     this.whatsapp,
+    this.lat,
+    this.lng,
   });
 
   factory ShopInfo.fromJson(Map<String, dynamic> json) {
@@ -67,6 +72,8 @@ class ShopInfo {
       phone: contact['phone'] as String,
       whatsapp: contact['whatsapp'] as String?,
       address: contact['address'] as String,
+      lat: (contact['lat'] as num?)?.toDouble(),
+      lng: (contact['lng'] as num?)?.toDouble(),
     );
   }
 
@@ -77,6 +84,8 @@ class ShopInfo {
   final String phone;
   final String? whatsapp;
   final String address;
+  final double? lat;
+  final double? lng;
 
   String localizedName(Locale locale) => nameI18n[locale.languageCode] ?? name;
 }
@@ -91,6 +100,7 @@ class DeliveryRules {
     required this.feePaise,
     required this.freeAbovePaise,
     required this.etaMinutes,
+    this.slots,
   });
 
   factory DeliveryRules.fromJson(Map<String, dynamic> json) => DeliveryRules(
@@ -101,6 +111,7 @@ class DeliveryRules {
     feePaise: json['feePaise'] as int,
     freeAbovePaise: json['freeAbovePaise'] as int?,
     etaMinutes: json['etaMinutes'] as int,
+    slots: json['slots'] == null ? null : SlotSettings.fromJson(json['slots'] as Map<String, dynamic>),
   );
 
   final bool enabled;
@@ -110,6 +121,51 @@ class DeliveryRules {
   final int feePaise;
   final int? freeAbovePaise;
   final int etaMinutes;
+
+  /// Delivery windows customers choose from (when [Feature.deliverySlots] is on).
+  final SlotSettings? slots;
+}
+
+/// One daily delivery window, `HH:MM` in shop time.
+typedef SlotWindow = ({String start, String end});
+
+@immutable
+class SlotSettings {
+  const SlotSettings({required this.windows, this.daysAhead = 2, this.capacityPerSlot = 10, this.cutoffMinutes = 60});
+
+  factory SlotSettings.fromJson(Map<String, dynamic> json) => SlotSettings(
+    windows: [
+      for (final w in json['windows'] as List<dynamic>)
+        (start: (w as Map<String, dynamic>)['start'] as String, end: w['end'] as String),
+    ],
+    daysAhead: json['daysAhead'] as int? ?? 2,
+    capacityPerSlot: json['capacityPerSlot'] as int? ?? 10,
+    cutoffMinutes: json['cutoffMinutes'] as int? ?? 60,
+  );
+
+  final List<SlotWindow> windows;
+  final int daysAhead;
+  final int capacityPerSlot;
+  final int cutoffMinutes;
+
+  Map<String, dynamic> toJson() => {
+    'windows': [for (final w in windows) {'start': w.start, 'end': w.end}],
+    'daysAhead': daysAhead,
+    'capacityPerSlot': capacityPerSlot,
+    'cutoffMinutes': cutoffMinutes,
+  };
+}
+
+/// Owner's "not taking orders" switch.
+@immutable
+class OrderingState {
+  const OrderingState({this.paused = false, this.message});
+
+  factory OrderingState.fromJson(Map<String, dynamic> json) =>
+      OrderingState(paused: json['paused'] as bool? ?? false, message: json['pausedMessage'] as String?);
+
+  final bool paused;
+  final String? message;
 }
 
 @immutable

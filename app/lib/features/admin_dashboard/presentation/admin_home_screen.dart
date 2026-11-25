@@ -36,6 +36,19 @@ class AdminHomeScreen extends ConsumerWidget {
           const SizedBox(height: 4),
           Text(l10n.adminWelcome(user?.name ?? user?.phone ?? ''), style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 24),
+          if (ref.watch(shopSettingsProvider).value?.ordering.paused ?? false) ...[
+            Card(
+              key: const Key('pausedNotice'),
+              color: Theme.of(context).colorScheme.errorContainer,
+              child: ListTile(
+                leading: const Icon(Icons.pause_circle_outline),
+                title: Text(l10n.settingsPausedNotice),
+                trailing: user?.role == UserRole.owner ? const Icon(Icons.chevron_right) : null,
+                onTap: user?.role == UserRole.owner ? () => context.push(Routes.adminSettings) : null,
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
           if (user?.role == UserRole.owner) ...[
             Card(
               child: ListTile(
@@ -104,6 +117,17 @@ class AdminHomeScreen extends ConsumerWidget {
                 subtitle: Text(l10n.adminTeamSubtitle),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.push(Routes.adminTeam),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Card(
+              child: ListTile(
+                key: const Key('adminSettingsTile'),
+                leading: const Icon(Icons.settings_outlined),
+                title: Text(l10n.adminSettings),
+                subtitle: Text(l10n.adminSettingsSubtitle),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push(Routes.adminSettings),
               ),
             ),
           ],

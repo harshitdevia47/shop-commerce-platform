@@ -96,6 +96,8 @@ String errorMessage(AppLocalizations l10n, Object error) {
   if (error.isNetwork) return l10n.errorNetwork;
   return switch (error.code) {
     'SHOP_INACTIVE' => l10n.errorShopInactive,
+    'ORDERS_PAUSED' => l10n.shopPausedTitle,
+    'SETTINGS_INVALID' => l10n.settingsFixFields,
     'VALIDATION_FAILED' => l10n.errorPhoneInvalid,
     'OTP_INVALID' => l10n.errorOtpInvalid(error.detailInt('attemptsLeft') ?? 0),
     'OTP_EXPIRED' => l10n.errorOtpExpired,

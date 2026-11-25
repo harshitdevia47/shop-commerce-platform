@@ -38,6 +38,69 @@ afterAll(async () => {
   await rawPrisma.$disconnect();
 });
 
+describe('owner settings', () => {
+  const owner = (shopId: string) => signInternalHeaders({ requestId: randomUUID(), shopId, userId: randomUUID(), role: 'OWNER' }, secret);
+  const staff = (shopId: string) => signInternalHeaders({ requestId: randomUUID(), shopId, userId: randomUUID(), role: 'STAFF' }, secret);
+  const patch = (body: object, headers = owner(shopA.id)) => request(app).patch('/api/v1/admin/settings').set(headers).send(body);
+  const config = async (shopId = shopA.id) => (await request(app).get('/api/v1/shop/config').set(as(shopId))).body.data;
+
+  beforeEach(async () => {
+    await shops.upsertFromClientConfig(loadClient('sharma_kirana'), { resetSettings: true });
+    await shops.upsertFromClientConfig(loadClient('style_hub'), { resetSettings: true });
+  });
+
+  it('owner changes delivery, payments, features and pauses orders; customers see it', async () => {
+    const res = await patch({
+      delivery: { feePaise: 1500, minOrderPaise: 20_000, freeAbovePaise: null, pincodes: ['364001'] },
+      payments: { upi: { enabled: true, vpa: 'newshop@okicici', payeeName: 'Sharma Kirana' } },
+      features: { returns: true },
+      returns: { windowDays: 3 },
+      ordering: { paused: true, pausedMessage: 'Closed today for Diwali' },
+      contact: { whatsapp: null },
+    });
+    expect(res.status, JSON.stringify(res.body)).toBe(200);
+    const data = await config();
+    expect(data.delivery).toMatchObject({ feePaise: 1500, minOrderPaise: 20_000, freeAbovePaise: null, pincodes: ['364001'] });
+    expect(data.payments.upi.vpa).toBe('newshop@okicici');
+    expect(data.features.returns).toBe(true);
+    expect(data.returns).toEqual({ windowDays: 3, allowExchange: true });
+    expect(data.ordering).toEqual({ paused: true, pausedMessage: 'Closed today for Diwali' });
+    expect(data.shop.contact.whatsapp).toBeUndefined();
+    expect(data.shop.name).toBe('Sharma Kirana'); // not editable here
+
+    await patch({ ordering: { paused: false, pausedMessage: null } });
+    expect((await config()).ordering).toEqual({ paused: false });
+  });
+
+  it('refuses invalid combinations with readable reasons', async () => {
+    const noWay = await patch({ delivery: { enabled: false }, features: { storePickup: false } });
+    expect(noWay.body.error.code).toBe('SETTINGS_INVALID');
+    expect(JSON.stringify(noWay.body.error.details.issues)).toContain('delivery.enabled');
+    expect((await patch({ payments: { cod: false, upi: { enabled: false } } })).body.error.code).toBe('SETTINGS_INVALID');
+    expect((await patch({ payments: { upi: { enabled: true, vpa: 'not-an-upi-id', payeeName: 'X' } } })).body.error.code).toBe('SETTINGS_INVALID');
+    expect((await patch({ delivery: { feePaise: 12.5 } })).body.error.code).toBe('SETTINGS_INVALID');
+    expect((await patch({ shop: { name: 'Hacked' } })).status).toBe(400); // name is not owner-editable
+    expect((await patch({ payments: { razorpay: { enabled: true } } })).status).toBe(400); // needs platform keys
+  });
+
+  it('only the owner changes settings; staff can read; each shop its own', async () => {
+    expect((await patch({ delivery: { feePaise: 0 } }, staff(shopA.id))).status).toBe(403);
+    expect((await request(app).get('/api/v1/admin/settings').set(staff(shopA.id))).body.data.slug).toBe('sharma_kirana');
+    await patch({ delivery: { feePaise: 999 } }, owner(shopB.id));
+    expect((await config(shopA.id)).delivery.feePaise).not.toBe(999);
+    expect((await config(shopB.id)).delivery.feePaise).toBe(999);
+  });
+
+  it('client.json sync keeps what the owner edited, unless reset', async () => {
+    await patch({ delivery: { feePaise: 4200 } });
+    const synced = await shops.upsertFromClientConfig(loadClient('sharma_kirana'));
+    expect(synced.keptOwnerSettings).toBe(true);
+    expect((await config()).delivery.feePaise).toBe(4200);
+    await shops.upsertFromClientConfig(loadClient('sharma_kirana'), { resetSettings: true });
+    expect((await config()).delivery.feePaise).toBe(2000);
+  });
+});
+
 describe('health', () => {
   it('serves /health and /ready without internal auth', async () => {
     expect((await request(app).get('/health')).status).toBe(200);

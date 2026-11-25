@@ -51,5 +51,6 @@ export function toRuntimeConfig(config: ClientConfig): RuntimeConfig {
     features: config.features,
     catalog: config.catalog,
     returns: config.returns,
+    ordering: { paused: false },
   };
 }

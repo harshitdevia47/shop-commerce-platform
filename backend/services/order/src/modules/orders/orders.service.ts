@@ -318,6 +318,11 @@ export function createOrdersService({
       if (existing) return { order: toOrderView(existing), payment: null };
 
       const config = await shopConfig.get();
+      if (config.ordering?.paused) {
+        throw new AppError('ORDERS_PAUSED', 409, config.ordering.pausedMessage ?? 'The shop is not taking orders right now', {
+          message: config.ordering.pausedMessage ?? null,
+        });
+      }
       checkFulfillment(config, input.fulfillment);
       if (input.note && !config.features.orderNotes) {
         throw Errors.badRequest('FEATURE_DISABLED', 'This shop does not take order notes');

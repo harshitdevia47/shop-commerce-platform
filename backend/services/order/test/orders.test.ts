@@ -197,6 +197,7 @@ beforeEach(async () => {
     features: { ...PRESETS.grocery.features, storePickup: shopId === SHOP_A, orderNotes: true },
     catalog: PRESETS.grocery.catalog,
     returns: { windowDays: 7, allowExchange: true },
+    ordering: { paused: false },
   });
   configs = { [SHOP_A]: base(SHOP_A), [SHOP_B]: base(SHOP_B) };
   addresses = {
@@ -319,6 +320,14 @@ describe('place order', () => {
     );
     configs[SHOP_A]!.features.orderNotes = false;
     expect((await place(order({ note: 'hi' }))).body.error.code).toBe('FEATURE_DISABLED');
+  });
+
+  it('a paused shop takes no new orders, with the owner message', async () => {
+    configs[SHOP_A]!.ordering = { paused: true, pausedMessage: 'Closed for Diwali' };
+    const res = await place();
+    expect(res.status).toBe(409);
+    expect(res.body.error).toMatchObject({ code: 'ORDERS_PAUSED', details: { message: 'Closed for Diwali' } });
+    expect(reservations.size).toBe(0);
   });
 
   it('blocked customers cannot order', async () => {
@@ -712,7 +721,7 @@ describe('returns and exchanges', () => {
     expect((await ask(orderId, { items: [] })).body.error.code).toBe('RETURN_ITEMS_REQUIRED');
     configs[SHOP_A]!.returns.allowExchange = false;
     expect((await ask(orderId, { type: 'EXCHANGE' })).body.error.code).toBe('EXCHANGE_NOT_OFFERED');
-    clock = new Date(clock.getTime() + 8 * 86_400_000);
+    clock = new Date(Date.now() + 8 * 86_400_000); // delivery time comes from the database clock (real time)
     expect((await ask(orderId)).body.error.code).toBe('RETURN_WINDOW_CLOSED');
     configs[SHOP_A]!.features.returns = false;
     expect((await ask(orderId)).body.error.code).toBe('FEATURE_DISABLED');

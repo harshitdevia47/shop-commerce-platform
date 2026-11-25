@@ -142,6 +142,15 @@ export const returnsSchema = z
 
 const DEFAULT_RETURNS = { windowDays: 7, allowExchange: true };
 
+/** Owner's switch: stop taking new orders for a while (holiday, stock-taking). Runtime only. */
+export const orderingSchema = z
+  .object({
+    paused: z.boolean().default(false),
+    /** Shown to customers while paused, e.g. "Closed for Diwali, back on 3 Nov". */
+    pausedMessage: z.string().trim().max(200).optional(),
+  })
+  .strict();
+
 export const paymentsSchema = z
   .object({
     cod: z.boolean(),
@@ -244,6 +253,7 @@ export const runtimeConfigSchema = z
     features: featuresSchema,
     catalog: catalogSchema,
     returns: returnsSchema.default(DEFAULT_RETURNS),
+    ordering: orderingSchema.default({ paused: false }),
   })
   .strict()
   .superRefine(checkCrossSectionRules);
@@ -273,4 +283,5 @@ export type PaymentsConfig = z.infer<typeof paymentsSchema>;
 export type CatalogConfig = z.infer<typeof catalogSchema>;
 export type SlotsConfig = z.infer<typeof slotsSchema>;
 export type ReturnsConfig = z.infer<typeof returnsSchema>;
+export type OrderingConfig = z.infer<typeof orderingSchema>;
 export type ShopInfo = z.infer<typeof shopSchema>;

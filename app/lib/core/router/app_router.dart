@@ -26,6 +26,7 @@ import '../../features/orders/presentation/my_orders_screen.dart';
 import '../../features/orders/presentation/order_detail_screen.dart';
 import '../../features/orders/presentation/return_request_screen.dart';
 import '../../features/admin_reports/presentation/reports_screen.dart';
+import '../../features/admin_settings/presentation/admin_settings_screen.dart';
 import '../../features/admin_team/presentation/admin_team_screen.dart';
 import '../../features/rider_deliveries/presentation/rider_delivery_screen.dart';
 import '../../features/rider_deliveries/presentation/rider_home_screen.dart';
@@ -151,6 +152,12 @@ final routerProvider = Provider<GoRouter>((ref) {
             // Owner only (sales figures); the server enforces it too.
             redirect: (context, state) => ref.read(authControllerProvider).value?.role == UserRole.owner ? null : Routes.admin,
             builder: (context, state) => const ReportsScreen(),
+          ),
+          GoRoute(
+            path: 'settings',
+            // Owner only; the server enforces it too.
+            redirect: (context, state) => ref.read(authControllerProvider).value?.role == UserRole.owner ? null : Routes.admin,
+            builder: (context, state) => const AdminSettingsScreen(),
           ),
           GoRoute(
             path: 'team',

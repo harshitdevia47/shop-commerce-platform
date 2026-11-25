@@ -483,6 +483,7 @@ Future<Harness> pumpShop(
   List<Override> extraOverrides = const [],
   Map<String, bool> features = const {},
   bool razorpay = false,
+  FakeRepository? settings,
 }) async {
   usePhoneScreen(tester);
   quoteDebounce = Duration.zero;
@@ -497,7 +498,9 @@ Future<Harness> pumpShop(
         clientConfigProvider.overrideWithValue(testClient),
         envConfigProvider.overrideWithValue(testEnv),
         sharedPreferencesProvider.overrideWithValue(prefs),
-        shopSettingsRepositoryProvider.overrideWithValue(FakeRepository(ShopSettings.fromJson(shopConfigJson(features: features, razorpay: razorpay)))),
+        shopSettingsRepositoryProvider.overrideWithValue(
+          settings ?? FakeRepository(ShopSettings.fromJson(shopConfigJson(features: features, razorpay: razorpay))),
+        ),
         catalogRepositoryProvider.overrideWithValue(FakeCatalogRepository()),
         ordersRepositoryProvider.overrideWithValue(orders),
         adminOrdersRepositoryProvider.overrideWithValue(orders),

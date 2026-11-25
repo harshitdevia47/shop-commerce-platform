@@ -82,6 +82,8 @@ Single source per client: `clients/<slug>/client.json` + assets (`logo.png`, `ic
 | `slug`, `build`, `branding`, `locale` | Flutter build | `tool/gen_flavors.dart` generates the Android flavor + flavor assets; values read via `--dart-define-from-file` |
 | `shop`, `delivery` (incl. `slots`), `payments`, `features`, `catalog`, `returns` | `tenant` service DB | `client.js sync` upserts them; app fetches at runtime from `GET /shop/config` |
 
+- **Owner edits settings in the app** (`features/admin_settings`, `/admin/settings`, OWNER only): `PATCH /api/v1/admin/settings` (tenant) takes partial `contact`, `delivery` (incl. `slots`), `payments` (COD/UPI; Razorpay needs server keys so it is not editable), `features`, `returns`, `ordering`; the merged result is validated with `runtimeConfigSchema` (`SETTINGS_INVALID` with issues). Shop name, branding, business type and catalog shape stay platform-managed. Once edited (`settings_edited_at`), `client.js sync` only updates name/business type/catalog; `--reset-settings` overwrites with client.json.
+- **Ordering pause:** runtime `ordering: { paused, pausedMessage? }` (owner switch "Taking orders"); order refuses placement with `ORDERS_PAUSED` (409, message in details; shop config is cached up to 60 s there); the customer home shows a banner, the admin dashboard a notice.
 - One Zod schema in `backend/packages/config-schema`; Dart model mirrors it in `app/lib/core/config/`.
 - Business-type presets (`grocery`, `clothing`, `bakery`, `electronics`, `pharmacy`, `general`) give defaults; `client.json` overrides.
 - Slug format: `^[a-z][a-z0-9]*(_[a-z0-9]+)*$` (e.g. `sharma_kirana`). It is the folder name, `X-Shop-Key`, and Android flavor name.

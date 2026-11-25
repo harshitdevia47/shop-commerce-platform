@@ -2235,6 +2235,408 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sent on WhatsApp to {phone}'**
   String otpSubtitleWhatsApp(String phone);
+
+  /// No description provided for @adminSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop settings'**
+  String get adminSettings;
+
+  /// No description provided for @adminSettingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery, payments, timings, closing the shop'**
+  String get adminSettingsSubtitle;
+
+  /// No description provided for @settingsSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save settings'**
+  String get settingsSave;
+
+  /// No description provided for @settingsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings saved. Customers see them now.'**
+  String get settingsSaved;
+
+  /// No description provided for @settingsFixFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fix the highlighted fields'**
+  String get settingsFixFields;
+
+  /// No description provided for @settingsAcceptingOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Taking orders'**
+  String get settingsAcceptingOrders;
+
+  /// No description provided for @settingsOpenHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Customers can place orders now'**
+  String get settingsOpenHint;
+
+  /// No description provided for @settingsPausedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Customers can browse but cannot order'**
+  String get settingsPausedHint;
+
+  /// No description provided for @settingsPausedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Message for customers (optional)'**
+  String get settingsPausedMessage;
+
+  /// No description provided for @settingsPausedMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Closed for Diwali, open again on 3 Nov'**
+  String get settingsPausedMessageHint;
+
+  /// No description provided for @settingsTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Too long'**
+  String get settingsTooLong;
+
+  /// No description provided for @settingsPausedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Your shop is not taking orders. Tap to open it again.'**
+  String get settingsPausedNotice;
+
+  /// No description provided for @settingsDeliverySection.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery and pickup'**
+  String get settingsDeliverySection;
+
+  /// No description provided for @settingsHomeDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Home delivery'**
+  String get settingsHomeDelivery;
+
+  /// No description provided for @settingsDeliveryFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery fee'**
+  String get settingsDeliveryFee;
+
+  /// No description provided for @settingsMinOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum order for delivery'**
+  String get settingsMinOrder;
+
+  /// No description provided for @settingsFreeAbove.
+  ///
+  /// In en, this message translates to:
+  /// **'Free delivery above'**
+  String get settingsFreeAbove;
+
+  /// No description provided for @settingsFreeAboveHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty to always charge the fee'**
+  String get settingsFreeAboveHint;
+
+  /// No description provided for @settingsRadius.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery distance from shop'**
+  String get settingsRadius;
+
+  /// No description provided for @settingsEta.
+  ///
+  /// In en, this message translates to:
+  /// **'Usual delivery time'**
+  String get settingsEta;
+
+  /// No description provided for @settingsMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'min'**
+  String get settingsMinutes;
+
+  /// No description provided for @settingsPincodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery pincodes (optional)'**
+  String get settingsPincodes;
+
+  /// No description provided for @settingsPincodesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Comma separated. Empty = any pincode within distance'**
+  String get settingsPincodesHint;
+
+  /// No description provided for @settingsPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Customers can pick up at the shop'**
+  String get settingsPickup;
+
+  /// No description provided for @settingsPickupHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No delivery fee or minimum for pickup'**
+  String get settingsPickupHint;
+
+  /// No description provided for @settingsSlotsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery time slots'**
+  String get settingsSlotsSection;
+
+  /// No description provided for @settingsSlots.
+  ///
+  /// In en, this message translates to:
+  /// **'Let customers choose a time'**
+  String get settingsSlots;
+
+  /// No description provided for @settingsSlotsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Same slots every day'**
+  String get settingsSlotsHint;
+
+  /// No description provided for @settingsSlotAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add time slot'**
+  String get settingsSlotAdd;
+
+  /// No description provided for @settingsSlotRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove slot'**
+  String get settingsSlotRemove;
+
+  /// No description provided for @settingsSlotStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Slot starts at'**
+  String get settingsSlotStart;
+
+  /// No description provided for @settingsSlotEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Slot ends at'**
+  String get settingsSlotEnd;
+
+  /// No description provided for @settingsSlotOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'The end time must be after the start time'**
+  String get settingsSlotOrder;
+
+  /// No description provided for @settingsSlotCapacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders per slot'**
+  String get settingsSlotCapacity;
+
+  /// No description provided for @settingsPaymentsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments'**
+  String get settingsPaymentsSection;
+
+  /// No description provided for @settingsCod.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash on delivery'**
+  String get settingsCod;
+
+  /// No description provided for @settingsUpi.
+  ///
+  /// In en, this message translates to:
+  /// **'UPI to your account'**
+  String get settingsUpi;
+
+  /// No description provided for @settingsUpiHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Customers pay from any UPI app; you confirm when the money arrives'**
+  String get settingsUpiHint;
+
+  /// No description provided for @settingsUpiId.
+  ///
+  /// In en, this message translates to:
+  /// **'Your UPI ID'**
+  String get settingsUpiId;
+
+  /// No description provided for @settingsUpiName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name shown when paying'**
+  String get settingsUpiName;
+
+  /// No description provided for @settingsOnlineOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Online payments (Razorpay) are on'**
+  String get settingsOnlineOn;
+
+  /// No description provided for @settingsOnlineHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact support to change them'**
+  String get settingsOnlineHint;
+
+  /// No description provided for @settingsReturnsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Returns'**
+  String get settingsReturnsSection;
+
+  /// No description provided for @settingsReturns.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept return requests'**
+  String get settingsReturns;
+
+  /// No description provided for @settingsReturnDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Customers can ask within'**
+  String get settingsReturnDays;
+
+  /// No description provided for @settingsDays.
+  ///
+  /// In en, this message translates to:
+  /// **'days'**
+  String get settingsDays;
+
+  /// No description provided for @settingsExchange.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer exchanges too'**
+  String get settingsExchange;
+
+  /// No description provided for @settingsExtrasSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Order options'**
+  String get settingsExtrasSection;
+
+  /// No description provided for @settingsOrderNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Customers can add a note to the order'**
+  String get settingsOrderNotes;
+
+  /// No description provided for @settingsListUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Order by photo of a written list'**
+  String get settingsListUpload;
+
+  /// No description provided for @settingsListUploadHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You set the bill amount when you accept'**
+  String get settingsListUploadHint;
+
+  /// No description provided for @settingsPrescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Prescription photo upload'**
+  String get settingsPrescription;
+
+  /// No description provided for @settingsContactSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop contact'**
+  String get settingsContactSection;
+
+  /// No description provided for @settingsShopPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop phone'**
+  String get settingsShopPhone;
+
+  /// No description provided for @settingsShopWhatsapp.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp number (optional)'**
+  String get settingsShopWhatsapp;
+
+  /// No description provided for @settingsShopAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop address'**
+  String get settingsShopAddress;
+
+  /// No description provided for @settingsPlatformNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop name, logo, colours and the app itself are managed by your app provider. Contact support to change them.'**
+  String get settingsPlatformNote;
+
+  /// No description provided for @settingsInvalidAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an amount like 20 or 20.50'**
+  String get settingsInvalidAmount;
+
+  /// No description provided for @settingsInvalidPincodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Each pincode has 6 digits'**
+  String get settingsInvalidPincodes;
+
+  /// No description provided for @settingsInvalidUpi.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a UPI ID like shopname@okaxis'**
+  String get settingsInvalidUpi;
+
+  /// No description provided for @settingsRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get settingsRequired;
+
+  /// No description provided for @settingsNeedDeliveryOrPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on home delivery or pickup, otherwise customers cannot order'**
+  String get settingsNeedDeliveryOrPickup;
+
+  /// No description provided for @settingsNeedPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on at least one way to pay'**
+  String get settingsNeedPayment;
+
+  /// No description provided for @settingsNeedSlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one time slot, or turn slots off'**
+  String get settingsNeedSlot;
+
+  /// No description provided for @shopPausedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The shop is not taking orders right now'**
+  String get shopPausedTitle;
+
+  /// No description provided for @shopPausedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can still look at products. Please check again later.'**
+  String get shopPausedBody;
+
+  /// No description provided for @settingsNumberRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a number from {min} to {max}'**
+  String settingsNumberRange(int min, int max);
 }
 
 class _AppLocalizationsDelegate
