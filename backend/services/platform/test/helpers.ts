@@ -7,8 +7,6 @@ import type { MailMessage, Mailer } from '../src/mail/mailer.js';
 
 export const db = createDb(process.env.DATABASE_URL!);
 export const ADMIN = 'owner@example.com';
-export const ORIGIN = 'http://admin.test';
-
 export class CapturingMailer implements Mailer {
   sent: MailMessage[] = [];
   async send(message: MailMessage): Promise<void> {
@@ -37,27 +35,27 @@ export function buildApp(extra: Partial<PlatformAppDeps> = {}): TestApp & { dire
     limits: new MemoryRateLimitStore(() => clock.now.getTime()),
     loginCodeSecret: 'test-login-code-secret-test-login-code-secret',
     admins: [ADMIN],
-    origin: ORIGIN,
-    cookie: { secure: false },
     now: () => clock.now,
     directory,
     payTo: 'me@okaxis',
+    defaultFeeRupees: 999,
     ...extra,
   });
   return { app, mailer, clock, directory };
 }
 
-/** Posts a form the way a browser on the admin site does. */
-export const post = (app: Express, path: string, form: Record<string, string>, cookie?: string) => {
-  const req = request(app).post(path).set('origin', ORIGIN).type('form').send(form);
-  return cookie ? req.set('cookie', cookie) : req;
-};
+/** JSON request as the admin app sends it (bearer token when given). */
+export function api(app: Express, method: 'get' | 'post' | 'put', path: string, token?: string, body?: object) {
+  const req = request(app)[method](path);
+  if (token) req.set('authorization', `Bearer ${token}`);
+  return body ? req.send(body) : req;
+}
 
-/** Logs the admin in and returns the session cookie. */
+/** Logs the admin in and returns the session token. */
 export async function login(t: TestApp): Promise<string> {
-  await post(t.app, '/login', { email: ADMIN }).expect(200);
-  const res = await post(t.app, '/login/verify', { email: ADMIN, code: t.mailer.lastCode() }).expect(303);
-  return (res.headers['set-cookie'] as unknown as string[])[0]!.split(';')[0]!;
+  await api(t.app, 'post', '/api/admin/login/code', undefined, { email: ADMIN }).expect(200);
+  const res = await api(t.app, 'post', '/api/admin/login/verify', undefined, { email: ADMIN, code: t.mailer.lastCode() }).expect(200);
+  return res.body.data.token as string;
 }
 
 export async function cleanDb(): Promise<void> {
@@ -66,6 +64,7 @@ export async function cleanDb(): Promise<void> {
   await db.alertLog.deleteMany();
   await db.usedForm.deleteMany();
   await db.dailyMail.deleteMany();
+  await db.adminDevice.deleteMany();
   await db.adminSession.deleteMany();
   await db.adminLoginCode.deleteMany();
 }

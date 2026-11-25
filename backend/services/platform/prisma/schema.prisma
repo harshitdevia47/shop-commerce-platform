@@ -27,7 +27,7 @@ model AdminLoginCode {
   @@map("admin_login_codes")
 }
 
-/// Browser session of an admin (cookie holds the raw token; only its hash is stored).
+/// Session of the admin app (the app keeps the raw token; only its hash is stored).
 model AdminSession {
   id         String   @id @default(uuid(7)) @db.Uuid
   tokenHash  String   @unique @map("token_hash")
@@ -36,7 +36,24 @@ model AdminSession {
   lastSeenAt DateTime @default(now()) @map("last_seen_at") @db.Timestamptz(3)
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
+  devices AdminDevice[]
+
   @@map("admin_sessions")
+}
+
+/// A phone that gets overdue notifications (FCM token). Removed with its session (logout, expiry).
+model AdminDevice {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  sessionId String   @map("session_id") @db.Uuid
+  email     String
+  token     String   @unique
+  platform  String
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  session AdminSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("admin_devices")
 }
 
 /// A shop's monthly subscription to the platform.

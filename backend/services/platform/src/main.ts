@@ -4,6 +4,7 @@ import { createPlatformApp } from './app.js';
 import { runDailyAlerts } from './jobs/daily-alerts.js';
 import { createDb } from './db.js';
 import { loadPlatformEnv } from './env.js';
+import { consolePushSender, fcmPushSender } from '@qc/fcm';
 import { createMailer } from './mail/mailer.js';
 import { createHttpShopDirectory } from './modules/subscriptions/shop-directory.js';
 import { createSubscriptionsService } from './modules/subscriptions/subscriptions.service.js';
@@ -19,6 +20,9 @@ const mailer = createMailer(
   logger,
 );
 
+const push =
+  env.PUSH_PROVIDER === 'fcm' ? fcmPushSender(env.FCM_SERVICE_ACCOUNT!, logger) : env.PUSH_PROVIDER === 'console' ? consolePushSender(logger) : null;
+
 const directory = createHttpShopDirectory(
   { tenant: env.TENANT_URL, identity: env.IDENTITY_URL, catalog: env.CATALOG_URL, reporting: env.REPORTING_URL },
   env.INTERNAL_HMAC_SECRET,
@@ -32,8 +36,6 @@ const app = createPlatformApp({
   limits: new RedisRateLimitStore(redis),
   loginCodeSecret: env.LOGIN_CODE_SECRET,
   admins: env.ADMIN_EMAILS,
-  origin: env.ADMIN_ORIGIN,
-  cookie: { secure: env.ADMIN_ORIGIN.startsWith('https://') },
   directory,
   payTo: env.PLATFORM_UPI_ID,
   defaultFeeRupees: env.PLATFORM_DEFAULT_FEE_RUPEES,
@@ -43,11 +45,11 @@ const app = createPlatformApp({
 const subscriptions = createSubscriptionsService({ db, directory, logger, payTo: env.PLATFORM_UPI_ID });
 const pushJob = startIntervalJob('push-app-states', 60 * 60_000, () => subscriptions.pushAll(), logger);
 void pushJob.runOnce();
-// From 09:00 IST, one email a day about shops that became 7 days overdue (nothing is paused automatically).
+// From 09:00 IST, once a day: phone notification (email if no phone) for shops that became 7 days overdue.
 const alertsJob = startIntervalJob(
   'daily-overdue-email',
   15 * 60_000,
-  () => runDailyAlerts({ db, mailer, directory, now: () => new Date(), to: env.MAIL_TO ?? env.ADMIN_EMAILS[0]!, baseUrl: env.ADMIN_ORIGIN }),
+  () => runDailyAlerts({ db, push, mailer, directory, logger, now: () => new Date(), to: env.MAIL_TO ?? env.ADMIN_EMAILS[0]! }),
   logger,
 );
 

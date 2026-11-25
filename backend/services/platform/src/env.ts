@@ -13,13 +13,14 @@ const envSchema = z
     REDIS_URL: z.string().url(),
     /** Who may log in (comma separated). */
     ADMIN_EMAILS: emailList,
-    /** Where the admin site is opened, e.g. https://admin.example.in (form submits must come from it). */
-    ADMIN_ORIGIN: z.string().url().transform((v) => new URL(v).origin),
     LOGIN_CODE_SECRET: z.string().min(32, 'LOGIN_CODE_SECRET must be at least 32 characters'),
     MAIL_PROVIDER: z.enum(['console', 'gmail']).default('console'),
     MAIL_USER: z.email().optional(),
     MAIL_APP_PASSWORD: z.string().optional(),
-    /** Daily summary goes here (default: the first admin email). */
+    /** Overdue alerts to the Shop Admin app: fcm (Firebase), console (log, dev) or none (email only). */
+    PUSH_PROVIDER: z.enum(['none', 'console', 'fcm']).default('none'),
+    FCM_SERVICE_ACCOUNT: z.string().optional(),
+    /** Fallback inbox for alerts when no phone is registered (default: the first admin email). */
     MAIL_TO: z.email().optional(),
     TENANT_URL: z.string().url(),
     IDENTITY_URL: z.string().url(),
@@ -36,16 +37,20 @@ const envSchema = z
     if (env.MAIL_PROVIDER === 'gmail' && (!env.MAIL_USER || !env.MAIL_APP_PASSWORD)) {
       ctx.addIssue({ code: 'custom', path: ['MAIL_USER'], message: 'MAIL_PROVIDER=gmail needs MAIL_USER and MAIL_APP_PASSWORD(_FILE)' });
     }
+    if (env.PUSH_PROVIDER === 'fcm' && !env.FCM_SERVICE_ACCOUNT) {
+      ctx.addIssue({ code: 'custom', path: ['FCM_SERVICE_ACCOUNT'], message: 'PUSH_PROVIDER=fcm needs FCM_SERVICE_ACCOUNT(_FILE)' });
+    }
     if (env.NODE_ENV === 'production' && env.MAIL_PROVIDER === 'console') {
       ctx.addIssue({ code: 'custom', path: ['MAIL_PROVIDER'], message: 'console mail is not allowed in production' });
-    }
-    if (env.NODE_ENV === 'production' && !env.ADMIN_ORIGIN.startsWith('https://')) {
-      ctx.addIssue({ code: 'custom', path: ['ADMIN_ORIGIN'], message: 'ADMIN_ORIGIN must be https in production' });
     }
   });
 
 export type PlatformEnv = z.infer<typeof envSchema>;
 
 export function loadPlatformEnv(source: Record<string, string | undefined> = process.env): PlatformEnv {
-  return loadEnv(envSchema, { ...source, MAIL_APP_PASSWORD: readSecret(source, 'MAIL_APP_PASSWORD') });
+  return loadEnv(envSchema, {
+    ...source,
+    MAIL_APP_PASSWORD: readSecret(source, 'MAIL_APP_PASSWORD'),
+    FCM_SERVICE_ACCOUNT: readSecret(source, 'FCM_SERVICE_ACCOUNT'),
+  });
 }

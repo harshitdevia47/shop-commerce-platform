@@ -6,7 +6,9 @@ import type { Mailer } from '../../mail/mailer.js';
 const CODE_TTL_MS = 10 * 60_000;
 const MAX_ATTEMPTS = 5;
 const RESEND_AFTER_MS = 30_000;
-export const SESSION_TTL_MS = 7 * 24 * 60 * 60_000;
+/** App sessions last 90 days and are renewed (at most once a day) while the app is used. */
+export const SESSION_TTL_MS = 90 * 24 * 60 * 60_000;
+const RENEW_AFTER_MS = 24 * 60 * 60_000;
 
 export interface AuthDeps {
   db: Db;
@@ -51,8 +53,8 @@ export function createAuthService({ db, mailer, limits, logger, secret, admins, 
       await db.adminLoginCode.create({ data: { email, codeHash: hashCode(email, code), expiresAt: new Date(at.getTime() + CODE_TTL_MS), createdAt: at } });
       await mailer.send({
         to: email,
-        subject: `Admin login code: ${code}`,
-        text: `Your login code for the shop apps admin is ${code}.\nIt works for 10 minutes. If you did not ask for it, ignore this email.`,
+        subject: `Shop Admin login code: ${code}`,
+        text: `Your login code for the Shop Admin app is ${code}.\nIt works for 10 minutes. If you did not ask for it, ignore this email.`,
       });
     },
 
@@ -81,20 +83,30 @@ export function createAuthService({ db, mailer, limits, logger, secret, admins, 
       return token;
     },
 
-    /** The admin email for a session token, or null (expired, logged out, or no longer an admin). */
-    async session(token: string | undefined): Promise<string | null> {
+    /** The session for a token, or null (expired, logged out, or no longer an admin). Renews it daily. */
+    async session(token: string | undefined): Promise<{ id: string; email: string } | null> {
       if (!token) return null;
       const session = await db.adminSession.findUnique({ where: { tokenHash: sha256(token) } });
       const at = now();
       if (!session || session.expiresAt <= at || !admins.includes(session.email)) return null;
-      if (at.getTime() - session.lastSeenAt.getTime() > 60_000) {
-        await db.adminSession.update({ where: { id: session.id }, data: { lastSeenAt: at } });
+      if (at.getTime() - session.lastSeenAt.getTime() > RENEW_AFTER_MS) {
+        await db.adminSession.update({ where: { id: session.id }, data: { lastSeenAt: at, expiresAt: new Date(at.getTime() + SESSION_TTL_MS) } });
       }
-      return session.email;
+      return { id: session.id, email: session.email };
     },
 
+    /** Ends the session; its notification devices go with it (cascade). */
     async logout(token: string | undefined): Promise<void> {
       if (token) await db.adminSession.deleteMany({ where: { tokenHash: sha256(token) } });
+    },
+
+    /** This phone gets overdue notifications for the signed-in admin (a token moves to the newest session). */
+    async registerDevice(session: { id: string; email: string }, token: string, platform: string): Promise<void> {
+      await db.adminDevice.upsert({
+        where: { token },
+        create: { sessionId: session.id, email: session.email, token, platform },
+        update: { sessionId: session.id, email: session.email, platform },
+      });
     },
   };
 }
