@@ -25,5 +25,11 @@ export function reportsRouter(reports: ReportsService): Router {
       reports.topProducts(parseRange(query.from, query.to), query.limit),
     ),
   );
+  // Internal (platform service): this month's numbers for the shop in the signed context.
+  router.get(
+    '/internal/stats/month',
+    requireShop,
+    handler({ query: z.object({ from: isoDay }) }, ({ query }) => reports.monthStats(new Date(`${query.from}T00:00:00.000Z`))),
+  );
   return router;
 }

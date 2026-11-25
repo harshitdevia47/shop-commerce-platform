@@ -11,6 +11,7 @@ import { createTokenService } from './modules/auth/token.service.js';
 import { teamRouter } from './modules/team/team.routes.js';
 import { createTeamService } from './modules/team/team.service.js';
 import { usersRouter } from './modules/users/users.routes.js';
+import { statsRouter } from './modules/users/stats.routes.js';
 import { createUsersService, type OpenOrders } from './modules/users/users.service.js';
 import type { SmsProvider } from './sms/sms-provider.js';
 
@@ -51,6 +52,7 @@ export async function createIdentityApp(deps: IdentityAppDeps): Promise<Express>
   app.use(teamRouter(createTeamService(db, tokens)));
   app.use(addressesRouter(createAddressesService(db, now), users));
   app.use(usersRouter(users, deps.orders));
+  app.use(statsRouter(db, users));
 
   finalizeApp(app, logger);
   return app;

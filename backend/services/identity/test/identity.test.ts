@@ -613,6 +613,34 @@ describe('deleting my account', () => {
   });
 });
 
+describe('internal: numbers and owner for the platform', () => {
+  it('counts customers (not team, not deleted) and new/active since a day, per shop', async () => {
+    const a = await login(SHOP_A, '+919800000001');
+    clock = new Date('2026-11-24T10:00:00Z');
+    await login(SHOP_A, '+919800000002');
+    const rider = await login(SHOP_A, '+919800000003');
+    await rawPrisma.user.update({ where: { id: rider.user.id }, data: { role: 'RIDER' } });
+    await login(SHOP_B, '+919800000004');
+    await rawPrisma.user.update({ where: { id: a.user.id }, data: { createdAt: new Date('2026-10-10T10:00:00Z'), lastLoginAt: new Date('2026-10-10T10:00:00Z') } });
+
+    const stats = async (shop: string) => (await request(app).get('/internal/stats/customers?since=2026-11-01').set(as(shop))).body.data;
+    expect(await stats(SHOP_A)).toEqual({ total: 2, newSince: 1, activeSince: 1 });
+    expect(await stats(SHOP_B)).toEqual({ total: 1, newSince: 1, activeSince: 1 });
+  });
+
+  it('creates the owner and reports whether they logged in', async () => {
+    const owner = async (shop: string) => (await request(app).get('/internal/stats/owner').set(as(shop))).body.data;
+    expect(await owner(SHOP_A)).toEqual({ name: null, phone: null, hasLoggedIn: false });
+    const created = await request(app).post('/internal/platform/owner').set(as(SHOP_A)).send({ phone: '98250 12345', name: 'Patel' });
+    expect(created.status).toBe(200);
+    expect(await owner(SHOP_A)).toEqual({ name: 'Patel', phone: '+919825012345', hasLoggedIn: false });
+    expect(await owner(SHOP_B)).toEqual({ name: null, phone: null, hasLoggedIn: false });
+    await login(SHOP_A, '+919825012345');
+    expect((await owner(SHOP_A)).hasLoggedIn).toBe(true);
+    expect((await request(app).post('/internal/platform/owner').set(as(SHOP_A)).send({ phone: '12' })).status).toBe(400);
+  });
+});
+
 describe('rawPrisma usage guard', () => {
   it('is only referenced in db.ts and main.ts within src/', () => {
     const srcDir = fileURLToPath(new URL('../src/', import.meta.url));

@@ -188,6 +188,11 @@ export function createProductsService({ db, categories, settings, media, now = (
   });
 
   return {
+    /** Platform admin: products of the shop that are not deleted. */
+    async count(): Promise<{ count: number }> {
+      return { count: await db.product.count({ where: { deletedAt: null } }) };
+    },
+
     async listPublic(query: ProductQuery): Promise<Page<PublicProduct>> {
       return toPage(await list(query, true), query.limit, (p) => p.id, toPublicProduct);
     },

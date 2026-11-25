@@ -146,6 +146,21 @@ describe('sales summary', () => {
   });
 });
 
+describe('internal: month numbers for the platform', () => {
+  it('counts sales since a day and the last order, in the calling shop only', async () => {
+    await placed('2026-10-30T05:00:00Z');
+    const a = await placed('2026-11-02T05:00:00Z', { items: [{ line: RICE, qty: 1, paise: 12_000 }] });
+    const b = await placed('2026-11-20T05:00:00Z', { items: [{ line: DAL, qty: 1, paise: 9_000 }] });
+    await status(b.orderId, 'CANCELLED', '2026-11-20T06:00:00Z');
+    void a;
+    const month = (shop: string) => request(app).get('/internal/stats/month?from=2026-11-01').set(signInternalHeaders({ requestId: randomUUID(), shopId: shop }, SECRET));
+    const res = await month(SHOP_A);
+    expect(res.status).toBe(200);
+    expect(res.body.data).toEqual({ orders: 1, salesPaise: 12_000, lastOrderAt: '2026-11-20T05:00:00.000Z' });
+    expect((await month(SHOP_B)).body.data).toEqual({ orders: 0, salesPaise: 0, lastOrderAt: null });
+  });
+});
+
 describe('daily and top products', () => {
   it('fills every day and ranks products by sales', async () => {
     await placed('2026-11-21T05:00:00Z', { items: [{ line: RICE, qty: 1, paise: 12_000 }] });

@@ -95,5 +95,8 @@ export function productsRouter(products: ProductsService): Router {
   );
   router.use('/api/v1/admin/catalog', admin);
 
+  // Internal (platform service): product count for the shop in the signed context.
+  router.get('/internal/stats/products', requireShop, handler({}, () => products.count()));
+
   return router;
 }

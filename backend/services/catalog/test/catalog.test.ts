@@ -281,6 +281,19 @@ describe('products (admin)', () => {
   });
 });
 
+describe('internal: product count for the platform', () => {
+  it('counts products that are not deleted, per shop', async () => {
+    const count = async (shop: string) => (await request(app).get('/internal/stats/products').set(guest(shop))).body.data;
+    const before = (await count(SHOP_A)).count;
+    const product = await createProduct(SHOP_A, rice());
+    expect(await count(SHOP_A)).toEqual({ count: before + 1 });
+    const other = (await count(SHOP_B)).count;
+    await request(app).delete(`/api/v1/admin/catalog/products/${product.id}`).set(admin()).expect(204);
+    expect(await count(SHOP_A)).toEqual({ count: before });
+    expect((await count(SHOP_B)).count).toBe(other);
+  });
+});
+
 describe('products (customer browsing)', () => {
   it('hides stock counts and SKUs', async () => {
     const product = await createProduct(SHOP_A, rice());

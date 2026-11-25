@@ -85,6 +85,15 @@ export function createReportsService(db: Db) {
       };
     },
 
+    /** Platform admin: sales since a shop day, and when the last order (any status) came in. */
+    async monthStats(from: Date) {
+      const [agg, last] = await Promise.all([
+        db.saleOrder.aggregate({ where: { placedDay: { gte: from }, status: { notIn: FAILED } }, _count: { _all: true }, _sum: { totalPaise: true } }),
+        db.saleOrder.findFirst({ orderBy: { placedAt: 'desc' }, select: { placedAt: true } }),
+      ]);
+      return { orders: agg._count._all, salesPaise: agg._sum.totalPaise ?? 0, lastOrderAt: last?.placedAt.toISOString() ?? null };
+    },
+
     /** Sales per day, every day of the period (zero days included, for charts). */
     async daily(range: DayRange) {
       const rows = await db.saleOrder.groupBy({
