@@ -196,7 +196,7 @@ services:
     deploy:
       resources: { limits: { memory: 192m } }
 
-  # Platform owner's admin site (subscriptions), reached through nginx at admin.<domain>.
+  # API of the platform owner's Shop Admin app (subscriptions), reached through nginx at admin.<domain>.
   platform:
     <<: *service
     image: qc-backend:latest
@@ -210,11 +210,13 @@ services:
       IDENTITY_URL: http://identity:3000
       CATALOG_URL: http://catalog:3000
       REPORTING_URL: http://reporting:3000
-      # ADMIN_EMAILS, ADMIN_ORIGIN, LOGIN_CODE_SECRET, MAIL_*, PLATFORM_* come from .env;
-      # the Gmail app password from a file in secrets/mail (docs/deploy.md, "Platform admin").
+      # ADMIN_EMAILS, LOGIN_CODE_SECRET, MAIL_*, PLATFORM_*, PUSH_PROVIDER come from .env; the Gmail app
+      # password and the Firebase service account (same as notification) from files (docs/deploy.md, 6e).
       MAIL_APP_PASSWORD_FILE: ${MAIL_APP_PASSWORD_FILE:-}
+      FCM_SERVICE_ACCOUNT_FILE: ${FCM_SERVICE_ACCOUNT_FILE:-}
     volumes:
       - ./secrets/mail:/run/mail:ro
+      - ./secrets/fcm:/run/fcm:ro
     depends_on:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }

@@ -7,6 +7,8 @@ import 'package:platform_admin/app.dart';
 import 'package:platform_admin/auth/session.dart';
 import 'package:platform_admin/config.dart';
 import 'package:platform_admin/providers.dart';
+import 'package:platform_admin/push/push.dart';
+import 'dart:async';
 
 const shopA = '01936a00-0000-7000-8000-00000000000a';
 const shopB = '01936a00-0000-7000-8000-00000000000b';
@@ -112,11 +114,32 @@ class FakeAdminApi implements AdminApi {
   }
 }
 
-Future<(FakeAdminApi, InMemorySessionStore, List<Uri>)> pumpAdmin(WidgetTester tester, {bool loggedIn = true}) async {
+class FakePush implements AdminPush {
+  final tapController = StreamController<String>.broadcast();
+  bool asked = false;
+  @override
+  Future<String?> token() async => 'fcm-token-of-this-phone';
+  @override
+  Stream<String> get tokenRefresh => const Stream.empty();
+  @override
+  Stream<String> get taps => tapController.stream;
+  @override
+  Future<String?> takeLaunchShop() async => null;
+  @override
+  Future<void> requestPermission() async => asked = true;
+}
+
+class RecordingApi extends FakeAdminApi {
+  final devices = <String>[];
+  @override
+  Future<void> registerDevice(String token, String fcmToken) async => devices.add(fcmToken);
+}
+
+Future<(FakeAdminApi, InMemorySessionStore, List<Uri>)> pumpAdmin(WidgetTester tester, {bool loggedIn = true, FakeAdminApi? apiOverride, AdminPush push = const NoPush()}) async {
   tester.view.physicalSize = const Size(1080, 2340);
   tester.view.devicePixelRatio = 3;
   addTearDown(tester.view.reset);
-  final api = FakeAdminApi();
+  final api = apiOverride ?? FakeAdminApi();
   final store = InMemorySessionStore(loggedIn ? const AdminSession(token: 'tok', email: 'owner@example.com') : null);
   final opened = <Uri>[];
   await tester.pumpWidget(
@@ -125,6 +148,7 @@ Future<(FakeAdminApi, InMemorySessionStore, List<Uri>)> pumpAdmin(WidgetTester t
         appConfigProvider.overrideWithValue(const AppConfig(apiUrl: 'http://test')),
         adminApiProvider.overrideWithValue(api),
         sessionStoreProvider.overrideWithValue(store),
+        adminPushProvider.overrideWithValue(push),
         externalLauncherProvider.overrideWithValue((uri) async {
           opened.add(uri);
           return true;
@@ -261,5 +285,16 @@ void main() {
     await tester.tap(find.byKey(const Key('retryButton')));
     await tester.pumpAndSettle();
     expect(find.text('Sharma Kirana'), findsOneWidget);
+  });
+
+  testWidgets('registers the phone for alerts; a tapped alert opens that shop', (tester) async {
+    final push = FakePush();
+    final api = RecordingApi();
+    await pumpAdmin(tester, apiOverride: api, push: push);
+    expect(push.asked, isTrue);
+    expect(api.devices, ['fcm-token-of-this-phone']);
+    push.tapController.add(shopA);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('markPaidButton')), findsOneWidget);
   });
 }

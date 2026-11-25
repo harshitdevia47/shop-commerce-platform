@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'auth/session.dart';
+import 'push/push_registration.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/shop_screen.dart';
@@ -54,6 +55,7 @@ class AdminApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final session = ref.watch(sessionProvider);
+    ref.watch(pushRegistrationProvider);
     const seed = Color(0xFF1B5E20);
     return MaterialApp.router(
       title: 'Shop Admin',

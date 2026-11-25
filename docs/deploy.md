@@ -53,7 +53,7 @@ Each service applies its own pending Prisma migrations on start (`migrate deploy
 ## 3. Add shops and owners
 
 Normally from the laptop: `cd backend && npm run new-shop` creates the shop, its owner and its
-subscription on the server through the admin site (section 6e; needs `backend/.env.platform`).
+subscription on the server through the platform service (section 6e; needs `backend/.env.platform`).
 By hand on the server:
 
 Client folders (`clients/<slug>/client.json`) are mounted into the tenant container read-only.
@@ -183,35 +183,49 @@ The apps link to them on the login screen and in Account. Set the operator detai
 `backend/services/tenant/src/modules/legal/legal.pages.ts` and describes what the platform collects: update
 it when that changes, and have it reviewed by a lawyer before launch.
 
-## 6e. Platform admin (subscriptions)
+## 6e. Platform admin: Shop Admin app (subscriptions)
 
-The platform owner's private site at `https://admin.<domain>`: which shops paid, Mark paid (UPI), Extend 7
-days, Pause / Resume online orders, app numbers per shop, and one email at 09:00 IST when a shop is 7 days
-overdue. Nothing is paused automatically.
+The platform owner's own Android app (`platform_app/`, "Shop Admin") talks to the platform service at
+`https://admin.<domain>`: which shops paid, Mark paid (UPI), Extend 7 days, Pause / Resume online orders,
+app numbers per shop. At 09:00 IST it gets a **phone notification** for each shop that became 7 days
+overdue (email only while no phone is registered). Nothing is paused automatically.
 
-1. **DNS:** an A record `admin.<domain>` → the server. Certificate:
-   `certbot ... -d admin.example.in` (same command as section 4), and in `nginx/nginx.conf` (copied from
-   `nginx.tls.conf`) replace `admin.example.in` with your admin host.
-2. **Database** (only on servers created before the admin site existed; new servers get it automatically):
+1. **DNS + certificate:** A record `admin.<domain>` → the server; `certbot ... -d admin.example.in`
+   (section 4); in `nginx/nginx.conf` (copied from `nginx.tls.conf`) replace `admin.example.in`.
+2. **Database** (only on servers created before the admin existed):
    `docker compose exec postgres psql -U qc -d postgres -c "CREATE DATABASE qc_platform"`
-3. **Gmail app password** (free; the server sends login codes and alerts from your Gmail):
-   Google Account → Security → turn on 2-Step Verification → search "App passwords" → create one named
-   "shop admin" → copy the 16 letters into `deploy/secrets/mail/gmail-app-password` (no spaces, `chmod 600`).
-4. **`.env`:** `ADMIN_EMAILS` (your Gmail; comma separated for more people), `ADMIN_ORIGIN=https://admin.<domain>`,
-   `LOGIN_CODE_SECRET` (`openssl rand -hex 32`), `MAIL_PROVIDER=gmail`, `MAIL_USER` (your Gmail),
-   `MAIL_APP_PASSWORD_FILE=/run/mail/gmail-app-password`, `PLATFORM_UPI_ID` (where shops pay you),
-   `PLATFORM_DEFAULT_FEE_RUPEES`.
-5. **Laptop → server for `npm run new-shop`:** `node backend/scripts/platform-token.mjs` prints a token and its
-   hash. Hash → `PLATFORM_API_TOKEN_HASH` in `deploy/.env`; on the laptop create `backend/.env.platform` with
-   `PLATFORM_URL=https://admin.<domain>`, `PLATFORM_TOKEN=<token>` and `PLATFORM_DEFAULT_FEE_RUPEES=999`
-   (gitignored; keep the token secret).
-6. `docker compose up -d platform nginx`, open `https://admin.<domain>`, log in with the code from Gmail.
-   Shops created before this show **Not set up**: open each and set its fee and due day.
+3. **Gmail app password** (login codes, and alerts while no phone is registered): Google Account →
+   Security → 2-Step Verification on → "App passwords" → create "shop admin" → the 16 letters into
+   `deploy/secrets/mail/gmail-app-password` (no spaces, `chmod 600`).
+4. **`.env`:** `ADMIN_EMAILS` (your Gmail), `LOGIN_CODE_SECRET` (`openssl rand -hex 32`),
+   `MAIL_PROVIDER=gmail`, `MAIL_USER`, `MAIL_APP_PASSWORD_FILE=/run/mail/gmail-app-password`,
+   `PLATFORM_UPI_ID` (where shops pay you), `PLATFORM_DEFAULT_FEE_RUPEES`. Phone notifications use the
+   same `PUSH_PROVIDER=fcm` + Firebase service account as section 7.
+5. **Laptop → server for `npm run new-shop`:** `node backend/scripts/platform-token.mjs`; hash →
+   `PLATFORM_API_TOKEN_HASH` in `deploy/.env`; on the laptop `backend/.env.platform` with
+   `PLATFORM_URL=https://admin.<domain>`, `PLATFORM_TOKEN=<token>`, `PLATFORM_DEFAULT_FEE_RUPEES=999`.
+6. `docker compose up -d platform nginx`.
+7. **The app:** in the Firebase project (section 7) add an Android app `in.qcommerce.platformadmin`,
+   download its `google-services.json` into `platform_app/` (gitignored), then on the laptop:
 
-How it reaches the apps: the platform service sets the shop's `subscription` in tenant (`ok`, `due` with
-amount/date/UPI ID, `paused`), right after every action and once an hour. `due` shows the owner a reminder
-card with a Pay by UPI button; `paused` makes the order service refuse new orders (`SHOP_SUSPENDED`) and
-customers see "Please call the shop". Mark paid resumes and moves the due date ahead.
+   ```bash
+   cd platform_app
+   dart run tool/firebase_defines.dart          # writes config/firebase.json
+   echo '{"ENV":"prod","ADMIN_API_URL":"https://admin.<domain>"}' > config/env.prod.json
+   flutter build apk --release --dart-define-from-file=config/env.prod.json --dart-define-from-file=config/firebase.json
+   adb install -r build/app/outputs/flutter-apk/app-release.apk
+   ```
+   Log in with your Gmail and the code; allow notifications. Shops created before show **Not set up**:
+   open each and set its fee and due day.
+
+Development: `cd platform_app && flutter run --dart-define-from-file=config/env.dev.json` with
+`adb reverse tcp:4011 tcp:4011` (the platform service on the laptop; `MAIL_PROVIDER=console` prints the
+login code in its log).
+
+How it reaches the shop apps: the platform service sets the shop's `subscription` in tenant (`ok`, `due`
+with amount/date/UPI ID, `paused`) after every action and once an hour. `due` shows the owner a reminder
+card with Pay by UPI; `paused` makes the order service refuse new orders (`SHOP_SUSPENDED`) and customers
+see "Please call the shop". Mark paid resumes and moves the due date ahead.
 
 ## 7. Push notifications (Firebase Cloud Messaging)
 
