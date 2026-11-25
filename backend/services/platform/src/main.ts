@@ -37,6 +37,7 @@ const app = createPlatformApp({
   directory,
   payTo: env.PLATFORM_UPI_ID,
   defaultFeeRupees: env.PLATFORM_DEFAULT_FEE_RUPEES,
+  apiTokenHash: env.PLATFORM_API_TOKEN_HASH,
 });
 // Hourly: date-driven state changes (paid → due) reach the shop apps; failed pushes are repaired.
 const subscriptions = createSubscriptionsService({ db, directory, logger, payTo: env.PLATFORM_UPI_ID });

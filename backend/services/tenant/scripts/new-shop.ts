@@ -6,6 +6,10 @@
  *
  * Options: --yes (no confirmation), --skip-app (do not generate the Android flavor).
  *
+ * Live server: with PLATFORM_URL and PLATFORM_TOKEN in backend/.env.platform (never in git), the
+ * shop, its owner and its monthly subscription are also created on the live server through the
+ * admin site (docs/deploy.md, "Platform admin"), so nobody has to log into the server.
+ *
  * Steps: client.json + placeholder logo/icon → validate → (dev stack running) create the shop and its
  * owner in the local database → Android flavor for the app → prints the server commands and what is
  * left (real logo, Firebase file, Play listing).
@@ -17,7 +21,8 @@ import { stdin, stdout } from 'node:process';
 import { createInterface } from 'node:readline/promises';
 import { fileURLToPath } from 'node:url';
 import { BUSINESS_TYPES, LOCALES } from '@qc/config-schema';
-import { answerChecks, buildClientJson, slugify, type BusinessType, type Locale, type ShopAnswers } from './new-shop-lib.js';
+import { parse as parseEnv } from 'dotenv';
+import { answerChecks, buildClientJson, slugify, subscriptionFrom, type BusinessType, type Locale, type ShopAnswers } from './new-shop-lib.js';
 
 const root = fileURLToPath(new URL('../../../../', import.meta.url));
 const backendDir = join(root, 'backend');
@@ -28,6 +33,13 @@ const option = (name: string) => {
   const i = args.indexOf(name);
   return i >= 0 ? args[i + 1] : undefined;
 };
+
+/** Live-server settings for the laptop, kept out of the tenant .env (which would leak into child commands). */
+const platformFile = join(backendDir, '.env.platform');
+const platform = existsSync(platformFile) ? parseEnv(readFileSync(platformFile)) : {};
+const platformUrl = process.env.PLATFORM_URL ?? platform.PLATFORM_URL;
+const platformToken = process.env.PLATFORM_TOKEN ?? platform.PLATFORM_TOKEN;
+const defaultFee = process.env.PLATFORM_DEFAULT_FEE_RUPEES ?? platform.PLATFORM_DEFAULT_FEE_RUPEES ?? '';
 
 const green = (s: string) => `\x1b[32m${s}\x1b[0m`;
 const red = (s: string) => `\x1b[31m${s}\x1b[0m`;
@@ -79,7 +91,9 @@ async function askAll(): Promise<ShopAnswers> {
   const upiName = upiVpa ? await ask('Name shown when paying', undefined, name) : '';
   const language = await choose<Locale>('App language for customers', LOCALES, 'gu');
   const primaryColor = await ask('Brand colour (optional, like #1B5E20)', answerChecks.color);
-  return { name, slug, nameGu, nameHi, businessType, ownerName, ownerPhone, shopPhone, whatsapp, address, location, pincodes, upiVpa, upiName, language, primaryColor };
+  const feeRupees = await ask('Monthly subscription fee in ₹ (what the shop pays you)', answerChecks.fee, defaultFee);
+  const dueDay = await ask('Due day of the month (1–28)', answerChecks.dueDay, '5');
+  return { name, slug, nameGu, nameHi, businessType, ownerName, ownerPhone, shopPhone, whatsapp, address, location, pincodes, upiVpa, upiName, language, primaryColor, feeRupees, dueDay };
 }
 
 function run(label: string, command: string, commandArgs: string[], cwd: string): boolean {
@@ -109,8 +123,10 @@ async function main(): Promise<number> {
   const answers: ShopAnswers = answersFile ? JSON.parse(readFileSync(answersFile, 'utf8')) : await askAll();
 
   let built;
+  let subscription: { feePaise: number; dueDay: number } | null = null;
   try {
     built = buildClientJson(answers);
+    if (answers.feeRupees || answers.dueDay) subscription = subscriptionFrom({ feeRupees: answers.feeRupees ?? '', dueDay: answers.dueDay ?? '' });
   } catch (error) {
     console.error(red('\nPlease fix:\n') + (error as Error).message);
     return 1;
@@ -132,6 +148,8 @@ async function main(): Promise<number> {
   console.log(`  Delivery:    ${config.delivery.enabled ? `${config.delivery.radiusKm} km` : 'off'}${config.delivery.pincodes.length ? `, pincodes ${config.delivery.pincodes.join(', ')}` : ''}`);
   console.log(`  Payments:    cash${config.payments.upi.enabled ? `, UPI ${config.payments.upi.vpa}` : ''}`);
   console.log(`  Language:    ${config.locale.default}`);
+  console.log(`  Subscription: ${subscription ? `₹${subscription.feePaise / 100}/month, due on day ${subscription.dueDay}` : 'not set (set it up on the admin site)'}`);
+  console.log(`  Live server: ${platformUrl && platformToken ? platformUrl : dim('not configured (backend/.env.platform): only local steps')}`);
   if (!flag('--yes')) {
     const ok = (await readLine(`\n${bold('Create this shop? (y/n)')}: `)).trim().toLowerCase();
     if (!['y', 'yes'].includes(ok)) {
@@ -162,6 +180,36 @@ async function main(): Promise<number> {
     steps.push(run('Android app flavor', 'dart', ['run', 'tool/gen_flavors.dart'], join(root, 'app')));
   }
 
+  let live = false;
+  if (platformUrl && platformToken && !subscription) {
+    console.log(dim('• Live server skipped: answer the monthly fee and due day to create the shop there.'));
+  } else if (platformUrl && platformToken && subscription) {
+    process.stdout.write('• Create the shop, owner and subscription on the live server… ');
+    try {
+      const res = await fetch(new URL('/api/shops', platformUrl), {
+        method: 'POST',
+        headers: { authorization: `Bearer ${platformToken}`, 'content-type': 'application/json' },
+        body: JSON.stringify({
+          clientJson: json,
+          ownerPhone: built.ownerPhone,
+          ...(built.ownerName ? { ownerName: built.ownerName } : {}),
+          feePaise: subscription.feePaise,
+          dueDay: subscription.dueDay,
+        }),
+        signal: AbortSignal.timeout(20_000),
+      });
+      const payload = (await res.json().catch(() => ({}))) as { data?: { nextDueDate?: string; created?: boolean; subscription?: string }; error?: { message?: string } };
+      if (!res.ok) throw new Error(payload.error?.message ?? `HTTP ${res.status}`);
+      live = true;
+      console.log(green('done'));
+      console.log(dim(`  ${payload.data?.created ? 'New shop' : 'Shop updated'}; subscription ${payload.data?.subscription}, next due ${payload.data?.nextDueDate}`));
+    } catch (error) {
+      steps.push(false);
+      console.log(red('failed'));
+      console.log(dim(`  ${(error as Error).message}`));
+    }
+  }
+
   const ownerCmd = `create-owner ${slug} ${built.ownerPhone}${built.ownerName ? ` "${built.ownerName}"` : ''}`;
   console.log(`\n${steps.every(Boolean) ? green(bold('Shop is set up.')) : red(bold('Some steps failed: fix them and run that command again.'))}`);
   console.log(`
@@ -174,9 +222,10 @@ ${bold('Still to do')}
   1. Real logo (512x512) and app icon (1024x1024) in clients/${slug}/ (logo.png, icon.png), then: cd app && dart run tool/gen_flavors.dart
   2. Firebase: add Android app ${config.build.androidPackage}, put google-services.json in clients/${slug}/ (docs/deploy.md, section 7)
   3. Commit and push clients/${slug} (git add clients/${slug}; google-services.json stays out of git)
-  4. On the server: git pull, then
+  4. ${live ? 'Live server: already done (shop, owner and subscription are on the admin site).' : `On the server: git pull, then
        docker compose exec tenant node dist/client.js sync ${slug}
        docker compose exec identity node dist/users.js ${ownerCmd}
+     and set up the subscription on the admin site.`}
   5. Build for Play: cd app && ./tool/build_release.sh ${slug}   (docs/release.md)
   6. The owner adds products (Quick add or Import from Excel) and checks Shop settings.
 `);

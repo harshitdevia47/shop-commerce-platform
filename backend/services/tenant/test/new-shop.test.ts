@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildClientJson, normalizePhone, parseLocation, parsePincodes, slugify, type ShopAnswers } from '../scripts/new-shop-lib.js';
+import { answerChecks, buildClientJson, normalizePhone, parseLocation, parsePincodes, slugify, subscriptionFrom, type ShopAnswers } from '../scripts/new-shop-lib.js';
 
 const answers: ShopAnswers = {
   name: 'Patel Provision Store',
@@ -57,5 +57,15 @@ describe('new shop helpers', () => {
     expect(() =>
       buildClientJson({ ...answers, ownerPhone: '123', location: 'near bus stand', upiVpa: 'patel', slug: 'Bad Slug' }),
     ).toThrow(/Short id[\s\S]*Owner mobile[\s\S]*Location[\s\S]*UPI ID/);
+  });
+
+  it('reads the monthly fee and due day', () => {
+    expect(subscriptionFrom({ feeRupees: '999', dueDay: '5' })).toEqual({ feePaise: 99_900, dueDay: 5 });
+    expect(subscriptionFrom({ feeRupees: '₹1,499.50', dueDay: '28' })).toEqual({ feePaise: 149_950, dueDay: 28 });
+    expect(() => subscriptionFrom({ feeRupees: '0', dueDay: '5' })).toThrow(/fee/i);
+    expect(() => subscriptionFrom({ feeRupees: '999', dueDay: '31' })).toThrow(/due day/i);
+    expect(answerChecks.fee('200000')).not.toBeNull();
+    expect(answerChecks.dueDay('29')).not.toBeNull();
+    expect(answerChecks.dueDay('1')).toBeNull();
   });
 });

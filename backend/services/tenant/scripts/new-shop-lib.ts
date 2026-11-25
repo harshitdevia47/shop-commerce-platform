@@ -28,6 +28,9 @@ export interface ShopAnswers {
   language?: Locale;
   primaryColor?: string;
   secondaryColor?: string;
+  /** Monthly subscription to the platform (rupees) and the day of the month it is due (1–28). */
+  feeRupees?: string;
+  dueDay?: string;
 }
 
 /** "Sharma Kirana Store" → "sharma_kirana_store" (valid slug, folder name and X-Shop-Key). */
@@ -95,7 +98,27 @@ export const answerChecks = {
   pincodes: (v: string) => (parsePincodes(v) ? null : 'Pincodes have 6 digits, separated by commas'),
   upi: (v: string) => (!v.trim() || /^[A-Za-z0-9._-]{2,256}@[A-Za-z]{2,64}$/.test(v.trim()) ? null : 'Enter a UPI ID like shopname@okaxis, or leave empty'),
   color: (v: string) => (!v.trim() || /^#[0-9A-Fa-f]{6}$/.test(v.trim()) ? null : 'Enter a colour like #1B5E20, or leave empty'),
+  fee: (v: string) => {
+    const rupees = parseRupees(v);
+    return rupees !== null && rupees > 0 && rupees <= 100_000 ? null : 'Enter the monthly fee in rupees, like 999';
+  },
+  dueDay: (v: string) => (/^\d{1,2}$/.test(v.trim()) && Number(v) >= 1 && Number(v) <= 28 ? null : 'Enter a due day from 1 to 28'),
 };
+
+/** "₹1,499.50" → 1499.5; null when it is not an amount. */
+function parseRupees(input: string): number | null {
+  const cleaned = input.replace(/[₹,\s]/g, '');
+  return /^\d+(\.\d{1,2})?$/.test(cleaned) ? Number(cleaned) : null;
+}
+
+/** Monthly subscription answers → what the platform stores. Throws with a readable message. */
+export function subscriptionFrom(answers: { feeRupees: string; dueDay: string }): { feePaise: number; dueDay: number } {
+  const feeProblem = answerChecks.fee(answers.feeRupees);
+  if (feeProblem) throw new Error(`Monthly fee: ${feeProblem}`);
+  const dayProblem = answerChecks.dueDay(answers.dueDay);
+  if (dayProblem) throw new Error(`Due day: ${dayProblem}`);
+  return { feePaise: Math.round(parseRupees(answers.feeRupees)! * 100), dueDay: Number(answers.dueDay) };
+}
 
 export interface BuiltShop {
   config: ClientConfig;
