@@ -21,8 +21,9 @@ same code.
    keyAlias=upload
    keyPassword=...
    ```
-3. `app/config/env.prod.json`: `{"ENV": "prod", "API_BASE_URL": "https://api.your-domain.in"}`
-   (production builds refuse `http://`).
+3. `app/config/env.prod.json`: `{"ENV": "prod", "API_BASE_URL": "https://api.your-domain.in", "SUPPORT_WHATSAPP": "+91XXXXXXXXXX"}`
+   (production builds refuse `http://`; `SUPPORT_WHATSAPP` is the platform team's number behind the
+   owners' "Need help?" card, left out = no card).
 4. Google Play Console developer account (one-time fee; identity verification takes a few days).
 
 ## Each release

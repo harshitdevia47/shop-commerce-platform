@@ -2949,6 +2949,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Empty = not counted'**
   String get quickAddStockHint;
+
+  /// No description provided for @setupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Get your shop ready'**
+  String get setupTitle;
+
+  /// No description provided for @setupAllDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Your shop is ready! 🎉'**
+  String get setupAllDone;
+
+  /// No description provided for @setupHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get setupHide;
+
+  /// No description provided for @setupProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} done'**
+  String setupProgress(int done, int total);
+
+  /// No description provided for @setupGotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get setupGotIt;
+
+  /// No description provided for @setupCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Add categories'**
+  String get setupCategories;
+
+  /// No description provided for @setupCategoriesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Like Rice & Grains, Oil, Snacks: customers browse by them'**
+  String get setupCategoriesHint;
+
+  /// No description provided for @setupProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your products'**
+  String get setupProducts;
+
+  /// No description provided for @setupProductsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick add one by one, or import an Excel list'**
+  String get setupProductsHint;
+
+  /// No description provided for @setupPayments.
+  ///
+  /// In en, this message translates to:
+  /// **'Set your UPI ID'**
+  String get setupPayments;
+
+  /// No description provided for @setupPaymentsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Customers pay straight to your account'**
+  String get setupPaymentsHint;
+
+  /// No description provided for @setupSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Check delivery and timings'**
+  String get setupSettings;
+
+  /// No description provided for @setupSettingsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery fee, minimum order, area, time slots. Save once'**
+  String get setupSettingsHint;
+
+  /// No description provided for @setupRider.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a delivery person'**
+  String get setupRider;
+
+  /// No description provided for @setupRiderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add their mobile number: they log in and see deliveries'**
+  String get setupRiderHint;
+
+  /// No description provided for @setupTestOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Place a test order'**
+  String get setupTestOrder;
+
+  /// No description provided for @setupTestOrderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Try the whole order once before telling customers'**
+  String get setupTestOrderHint;
+
+  /// No description provided for @setupTestOrderHow.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out, log in with another mobile number (for example a family member\'s), order something and pay cash. Then log in again as the owner, open Orders and accept it. When it works, cancel it or deliver it.'**
+  String get setupTestOrderHow;
+
+  /// No description provided for @supportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Need help?'**
+  String get supportTitle;
+
+  /// No description provided for @supportSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat with support on WhatsApp'**
+  String get supportSubtitle;
+
+  /// No description provided for @supportMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello, I need help with the {shop} app.'**
+  String supportMessage(String shop);
+
+  /// No description provided for @supportNoWhatsapp.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp is not installed. Message support at {number}.'**
+  String supportNoWhatsapp(String number);
 }
 
 class _AppLocalizationsDelegate

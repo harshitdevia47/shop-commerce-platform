@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:qc_app/features/admin_dashboard/presentation/setup_checklist.dart';
 import 'package:qc_app/app.dart';
 import 'package:qc_app/core/config/shop_settings.dart';
 import 'package:qc_app/core/network/api_exception.dart';
@@ -502,6 +503,7 @@ Future<Harness> pumpShop(
           settings ?? FakeRepository(ShopSettings.fromJson(shopConfigJson(features: features, razorpay: razorpay))),
         ),
         catalogRepositoryProvider.overrideWithValue(FakeCatalogRepository()),
+        setupChecklistProvider.overrideWith((ref) async => const SetupProgress(steps: {}, hidden: true)),
         ordersRepositoryProvider.overrideWithValue(orders),
         adminOrdersRepositoryProvider.overrideWithValue(orders),
         sessionStoreProvider.overrideWithValue(InMemorySessionStore(session)),

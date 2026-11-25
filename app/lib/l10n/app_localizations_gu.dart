@@ -1593,4 +1593,82 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get quickAddStockHint => 'ખાલી = ગણતરી નહીં';
+
+  @override
+  String get setupTitle => 'તમારી દુકાન તૈયાર કરો';
+
+  @override
+  String get setupAllDone => 'તમારી દુકાન તૈયાર છે! 🎉';
+
+  @override
+  String get setupHide => 'છુપાવો';
+
+  @override
+  String setupProgress(int done, int total) {
+    return '$total માંથી $done થયું';
+  }
+
+  @override
+  String get setupGotIt => 'બરાબર';
+
+  @override
+  String get setupCategories => 'કેટેગરી ઉમેરો';
+
+  @override
+  String get setupCategoriesHint =>
+      'જેમ કે ચોખા-અનાજ, તેલ, નાસ્તો: ગ્રાહકો તેનાથી શોધે છે';
+
+  @override
+  String get setupProducts => 'તમારી વસ્તુઓ ઉમેરો';
+
+  @override
+  String get setupProductsHint =>
+      'એક પછી એક ઝડપી ઉમેરો, અથવા Excel યાદી ઇમ્પોર્ટ કરો';
+
+  @override
+  String get setupPayments => 'તમારું UPI ID નાખો';
+
+  @override
+  String get setupPaymentsHint => 'ગ્રાહકો સીધા તમારા ખાતામાં ચૂકવે';
+
+  @override
+  String get setupSettings => 'ડિલિવરી અને સમય તપાસો';
+
+  @override
+  String get setupSettingsHint =>
+      'ડિલિવરી ચાર્જ, ન્યૂનતમ ઓર્ડર, વિસ્તાર, સમય સ્લોટ. એક વાર સાચવો';
+
+  @override
+  String get setupRider => 'ડિલિવરી કરનાર ઉમેરો';
+
+  @override
+  String get setupRiderHint =>
+      'તેમનો મોબાઇલ નંબર ઉમેરો: તેઓ લૉગિન કરી ડિલિવરી જુએ';
+
+  @override
+  String get setupTestOrder => 'એક ટેસ્ટ ઓર્ડર આપો';
+
+  @override
+  String get setupTestOrderHint =>
+      'ગ્રાહકોને કહેતા પહેલા એક વાર આખો ઓર્ડર અજમાવો';
+
+  @override
+  String get setupTestOrderHow =>
+      'લૉગ આઉટ કરો, બીજા મોબાઇલ નંબરથી (જેમ કે ઘરના સભ્યનો) લૉગિન કરો, કંઈક ઓર્ડર કરો અને રોકડ પસંદ કરો. પછી માલિક તરીકે ફરી લૉગિન કરો, ઓર્ડર ખોલો અને સ્વીકારો. બરાબર ચાલે તો રદ કરો અથવા ડિલિવર કરો.';
+
+  @override
+  String get supportTitle => 'મદદ જોઈએ?';
+
+  @override
+  String get supportSubtitle => 'WhatsApp પર સપોર્ટ સાથે વાત કરો';
+
+  @override
+  String supportMessage(String shop) {
+    return 'નમસ્તે, મને $shop એપમાં મદદ જોઈએ છે.';
+  }
+
+  @override
+  String supportNoWhatsapp(String number) {
+    return 'WhatsApp નથી. સપોર્ટને $number પર મેસેજ કરો.';
+  }
 }

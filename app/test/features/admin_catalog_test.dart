@@ -2,7 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:qc_app/features/admin_dashboard/presentation/setup_checklist.dart';
 import 'package:qc_app/app.dart';
+import 'package:qc_app/core/config/env_config.dart';
 import 'package:qc_app/core/config/shop_settings.dart';
 import 'package:qc_app/core/network/api_exception.dart';
 import 'package:qc_app/core/providers.dart';
@@ -112,6 +114,8 @@ Future<FakeAdminCatalog> pumpAdmin(
   WidgetTester tester, {
   Map<String, dynamic>? config,
   List<Override> extraOverrides = const [],
+  bool setupChecklist = false,
+  EnvConfig? env,
 }) async {
   usePhoneScreen(tester);
   SharedPreferences.setMockInitialValues({});
@@ -121,13 +125,15 @@ Future<FakeAdminCatalog> pumpAdmin(
     ProviderScope(
       overrides: [
         clientConfigProvider.overrideWithValue(testClient),
-        envConfigProvider.overrideWithValue(testEnv),
+        envConfigProvider.overrideWithValue(env ?? testEnv),
         sharedPreferencesProvider.overrideWithValue(prefs),
         shopSettingsRepositoryProvider.overrideWithValue(FakeRepository(ShopSettings.fromJson(config ?? shopConfigJson()))),
         catalogRepositoryProvider.overrideWithValue(FakeCatalogRepository()),
         adminCatalogRepositoryProvider.overrideWithValue(admin),
         sessionStoreProvider.overrideWithValue(InMemorySessionStore(owner)),
         photoSourceProvider.overrideWithValue(({required camera}) async => '/tmp/photo.jpg'),
+        if (!setupChecklist)
+          setupChecklistProvider.overrideWith((ref) async => const SetupProgress(steps: {}, hidden: true)),
         ...extraOverrides,
       ],
       child: const QcApp(),

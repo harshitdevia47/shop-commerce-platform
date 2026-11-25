@@ -8,6 +8,7 @@ import '../../../core/providers.dart';
 import '../../../core/router/routes.dart';
 import '../../auth/domain/auth_models.dart';
 import '../../auth/presentation/auth_controller.dart';
+import 'setup_checklist.dart';
 
 /// OWNER/STAFF landing page: orders, products, categories, and (owner) the team.
 class AdminHomeScreen extends ConsumerWidget {
@@ -50,6 +51,8 @@ class AdminHomeScreen extends ConsumerWidget {
             const SizedBox(height: 8),
           ],
           if (user?.role == UserRole.owner) ...[
+            const SetupChecklistCard(),
+            const SizedBox(height: 8),
             Card(
               child: ListTile(
                 key: const Key('adminSalesTile'),
@@ -131,6 +134,8 @@ class AdminHomeScreen extends ConsumerWidget {
               ),
             ),
           ],
+          const SizedBox(height: 16),
+          const SupportCard(),
         ],
       ),
     );

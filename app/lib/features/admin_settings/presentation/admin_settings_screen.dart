@@ -6,6 +6,7 @@ import '../../../core/config/shop_settings.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/providers.dart';
 import '../../../core/utils/money.dart';
+import '../../admin_dashboard/presentation/setup_checklist.dart';
 import '../data/shop_settings_admin_api.dart';
 
 /// Owner: the shop's own settings (taking orders, delivery, payments, slots, returns, extras, contact).
@@ -214,6 +215,7 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
     try {
       await ref.read(shopSettingsAdminApiProvider).save(_patch());
       messenger.showSnackBar(SnackBar(content: Text(l10n.settingsSaved)));
+      await markSettingsReviewed(ref);
       await ref.read(shopSettingsProvider.notifier).refresh();
     } on Object catch (error) {
       if (mounted) setState(() => _saving = false);

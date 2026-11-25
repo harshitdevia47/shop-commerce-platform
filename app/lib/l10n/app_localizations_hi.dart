@@ -1603,4 +1603,82 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get quickAddStockHint => 'खाली = गिनती नहीं';
+
+  @override
+  String get setupTitle => 'अपनी दुकान तैयार करें';
+
+  @override
+  String get setupAllDone => 'आपकी दुकान तैयार है! 🎉';
+
+  @override
+  String get setupHide => 'छिपाएं';
+
+  @override
+  String setupProgress(int done, int total) {
+    return '$total में से $done हो गया';
+  }
+
+  @override
+  String get setupGotIt => 'ठीक है';
+
+  @override
+  String get setupCategories => 'कैटेगरी जोड़ें';
+
+  @override
+  String get setupCategoriesHint =>
+      'जैसे चावल-अनाज, तेल, नमकीन: ग्राहक इनसे ढूंढते हैं';
+
+  @override
+  String get setupProducts => 'अपना सामान जोड़ें';
+
+  @override
+  String get setupProductsHint =>
+      'एक-एक करके जल्दी जोड़ें, या Excel सूची इम्पोर्ट करें';
+
+  @override
+  String get setupPayments => 'अपनी UPI ID डालें';
+
+  @override
+  String get setupPaymentsHint => 'ग्राहक सीधे आपके खाते में भुगतान करें';
+
+  @override
+  String get setupSettings => 'डिलीवरी और समय जांचें';
+
+  @override
+  String get setupSettingsHint =>
+      'डिलीवरी शुल्क, न्यूनतम ऑर्डर, इलाका, टाइम स्लॉट। एक बार सेव करें';
+
+  @override
+  String get setupRider => 'डिलीवरी वाला जोड़ें';
+
+  @override
+  String get setupRiderHint =>
+      'उनका मोबाइल नंबर जोड़ें: वे लॉगिन करके डिलीवरी देखें';
+
+  @override
+  String get setupTestOrder => 'एक टेस्ट ऑर्डर दें';
+
+  @override
+  String get setupTestOrderHint =>
+      'ग्राहकों को बताने से पहले एक बार पूरा ऑर्डर आज़माएं';
+
+  @override
+  String get setupTestOrderHow =>
+      'लॉग आउट करें, दूसरे मोबाइल नंबर से (जैसे घर के किसी सदस्य का) लॉगिन करें, कुछ ऑर्डर करें और कैश चुनें। फिर मालिक के रूप में दोबारा लॉगिन करें, ऑर्डर खोलें और स्वीकार करें। ठीक चले तो रद्द करें या डिलीवर करें।';
+
+  @override
+  String get supportTitle => 'मदद चाहिए?';
+
+  @override
+  String get supportSubtitle => 'WhatsApp पर सपोर्ट से बात करें';
+
+  @override
+  String supportMessage(String shop) {
+    return 'नमस्ते, मुझे $shop ऐप में मदद चाहिए।';
+  }
+
+  @override
+  String supportNoWhatsapp(String number) {
+    return 'WhatsApp नहीं है। सपोर्ट को $number पर मैसेज करें।';
+  }
 }

@@ -1607,4 +1607,82 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get quickAddStockHint => 'Empty = not counted';
+
+  @override
+  String get setupTitle => 'Get your shop ready';
+
+  @override
+  String get setupAllDone => 'Your shop is ready! 🎉';
+
+  @override
+  String get setupHide => 'Hide';
+
+  @override
+  String setupProgress(int done, int total) {
+    return '$done of $total done';
+  }
+
+  @override
+  String get setupGotIt => 'OK';
+
+  @override
+  String get setupCategories => 'Add categories';
+
+  @override
+  String get setupCategoriesHint =>
+      'Like Rice & Grains, Oil, Snacks: customers browse by them';
+
+  @override
+  String get setupProducts => 'Add your products';
+
+  @override
+  String get setupProductsHint =>
+      'Quick add one by one, or import an Excel list';
+
+  @override
+  String get setupPayments => 'Set your UPI ID';
+
+  @override
+  String get setupPaymentsHint => 'Customers pay straight to your account';
+
+  @override
+  String get setupSettings => 'Check delivery and timings';
+
+  @override
+  String get setupSettingsHint =>
+      'Delivery fee, minimum order, area, time slots. Save once';
+
+  @override
+  String get setupRider => 'Add a delivery person';
+
+  @override
+  String get setupRiderHint =>
+      'Add their mobile number: they log in and see deliveries';
+
+  @override
+  String get setupTestOrder => 'Place a test order';
+
+  @override
+  String get setupTestOrderHint =>
+      'Try the whole order once before telling customers';
+
+  @override
+  String get setupTestOrderHow =>
+      'Log out, log in with another mobile number (for example a family member\'s), order something and pay cash. Then log in again as the owner, open Orders and accept it. When it works, cancel it or deliver it.';
+
+  @override
+  String get supportTitle => 'Need help?';
+
+  @override
+  String get supportSubtitle => 'Chat with support on WhatsApp';
+
+  @override
+  String supportMessage(String shop) {
+    return 'Hello, I need help with the $shop app.';
+  }
+
+  @override
+  String supportNoWhatsapp(String number) {
+    return 'WhatsApp is not installed. Message support at $number.';
+  }
 }

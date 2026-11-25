@@ -896,5 +896,51 @@
         "type": "int"
       }
     }
+  },
+  "setupTitle": "Get your shop ready",
+  "setupAllDone": "Your shop is ready! 🎉",
+  "setupHide": "Hide",
+  "setupProgress": "{done} of {total} done",
+  "setupGotIt": "OK",
+  "setupCategories": "Add categories",
+  "setupCategoriesHint": "Like Rice & Grains, Oil, Snacks: customers browse by them",
+  "setupProducts": "Add your products",
+  "setupProductsHint": "Quick add one by one, or import an Excel list",
+  "setupPayments": "Set your UPI ID",
+  "setupPaymentsHint": "Customers pay straight to your account",
+  "setupSettings": "Check delivery and timings",
+  "setupSettingsHint": "Delivery fee, minimum order, area, time slots. Save once",
+  "setupRider": "Add a delivery person",
+  "setupRiderHint": "Add their mobile number: they log in and see deliveries",
+  "setupTestOrder": "Place a test order",
+  "setupTestOrderHint": "Try the whole order once before telling customers",
+  "setupTestOrderHow": "Log out, log in with another mobile number (for example a family member's), order something and pay cash. Then log in again as the owner, open Orders and accept it. When it works, cancel it or deliver it.",
+  "supportTitle": "Need help?",
+  "supportSubtitle": "Chat with support on WhatsApp",
+  "supportMessage": "Hello, I need help with the {shop} app.",
+  "supportNoWhatsapp": "WhatsApp is not installed. Message support at {number}.",
+  "@setupProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@supportMessage": {
+    "placeholders": {
+      "shop": {
+        "type": "String"
+      }
+    }
+  },
+  "@supportNoWhatsapp": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
   }
 }
