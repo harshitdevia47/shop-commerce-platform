@@ -8,7 +8,7 @@ import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { createDb } from '../src/db.js';
 import { formatRupees } from '../src/messages.js';
 import { createNotifier, type DeviceDirectory, type PushTarget } from '../src/notifier.js';
-import { fcmPushSender, type PushMessage, type PushSender } from '../src/push/push-sender.js';
+import { fcmPushSender, type PushMessage, type PushSender } from '@qc/fcm';
 
 const { rawPrisma, db } = createDb(process.env.DATABASE_URL!);
 const logger = createLogger('notification-test', 'silent');

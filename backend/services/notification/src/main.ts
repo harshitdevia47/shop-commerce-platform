@@ -6,7 +6,7 @@ import { createNotificationApp } from './app.js';
 import { createDb } from './db.js';
 import { loadNotificationEnv } from './env.js';
 import { NOTIFIED_EVENTS, createNotifier, type PushTarget } from './notifier.js';
-import { consolePushSender, fcmPushSender } from './push/push-sender.js';
+import { consolePushSender, fcmPushSender } from '@qc/fcm';
 
 const env = loadNotificationEnv();
 const logger = createLogger('notification', env.LOG_LEVEL);

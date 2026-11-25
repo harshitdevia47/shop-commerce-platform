@@ -2,7 +2,7 @@ import type { Logger, ShopConfigSource } from '@qc/common';
 import type { RuntimeConfig } from '@qc/config-schema';
 import type { AnyEvent, EventHandler } from '@qc/events';
 import { defaultNote, defaultReason, fill, formatRupees, messagesFor, type CustomerStatus } from './messages.js';
-import type { PushMessage, PushSender } from './push/push-sender.js';
+import type { PushMessage, PushSender } from '@qc/fcm';
 
 export interface PushTarget {
   userId: string;
