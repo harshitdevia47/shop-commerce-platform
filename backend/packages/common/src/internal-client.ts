@@ -64,7 +64,8 @@ export function createInternalClient({ baseUrl, secret, caller, timeoutMs = 3000
         status < 500 ? error?.details : undefined,
       );
     }
-    return (json as { data: T }).data;
+    // 204 No Content has no body.
+    return (json as { data: T } | undefined)?.data as T;
   }
 
   return {

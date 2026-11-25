@@ -1,9 +1,11 @@
-import { RedisRateLimitStore, createLogger } from '@qc/common';
+import { RedisRateLimitStore, createLogger, startIntervalJob } from '@qc/common';
 import { Redis } from 'ioredis';
 import { createPlatformApp } from './app.js';
 import { createDb } from './db.js';
 import { loadPlatformEnv } from './env.js';
 import { createMailer } from './mail/mailer.js';
+import { createHttpShopDirectory } from './modules/subscriptions/shop-directory.js';
+import { createSubscriptionsService } from './modules/subscriptions/subscriptions.service.js';
 
 const env = loadPlatformEnv();
 const logger = createLogger('platform', env.LOG_LEVEL);
@@ -26,10 +28,21 @@ const app = createPlatformApp({
   origin: env.ADMIN_ORIGIN,
   cookie: { secure: env.ADMIN_ORIGIN.startsWith('https://') },
 });
+// Hourly: date-driven state changes (paid → due) reach the shop apps; failed pushes are repaired.
+const directory = createHttpShopDirectory(
+  { tenant: env.TENANT_URL, identity: env.IDENTITY_URL, catalog: env.CATALOG_URL, reporting: env.REPORTING_URL },
+  env.INTERNAL_HMAC_SECRET,
+  logger,
+);
+const subscriptions = createSubscriptionsService({ db, directory, logger, payTo: env.PLATFORM_UPI_ID });
+const pushJob = startIntervalJob('push-app-states', 60 * 60_000, () => subscriptions.pushAll(), logger);
+void pushJob.runOnce();
+
 const server = app.listen(env.PORT, () => logger.info({ port: env.PORT }, 'platform admin listening'));
 
 function shutdown(signal: string): void {
   logger.info({ signal }, 'shutting down');
+  void pushJob.stop();
   server.close(() => {
     Promise.allSettled([db.$disconnect(), redis.quit()]).finally(() => process.exit(0));
   });

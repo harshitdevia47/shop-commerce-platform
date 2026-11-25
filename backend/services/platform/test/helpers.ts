@@ -66,3 +66,45 @@ export async function cleanDb(): Promise<void> {
   await db.adminSession.deleteMany();
   await db.adminLoginCode.deleteMany();
 }
+
+import type { SubscriptionState } from '@qc/config-schema';
+import type { ShopDirectory, ShopNumbers, ShopSummary } from '../src/modules/subscriptions/shop-directory.js';
+
+export const SHOP_A = '01936a00-0000-7000-8000-00000000000a';
+export const SHOP_B = '01936a00-0000-7000-8000-00000000000b';
+
+/** In-memory stand-in for the other services. */
+export class FakeDirectory implements ShopDirectory {
+  shops: ShopSummary[] = [
+    { id: SHOP_A, slug: 'sharma_kirana', name: 'Sharma Kirana', businessType: 'grocery', contact: { phone: '+919876543210', address: 'Station Road' }, isActive: true, createdAt: '2026-11-01T05:00:00.000Z' },
+    { id: SHOP_B, slug: 'style_hub', name: 'Style Hub', businessType: 'clothing', contact: { phone: '+919811111111', address: 'Main Bazaar' }, isActive: true, createdAt: '2026-11-02T05:00:00.000Z' },
+  ];
+  pushed = new Map<string, SubscriptionState>();
+  failPush = new Set<string>();
+  synced: unknown[] = [];
+  owners: { shopId: string; phone: string; name?: string }[] = [];
+  numbersFor: Record<string, ShopNumbers> = {};
+
+  async list() {
+    return this.shops;
+  }
+  async numbers(shopId: string): Promise<ShopNumbers> {
+    return this.numbersFor[shopId] ?? { customers: { total: 0, newSince: 0, activeSince: 0 }, owner: { name: null, phone: null, hasLoggedIn: false }, products: 0, month: { orders: 0, salesPaise: 0, lastOrderAt: null } };
+  }
+  async pushState(shopId: string, state: SubscriptionState) {
+    if (this.failPush.has(shopId)) throw new Error('tenant down');
+    this.pushed.set(shopId, state);
+  }
+  async sync(clientJson: unknown) {
+    this.synced.push(clientJson);
+    const slug = (clientJson as { slug: string }).slug;
+    const existing = this.shops.find((s) => s.slug === slug);
+    if (existing) return { id: existing.id, slug, created: false };
+    const id = `01936a00-0000-7000-8000-${String(this.shops.length).padStart(12, '0')}`;
+    this.shops.push({ id, slug, name: slug, businessType: 'grocery', contact: { phone: '+919800000000', address: 'x' }, isActive: true, createdAt: new Date().toISOString() });
+    return { id, slug, created: true };
+  }
+  async createOwner(shopId: string, phone: string, name?: string) {
+    this.owners.push({ shopId, phone, ...(name ? { name } : {}) });
+  }
+}
