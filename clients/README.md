@@ -16,6 +16,16 @@ Arrays replace preset arrays; objects merge.
 
 ## Adding a client
 
+Easiest: `cd backend && npm run new-shop` asks for the shop's details (name, owner mobile, address,
+location from Google Maps, pincodes, UPI ID, language) and then writes `clients/<slug>/client.json`
+with placeholder logo/icon, validates it, creates the shop and owner in the local database (when the
+dev services run), generates the Android flavor and prints the server commands and what is left.
+Answers can also come from a file: `npm run new-shop -- --answers shop.json --yes` (same keys as
+`ShopAnswers` in `backend/services/tenant/scripts/new-shop-lib.ts`).
+
+By hand:
+
+
 1. Copy `clients/_template/` to `clients/<slug>/` and edit `client.json` + images.
 2. `cd backend && npm run client -- validate <slug>`
 3. `npm run client -- sync <slug>` (creates/updates the shop in the tenant service DB)

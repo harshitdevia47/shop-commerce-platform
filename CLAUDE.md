@@ -88,6 +88,7 @@ Single source per client: `clients/<slug>/client.json` + assets (`logo.png`, `ic
 - Business-type presets (`grocery`, `clothing`, `bakery`, `electronics`, `pharmacy`, `general`) give defaults; `client.json` overrides.
 - Slug format: `^[a-z][a-z0-9]*(_[a-z0-9]+)*$` (e.g. `sharma_kirana`). It is the folder name, `X-Shop-Key`, and Android flavor name.
 - Commands:
+  - `cd backend && npm run new-shop` (questions, or `-- --answers file.json --yes`): writes client.json + placeholder images, validates, syncs + creates the owner locally when the dev stack runs, runs gen_flavors, prints server steps. Helpers in `tenant/scripts/new-shop-lib.ts` (tested).
   - `cd backend && npm run client -- validate [slug]` / `npm run client -- sync <slug>` / `npm run client -- list`
   - `npm run users -- create-owner <slug> <phone> [name]` / `set-role <slug> <phone> <ROLE>` / `list <slug>` (needs tenant service running)
   - `node backend/scripts/placeholder-images.mjs <slug>` creates placeholder logo/icon

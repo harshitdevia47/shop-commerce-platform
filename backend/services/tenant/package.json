@@ -13,6 +13,7 @@
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
     "client": "tsx --env-file-if-exists=.env scripts/client.ts",
+    "new-shop": "tsx scripts/new-shop.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
