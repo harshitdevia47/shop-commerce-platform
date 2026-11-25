@@ -41,7 +41,10 @@ services:
 
   tenant:
     <<: *service
-    build: { context: ../backend, dockerfile: Dockerfile, args: { SERVICE: tenant } }
+    # Builds the one backend image all services share (they start after it is built).
+    build: { context: ../backend, dockerfile: Dockerfile }
+    image: qc-backend:latest
+    working_dir: /app/services/tenant
     environment:
       PORT: 3000
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/qc_tenant
@@ -56,7 +59,9 @@ services:
 
   identity:
     <<: *service
-    build: { context: ../backend, dockerfile: Dockerfile, args: { SERVICE: identity } }
+    image: qc-backend:latest
+    pull_policy: never
+    working_dir: /app/services/identity
     environment:
       PORT: 3000
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/qc_identity
@@ -79,7 +84,9 @@ services:
 
   catalog:
     <<: *service
-    build: { context: ../backend, dockerfile: Dockerfile, args: { SERVICE: catalog } }
+    image: qc-backend:latest
+    pull_policy: never
+    working_dir: /app/services/catalog
     environment:
       PORT: 3000
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/qc_catalog
@@ -95,7 +102,9 @@ services:
 
   media:
     <<: *service
-    build: { context: ../backend, dockerfile: Dockerfile, args: { SERVICE: media } }
+    image: qc-backend:latest
+    pull_policy: never
+    working_dir: /app/services/media
     environment:
       PORT: 3000
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/qc_media
@@ -114,7 +123,9 @@ services:
 
   payment:
     <<: *service
-    build: { context: ../backend, dockerfile: Dockerfile, args: { SERVICE: payment } }
+    image: qc-backend:latest
+    pull_policy: never
+    working_dir: /app/services/payment
     environment:
       PORT: 3000
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/qc_payment
@@ -133,7 +144,9 @@ services:
 
   order:
     <<: *service
-    build: { context: ../backend, dockerfile: Dockerfile, args: { SERVICE: order } }
+    image: qc-backend:latest
+    pull_policy: never
+    working_dir: /app/services/order
     environment:
       PORT: 3000
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/qc_order
@@ -152,7 +165,9 @@ services:
   # Riders: assignment, pickup, delivery OTP; latest rider location in Redis.
   delivery:
     <<: *service
-    build: { context: ../backend, dockerfile: Dockerfile, args: { SERVICE: delivery } }
+    image: qc-backend:latest
+    pull_policy: never
+    working_dir: /app/services/delivery
     environment:
       PORT: 3000
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/qc_delivery
@@ -168,7 +183,9 @@ services:
   # Sales read models from order/payment events; owner reports.
   reporting:
     <<: *service
-    build: { context: ../backend, dockerfile: Dockerfile, args: { SERVICE: reporting } }
+    image: qc-backend:latest
+    pull_policy: never
+    working_dir: /app/services/reporting
     environment:
       PORT: 3000
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/qc_reporting
@@ -182,7 +199,9 @@ services:
   # Turns events into push notifications. No routes besides /health.
   notification:
     <<: *service
-    build: { context: ../backend, dockerfile: Dockerfile, args: { SERVICE: notification } }
+    image: qc-backend:latest
+    pull_policy: never
+    working_dir: /app/services/notification
     environment:
       PORT: 3000
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/qc_notification
@@ -203,7 +222,9 @@ services:
   # Socket.IO for live order updates; nginx proxies /socket.io/ here directly.
   realtime:
     <<: *service
-    build: { context: ../backend, dockerfile: Dockerfile, args: { SERVICE: realtime } }
+    image: qc-backend:latest
+    pull_policy: never
+    working_dir: /app/services/realtime
     environment:
       PORT: 3000
       REDIS_URL: redis://redis:6379
@@ -217,7 +238,9 @@ services:
 
   gateway:
     <<: *service
-    build: { context: ../backend, dockerfile: Dockerfile, args: { SERVICE: gateway } }
+    image: qc-backend:latest
+    pull_policy: never
+    working_dir: /app/services/gateway
     environment:
       PORT: 3000
       REDIS_URL: redis://redis:6379

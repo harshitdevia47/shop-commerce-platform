@@ -32,7 +32,7 @@ Multi-tenant quick-commerce ordering platform (Zepto/Blinkit-style architecture)
 
 **App:** Flutter, Riverpod 3 (hand-written providers, no codegen), go_router, dio, hand-written immutable models with `fromJson` (adopt freezed later only if models get large), flutter_secure_storage, local cart persistence, socket_io_client, firebase_messaging + flutter_local_notifications, google_maps_flutter (native mobile maps SDK; never call paid Directions/Distance Matrix APIs — use haversine), geolocator (rider location, foreground service while on delivery), cached_network_image, image_picker, flutter_localizations + intl (ARB files).
 
-**Hosting:** one Linux VPS (target 4 vCPU / 8 GB), Docker Compose, Nginx in front (TLS via Let's Encrypt, serves public `/media` from disk). Daily `pg_dump` backup copied off-server. Uptime Kuma self-hosted for monitoring.
+**Hosting:** one Linux VPS (start at 2 vCPU / 4 GB: the whole stack idles at about 650 MB; 8 GB when it grows), Docker Compose, Nginx in front (TLS via Let's Encrypt, serves public `/media` from disk). Daily `pg_dump` backup copied off-server. Uptime Kuma self-hosted for monitoring.
 
 ## 4. Services
 
@@ -137,7 +137,7 @@ Single source per client: `clients/<slug>/client.json` + assets (`logo.png`, `ic
 
 ## 8. Backend conventions
 
-- Service layout: `services/<name>/{src/{main.ts, app.ts, env.ts, db.ts, modules/<feature>/{<feature>.routes.ts, <feature>.service.ts}, consumers/, jobs/}, prisma/schema.prisma, prisma.config.ts, scripts/, test/}`. One shared `backend/Dockerfile` builds any service (`--build-arg SERVICE=<name>`).
+- Service layout: `services/<name>/{src/{main.ts, app.ts, env.ts, db.ts, modules/<feature>/{<feature>.routes.ts, <feature>.service.ts}, consumers/, jobs/}, prisma/schema.prisma, prisma.config.ts, scripts/, test/}`. `backend/Dockerfile` builds ONE image (`qc-backend`) with every service; compose runs each container in `working_dir: /app/services/<name>` (only `tenant` has `build:`, the others `pull_policy: never`). A new service needs its compose entry with that `working_dir`.
 - New service checklist: copy `services/tenant` structure, base app from `createServiceApp()` + `internalAuth()` + `finalizeApp()`, add its database to `deploy/postgres/init-databases.sh` (already lists all planned services), add a gateway route in `services/gateway/src/routes.ts`, add it to `deploy/docker-compose.yml`.
 - Build: tsup bundles only `@qc/*` workspace packages (shipped as TS source); every npm package stays external (`skipNodeModulesBundle`). Prisma 7: `prisma-client` generator output in `src/generated/prisma` (gitignored), `@prisma/adapter-pg`.
 - Never run destructive Prisma commands (`migrate reset`, `db push --force-reset`) as an agent. Tests use `migrate deploy` against `*_test` databases and clean their own rows.

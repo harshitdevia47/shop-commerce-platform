@@ -1,6 +1,9 @@
 # Deploying to a VPS (staging or production)
 
-One Linux VPS (4 vCPU / 8 GB, Ubuntu 24.04 LTS) runs everything with Docker Compose.
+One Linux VPS runs everything with Docker Compose. **2 vCPU / 4 GB RAM, 80 GB disk, Ubuntu 24.04 LTS** is
+enough to start: measured on the full stack, all eleven services + Postgres + Redis + nginx use about
+650 MB when idle (each Node service 30–60 MB). Move to 8 GB when Postgres needs more memory for many shops.
+All services run from ONE Docker image (`qc-backend`, about 760 MB), built once.
 Only nginx is reachable from the internet; services talk on the internal Docker network.
 
 ## 1. Server setup (once)
@@ -10,6 +13,9 @@ Only nginx is reachable from the internet; services talk on the internal Docker 
 adduser deploy && usermod -aG sudo deploy
 apt update && apt install -y docker.io docker-compose-v2 git ufw
 usermod -aG docker deploy
+# 2 GB swap: a safety net for the image build on a 4 GB server
+fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
+echo '/swapfile none swap sw 0 0' >> /etc/fstab
 ufw allow OpenSSH && ufw allow 80 && ufw allow 443 && ufw enable
 ```
 
@@ -32,7 +38,6 @@ chmod 600 secrets/*.pem .env
 | `POSTGRES_PASSWORD`, `INTERNAL_HMAC_SECRET`, `OTP_SECRET` | `openssl rand -hex 32` each | new values, never reuse staging ones |
 | `SMS_PROVIDER` | `console` (OTP printed in `docker compose logs identity`) | a real DLT-registered provider (Phase 8); `console` is refused |
 | `OTP_DEV_ECHO` | `true` only for internal testers | must be `false` (refused otherwise) |
-| `COMPOSE_PARALLEL_LIMIT` | `2` | `2` (image builds on 8 GB) |
 | `PUSH_PROVIDER` | `console` (pushes printed in `docker compose logs notification`) until Firebase is set up (section 7) | `fcm` |
 
 ## 2. Start
@@ -80,11 +85,12 @@ docker compose exec identity node dist/users.js create-owner sharma_kirana 98765
 
 ```bash
 git pull
-COMPOSE_PARALLEL_LIMIT=2 docker compose build   # 8 GB servers: building all images at once runs out of memory
+docker compose build      # builds the one backend image (a few minutes; every service uses it)
 docker compose up -d
 ```
 
-Each service applies its own pending migrations on start.
+Each service applies its own pending migrations on start. Old images pile up after updates:
+`docker image prune -f` frees the space.
 
 ## 6. Backups and restore check
 
