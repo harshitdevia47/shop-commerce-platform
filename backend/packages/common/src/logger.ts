@@ -7,7 +7,7 @@ export function createLogger(service: string, level: string = process.env.LOG_LE
     level,
     base: { service },
     redact: {
-      paths: ['req.headers.authorization', 'req.headers["x-internal-signature"]', 'req.headers.cookie'],
+      paths: ['req.headers.authorization', 'req.headers["x-internal-signature"]', 'req.headers.cookie', 'res.headers["set-cookie"]'],
       censor: '[redacted]',
     },
   });

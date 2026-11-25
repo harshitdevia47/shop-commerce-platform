@@ -1,0 +1,111 @@
+// Platform service: the platform owner's admin site. Data is ABOUT shops (subscriptions), not inside
+// a shop, so nothing here is tenant-scoped.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  runtime             = "nodejs"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// One login code sent to an admin's email. Stored as an HMAC; only the newest code is valid.
+model AdminLoginCode {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  email      String
+  codeHash   String    @map("code_hash")
+  attempts   Int       @default(0)
+  expiresAt  DateTime  @map("expires_at") @db.Timestamptz(3)
+  consumedAt DateTime? @map("consumed_at") @db.Timestamptz(3)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([email, createdAt])
+  @@map("admin_login_codes")
+}
+
+/// Browser session of an admin (cookie holds the raw token; only its hash is stored).
+model AdminSession {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  tokenHash  String   @unique @map("token_hash")
+  email      String
+  expiresAt  DateTime @map("expires_at") @db.Timestamptz(3)
+  lastSeenAt DateTime @default(now()) @map("last_seen_at") @db.Timestamptz(3)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@map("admin_sessions")
+}
+
+/// A shop's monthly subscription to the platform.
+model Subscription {
+  shopId        String    @id @map("shop_id") @db.Uuid
+  slug          String
+  feePaise      Int       @map("fee_paise")
+  /// Day of the month the fee is due (1–28, so every month has it).
+  dueDay        Int       @map("due_day")
+  nextDueDate   DateTime  @map("next_due_date") @db.Date
+  /// "Extend 7 days": not overdue before this day.
+  extendedUntil DateTime? @map("extended_until") @db.Date
+  /// Set when the platform owner paused the shop's online orders.
+  pausedAt      DateTime? @map("paused_at") @db.Timestamptz(3)
+  logoDone      Boolean   @default(false) @map("logo_done")
+  playDone      Boolean   @default(false) @map("play_done")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  payments SubscriptionPayment[]
+
+  @@map("subscriptions")
+}
+
+/// A UPI (or other) payment the platform owner recorded for a shop.
+model SubscriptionPayment {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  shopId      String   @map("shop_id") @db.Uuid
+  amountPaise Int      @map("amount_paise")
+  upiRef      String?  @map("upi_ref")
+  paidOn      DateTime @map("paid_on") @db.Date
+  months      Int      @default(1)
+  note        String?
+  recordedBy  String   @map("recorded_by")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  subscription Subscription @relation(fields: [shopId], references: [shopId], onDelete: Cascade)
+
+  @@index([shopId, paidOn])
+  @@map("subscription_payments")
+}
+
+/// One alert per shop, kind and due period: keeps the daily email from repeating itself.
+model AlertLog {
+  id      String    @id @default(uuid(7)) @db.Uuid
+  shopId  String    @map("shop_id") @db.Uuid
+  /// overdue | extension_ended
+  kind    String
+  dueDate DateTime  @map("due_date") @db.Date
+  /// Null until the daily email that lists it went out.
+  sentAt  DateTime? @map("sent_at") @db.Timestamptz(3)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@unique([shopId, kind, dueDate])
+  @@map("alert_log")
+}
+
+/// Ids of submitted forms: a repeated submit (double tap, back button) is ignored.
+model UsedForm {
+  id        String   @id
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@map("used_forms")
+}
+
+/// Days the daily summary email was sent (IST day), so it goes out once a day.
+model DailyMail {
+  day    DateTime @id @db.Date
+  sentAt DateTime @default(now()) @map("sent_at") @db.Timestamptz(3)
+
+  @@map("daily_mails")
+}

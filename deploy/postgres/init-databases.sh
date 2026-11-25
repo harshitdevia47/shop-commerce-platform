@@ -3,7 +3,7 @@
 # Runs only when the Postgres data volume is empty.
 set -eu
 
-SERVICES="tenant identity catalog order payment delivery media notification reporting"
+SERVICES="tenant identity catalog order payment delivery media notification reporting platform"
 
 for svc in $SERVICES; do
   for db in "qc_${svc}" "qc_${svc}_test"; do
