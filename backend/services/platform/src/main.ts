@@ -1,6 +1,7 @@
 import { RedisRateLimitStore, createLogger, startIntervalJob } from '@qc/common';
 import { Redis } from 'ioredis';
 import { createPlatformApp } from './app.js';
+import { runDailyAlerts } from './jobs/daily-alerts.js';
 import { createDb } from './db.js';
 import { loadPlatformEnv } from './env.js';
 import { createMailer } from './mail/mailer.js';
@@ -41,12 +42,20 @@ const app = createPlatformApp({
 const subscriptions = createSubscriptionsService({ db, directory, logger, payTo: env.PLATFORM_UPI_ID });
 const pushJob = startIntervalJob('push-app-states', 60 * 60_000, () => subscriptions.pushAll(), logger);
 void pushJob.runOnce();
+// From 09:00 IST, one email a day about shops that became 7 days overdue (nothing is paused automatically).
+const alertsJob = startIntervalJob(
+  'daily-overdue-email',
+  15 * 60_000,
+  () => runDailyAlerts({ db, mailer, directory, now: () => new Date(), to: env.MAIL_TO ?? env.ADMIN_EMAILS[0]!, baseUrl: env.ADMIN_ORIGIN }),
+  logger,
+);
 
 const server = app.listen(env.PORT, () => logger.info({ port: env.PORT }, 'platform admin listening'));
 
 function shutdown(signal: string): void {
   logger.info({ signal }, 'shutting down');
   void pushJob.stop();
+  void alertsJob.stop();
   server.close(() => {
     Promise.allSettled([db.$disconnect(), redis.quit()]).finally(() => process.exit(0));
   });
