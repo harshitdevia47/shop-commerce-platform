@@ -26,6 +26,7 @@ import '../../features/orders/presentation/my_orders_screen.dart';
 import '../../features/orders/presentation/order_detail_screen.dart';
 import '../../features/orders/presentation/return_request_screen.dart';
 import '../../features/admin_reports/presentation/reports_screen.dart';
+import '../../features/admin_catalog/presentation/quick_add_screen.dart';
 import '../../features/admin_import/presentation/product_import_screen.dart';
 import '../../features/admin_settings/presentation/admin_settings_screen.dart';
 import '../../features/admin_team/presentation/admin_team_screen.dart';
@@ -141,6 +142,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(path: 'new', builder: (context, state) => const ProductEditScreen()),
               GoRoute(path: 'import', builder: (context, state) => const ProductImportScreen()),
+              GoRoute(path: 'quick', builder: (context, state) => const QuickAddScreen()),
               GoRoute(
                 path: ':id',
                 builder: (context, state) => ProductEditScreen(productId: state.pathParameters['id']),

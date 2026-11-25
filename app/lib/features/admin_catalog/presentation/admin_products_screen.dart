@@ -58,15 +58,26 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
     final state = ref.watch(provider);
     final locale = ref.watch(localeProvider);
 
+    final theme = Theme.of(context);
+    final onBar = theme.appBarTheme.foregroundColor ?? theme.colorScheme.onPrimary;
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.adminProducts),
+        // Same colour as the title: plain TextButtons are primary-coloured, invisible on the brand bar.
+        actionsIconTheme: IconThemeData(color: onBar),
         actions: [
           TextButton.icon(
+            key: const Key('quickAddButton'),
+            style: TextButton.styleFrom(foregroundColor: onBar),
+            onPressed: () => context.push(Routes.adminQuickAdd),
+            icon: const Icon(Icons.bolt),
+            label: Text(l10n.quickAddShort),
+          ),
+          IconButton(
             key: const Key('importProductsButton'),
+            tooltip: l10n.importTitle,
             onPressed: () => context.push(Routes.adminImportProducts),
             icon: const Icon(Icons.upload_file_outlined),
-            label: Text(l10n.importShort),
           ),
         ],
       ),
@@ -101,30 +112,13 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
                 ButtonSegment(value: ProductStatus.inactive, label: Text(l10n.statusHidden)),
               ],
               selected: {_filter.status},
-              onSelectionChanged: (s) => setState(() => _filter = AdminProductFilter(query: _filter.query, status: s.first)),
+              onSelectionChanged: (s) =>
+                  setState(() => _filter = AdminProductFilter(query: _filter.query, status: s.first)),
             ),
           ),
           Expanded(
             child: switch (state) {
-              AsyncValue(:final value?) when value.items.isEmpty => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    spacing: 12,
-                    children: [
-                      Text(l10n.noProducts, textAlign: TextAlign.center),
-                      Text(l10n.importEmptyHint, textAlign: TextAlign.center),
-                      OutlinedButton.icon(
-                        key: const Key('importFromEmptyButton'),
-                        onPressed: () => context.push(Routes.adminImportProducts),
-                        icon: const Icon(Icons.upload_file_outlined),
-                        label: Text(l10n.importTitle),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              AsyncValue(:final value?) when value.items.isEmpty => Center(child: Text(l10n.noProducts)),
               AsyncValue(:final value?) => RefreshIndicator(
                 onRefresh: () async => ref.invalidate(provider),
                 child: ListView.separated(
@@ -137,7 +131,10 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
                         WidgetsBinding.instance.addPostFrameCallback((_) => ref.read(provider.notifier).loadMore());
                       }
                       return value.loadingMore
-                          ? const Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator()))
+                          ? const Padding(
+                              padding: EdgeInsets.all(16),
+                              child: Center(child: CircularProgressIndicator()),
+                            )
                           : const SizedBox.shrink();
                     }
                     final product = value.items[index];
@@ -156,10 +153,7 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
                           if (!product.inStock) l10n.outOfStock,
                         ].join(' · '),
                       ),
-                      trailing: Switch(
-                        value: product.isActive,
-                        onChanged: (isActive) => _toggle(product, isActive),
-                      ),
+                      trailing: Switch(value: product.isActive, onChanged: (isActive) => _toggle(product, isActive)),
                       onTap: () => context.push(Routes.adminProduct(product.id)),
                     );
                   },

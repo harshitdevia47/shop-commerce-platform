@@ -1411,14 +1411,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get importShort => 'Import';
-
-  @override
   String get importTitle => 'Import from Excel';
-
-  @override
-  String get importEmptyHint =>
-      'Have a list of products in Excel? Add them all at once.';
 
   @override
   String get importHowTitle => 'Add many products at once';
@@ -1588,4 +1581,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importErrOther => 'This row has a problem';
+
+  @override
+  String get quickAddShort => 'Quick add';
+
+  @override
+  String get quickAddTitle => 'Quick add';
+
+  @override
+  String get quickAddSaveNext => 'Save & add next';
+
+  @override
+  String get quickAddHint =>
+      'Add products one after another. The category stays the same. Add other details later from the product list.';
+
+  @override
+  String quickAddSaved(String name) {
+    return 'Added $name';
+  }
+
+  @override
+  String quickAddCount(int count) {
+    return 'Added now: $count';
+  }
+
+  @override
+  String get quickAddStockHint => 'Empty = not counted';
 }

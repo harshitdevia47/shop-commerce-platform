@@ -2638,23 +2638,11 @@ abstract class AppLocalizations {
   /// **'Enter a number from {min} to {max}'**
   String settingsNumberRange(int min, int max);
 
-  /// No description provided for @importShort.
-  ///
-  /// In en, this message translates to:
-  /// **'Import'**
-  String get importShort;
-
   /// No description provided for @importTitle.
   ///
   /// In en, this message translates to:
   /// **'Import from Excel'**
   String get importTitle;
-
-  /// No description provided for @importEmptyHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Have a list of products in Excel? Add them all at once.'**
-  String get importEmptyHint;
 
   /// No description provided for @importHowTitle.
   ///
@@ -2919,6 +2907,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This row has a problem'**
   String get importErrOther;
+
+  /// No description provided for @quickAddShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick add'**
+  String get quickAddShort;
+
+  /// No description provided for @quickAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick add'**
+  String get quickAddTitle;
+
+  /// No description provided for @quickAddSaveNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Save & add next'**
+  String get quickAddSaveNext;
+
+  /// No description provided for @quickAddHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add products one after another. The category stays the same. Add other details later from the product list.'**
+  String get quickAddHint;
+
+  /// No description provided for @quickAddSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {name}'**
+  String quickAddSaved(String name);
+
+  /// No description provided for @quickAddCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Added now: {count}'**
+  String quickAddCount(int count);
+
+  /// No description provided for @quickAddStockHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty = not counted'**
+  String get quickAddStockHint;
 }
 
 class _AppLocalizationsDelegate

@@ -423,9 +423,7 @@
   "shopPausedTitle": "દુકાન અત્યારે ઓર્ડર લેતી નથી",
   "shopPausedBody": "તમે વસ્તુઓ જોઈ શકો છો. કૃપા કરીને પછી ફરી તપાસો.",
   "settingsNumberRange": "{min} થી {max} વચ્ચેનો આંકડો લખો",
-  "importShort": "ઇમ્પોર્ટ",
   "importTitle": "Excel માંથી ઉમેરો",
-  "importEmptyHint": "Excel માં વસ્તુઓની યાદી છે? બધી એકસાથે ઉમેરો.",
   "importHowTitle": "ઘણી વસ્તુઓ એકસાથે ઉમેરો",
   "importStep1": "ટેમ્પ્લેટ મેળવો અને Excel કે Google Sheets માં ખોલો (ફોન કે કમ્પ્યુટર પર).",
   "importStep2": "દરેક સાઇઝ માટે એક લાઇન ભરો: કેટેગરી, નામ, સાઇઝ (જેમ કે 1 kg), કિંમત, MRP, સ્ટોક. ગુજરાતી/હિન્દી નામ વૈકલ્પિક છે.",
@@ -469,5 +467,12 @@
   "importErrTooManyVariants": "એક વસ્તુની ઘણી સાઇઝ (વધુમાં વધુ 50)",
   "importErrField": "આ કિંમત અહીં માન્ય નથી",
   "importErrFieldRequired": "જરૂરી માહિતી ખૂટે છે",
-  "importErrOther": "આ લાઇનમાં સમસ્યા છે"
+  "importErrOther": "આ લાઇનમાં સમસ્યા છે",
+  "quickAddShort": "ઝડપી ઉમેરો",
+  "quickAddTitle": "ઝડપી ઉમેરો",
+  "quickAddSaveNext": "સાચવો અને આગળ",
+  "quickAddHint": "એક પછી એક વસ્તુ ઉમેરો. કેટેગરી એ જ રહે છે. બાકીની વિગતો પછી વસ્તુઓની યાદીમાંથી ઉમેરો.",
+  "quickAddSaved": "{name} ઉમેરી",
+  "quickAddCount": "હમણાં ઉમેરી: {count}",
+  "quickAddStockHint": "ખાલી = ગણતરી નહીં"
 }

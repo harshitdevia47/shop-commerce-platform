@@ -1406,13 +1406,7 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
-  String get importShort => 'इम्पोर्ट';
-
-  @override
   String get importTitle => 'Excel से जोड़ें';
-
-  @override
-  String get importEmptyHint => 'Excel में सामान की सूची है? सब एक साथ जोड़ें।';
 
   @override
   String get importHowTitle => 'बहुत सारा सामान एक साथ जोड़ें';
@@ -1583,4 +1577,30 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get importErrOther => 'इस लाइन में समस्या है';
+
+  @override
+  String get quickAddShort => 'जल्दी जोड़ें';
+
+  @override
+  String get quickAddTitle => 'जल्दी जोड़ें';
+
+  @override
+  String get quickAddSaveNext => 'सेव करें और अगला';
+
+  @override
+  String get quickAddHint =>
+      'एक के बाद एक सामान जोड़ें। कैटेगरी वही रहती है। बाकी जानकारी बाद में सामान की सूची से जोड़ें।';
+
+  @override
+  String quickAddSaved(String name) {
+    return '$name जोड़ा';
+  }
+
+  @override
+  String quickAddCount(int count) {
+    return 'अभी जोड़े: $count';
+  }
+
+  @override
+  String get quickAddStockHint => 'खाली = गिनती नहीं';
 }

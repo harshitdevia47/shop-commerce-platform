@@ -16,6 +16,7 @@ abstract final class Routes {
   static const adminOrders = '/admin/orders';
   static const adminProducts = '/admin/products';
   static const adminImportProducts = '/admin/products/import';
+  static const adminQuickAdd = '/admin/products/quick';
   static const adminNewProduct = '/admin/products/new';
   static const adminCategories = '/admin/categories';
   static const adminTeam = '/admin/team';

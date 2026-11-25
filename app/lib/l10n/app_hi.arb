@@ -423,9 +423,7 @@
   "shopPausedTitle": "दुकान अभी ऑर्डर नहीं ले रही है",
   "shopPausedBody": "आप सामान देख सकते हैं। कृपया बाद में फिर देखें।",
   "settingsNumberRange": "{min} से {max} के बीच की संख्या लिखें",
-  "importShort": "इम्पोर्ट",
   "importTitle": "Excel से जोड़ें",
-  "importEmptyHint": "Excel में सामान की सूची है? सब एक साथ जोड़ें।",
   "importHowTitle": "बहुत सारा सामान एक साथ जोड़ें",
   "importStep1": "टेम्पलेट लें और Excel या Google Sheets में खोलें (फ़ोन या कंप्यूटर पर)।",
   "importStep2": "हर साइज़ के लिए एक लाइन भरें: कैटेगरी, नाम, साइज़ (जैसे 1 kg), कीमत, MRP, स्टॉक। गुजराती/हिंदी नाम वैकल्पिक हैं।",
@@ -469,5 +467,12 @@
   "importErrTooManyVariants": "एक सामान के बहुत सारे साइज़ (ज़्यादा से ज़्यादा 50)",
   "importErrField": "यह मान यहां मान्य नहीं है",
   "importErrFieldRequired": "ज़रूरी जानकारी नहीं है",
-  "importErrOther": "इस लाइन में समस्या है"
+  "importErrOther": "इस लाइन में समस्या है",
+  "quickAddShort": "जल्दी जोड़ें",
+  "quickAddTitle": "जल्दी जोड़ें",
+  "quickAddSaveNext": "सेव करें और अगला",
+  "quickAddHint": "एक के बाद एक सामान जोड़ें। कैटेगरी वही रहती है। बाकी जानकारी बाद में सामान की सूची से जोड़ें।",
+  "quickAddSaved": "{name} जोड़ा",
+  "quickAddCount": "अभी जोड़े: {count}",
+  "quickAddStockHint": "खाली = गिनती नहीं"
 }

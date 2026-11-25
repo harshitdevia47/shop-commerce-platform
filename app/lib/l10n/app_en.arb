@@ -728,9 +728,7 @@
       }
     }
   },
-  "importShort": "Import",
   "importTitle": "Import from Excel",
-  "importEmptyHint": "Have a list of products in Excel? Add them all at once.",
   "importHowTitle": "Add many products at once",
   "importStep1": "Get the template and open it in Excel or Google Sheets (on the phone or a computer).",
   "importStep2": "Fill one row per size: category, name, size (like 1 kg), price, MRP, stock. Gujarati/Hindi names are optional.",
@@ -872,6 +870,27 @@
     }
   },
   "@importMoreErrors": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "quickAddShort": "Quick add",
+  "quickAddTitle": "Quick add",
+  "quickAddSaveNext": "Save & add next",
+  "quickAddHint": "Add products one after another. The category stays the same. Add other details later from the product list.",
+  "quickAddSaved": "Added {name}",
+  "quickAddCount": "Added now: {count}",
+  "quickAddStockHint": "Empty = not counted",
+  "@quickAddSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@quickAddCount": {
     "placeholders": {
       "count": {
         "type": "int"

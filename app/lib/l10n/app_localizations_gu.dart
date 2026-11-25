@@ -1399,13 +1399,7 @@ class AppLocalizationsGu extends AppLocalizations {
   }
 
   @override
-  String get importShort => 'ઇમ્પોર્ટ';
-
-  @override
   String get importTitle => 'Excel માંથી ઉમેરો';
-
-  @override
-  String get importEmptyHint => 'Excel માં વસ્તુઓની યાદી છે? બધી એકસાથે ઉમેરો.';
 
   @override
   String get importHowTitle => 'ઘણી વસ્તુઓ એકસાથે ઉમેરો';
@@ -1573,4 +1567,30 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get importErrOther => 'આ લાઇનમાં સમસ્યા છે';
+
+  @override
+  String get quickAddShort => 'ઝડપી ઉમેરો';
+
+  @override
+  String get quickAddTitle => 'ઝડપી ઉમેરો';
+
+  @override
+  String get quickAddSaveNext => 'સાચવો અને આગળ';
+
+  @override
+  String get quickAddHint =>
+      'એક પછી એક વસ્તુ ઉમેરો. કેટેગરી એ જ રહે છે. બાકીની વિગતો પછી વસ્તુઓની યાદીમાંથી ઉમેરો.';
+
+  @override
+  String quickAddSaved(String name) {
+    return '$name ઉમેરી';
+  }
+
+  @override
+  String quickAddCount(int count) {
+    return 'હમણાં ઉમેરી: $count';
+  }
+
+  @override
+  String get quickAddStockHint => 'ખાલી = ગણતરી નહીં';
 }
